@@ -1,0 +1,374 @@
+@import "tailwindcss";
+
+/* ==============================
+   THEME
+============================== */
+
+@theme {
+  /* Primary - Orange */
+  --color-primary-50: rgb(255 244 237);
+  --color-primary-100: rgb(255 229 213);
+  --color-primary-200: rgb(255 199 170);
+  --color-primary-300: rgb(255 160 116);
+  --color-primary-400: rgb(255 110 59);
+  --color-primary-500: #4e0d6c;
+  --color-primary-600: rgb(224 53 13);
+  --color-primary-700: rgb(186 37 12);
+  --color-primary-800: rgb(148 31 18);
+  --color-primary-900: rgb(120 29 18);
+
+  /* Secondary - Navy */
+  --color-secondary: rgb(17 26 46);
+  --color-secondary-800: rgb(29 41 64);
+  --color-secondary-900: rgb(17 26 46);
+  --color-secondary-950: rgb(11 18 32);
+
+  /* Background */
+  --color-surface: rgb(246 247 251);
+
+  /* Shadows */
+  --shadow-card: 0 4px 18px rgb(17 26 46 / 8%);
+}
+
+
+/* ==============================
+   BASE
+============================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-slate-900 antialiased;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+}
+
+
+/* ==============================
+   LAYOUT
+============================== */
+
+@layer components {
+
+  .container-page {
+    @apply max-w-7xl mx-auto px-4 sm:px-6;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-card;
+  }
+
+  .tile {
+    @apply p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs;
+  }
+
+  .divider {
+    @apply flex-1 h-px bg-slate-200;
+  }
+
+
+  /* ==============================
+     BUTTONS
+  ============================== */
+
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-light,
+  .btn-outline,
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           px-5 py-2.5 rounded-xl text-sm font-bold
+           transition-colors disabled:opacity-50
+           disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary hover:bg-primary-500 text-white;
+  }
+
+  .btn-light {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-800;
+  }
+
+  .btn-outline {
+    @apply border border-slate-200 bg-white
+           hover:bg-slate-50 text-slate-700;
+  }
+
+  .btn-ghost {
+    @apply bg-white/10 hover:bg-white/20
+           border border-white/40 text-white backdrop-blur-md;
+  }
+
+  .btn-sm {
+    @apply px-4 py-2 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center p-1.5
+           rounded-full text-slate-500 hover:bg-slate-100;
+  }
+
+  .btn-qty {
+    @apply p-1 text-slate-600 hover:text-slate-950;
+  }
+
+  .btn-delete {
+    @apply p-0.5 text-slate-400 hover:text-rose-500;
+  }
+
+  .btn-wish {
+    @apply absolute flex items-center justify-center
+           rounded-full bg-white/90 hover:bg-white
+           shadow-sm transition-transform active:scale-90;
+  }
+
+  .btn-glow {
+    @apply shadow-md shadow-primary-500/20;
+  }
+
+
+  /* ==============================
+     LINKS
+  ============================== */
+
+  .link-primary {
+    @apply inline-flex items-center gap-1
+           font-bold text-primary-600 hover:text-primary-700;
+  }
+
+  .link-muted {
+    @apply hover:text-white transition-colors;
+  }
+
+
+  /* ==============================
+     FORMS
+  ============================== */
+
+  .input,
+  .input-with-icon {
+    @apply w-full px-3 py-2.5 rounded-xl bg-white
+           border border-slate-200 text-sm text-slate-900
+           placeholder:text-slate-400 outline-none
+           focus:border-primary-500 transition-colors;
+  }
+
+  .input-with-icon {
+    @apply pl-10;
+  }
+
+  .input-icon {
+    @apply absolute left-3.5 top-1/2 -translate-y-1/2
+           w-4 h-4 text-slate-400 pointer-events-none;
+  }
+
+
+  /* ==============================
+     BADGES
+  ============================== */
+
+  .badge,
+  .badge-primary,
+  .badge-secondary {
+    @apply inline-flex items-center px-2 py-0.5
+           rounded-md text-[11px] font-extrabold;
+  }
+
+  .badge-primary {
+    @apply bg-primary-500 text-white;
+  }
+
+  .badge-secondary {
+    @apply bg-secondary text-white;
+  }
+
+  .count-badge {
+    @apply absolute min-w-[18px] h-[18px] px-1
+           rounded-full flex items-center justify-center
+           bg-primary-500 text-white text-[10px] font-extrabold;
+  }
+
+
+  /* ==============================
+     CHIPS
+  ============================== */
+
+  .chip,
+  .chip-light,
+  .chip-primary {
+    @apply px-3 py-1 rounded-full text-xs font-medium transition-colors;
+  }
+
+  .chip-light {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700;
+  }
+
+  .chip-primary {
+    @apply bg-primary-50 hover:bg-primary-100 text-primary-700;
+  }
+
+
+  /* ==============================
+     TABS
+  ============================== */
+
+  .tab,
+  .tab-active,
+  .tab-idle {
+    @apply px-4 py-2 rounded-xl text-xs sm:text-sm
+           font-bold whitespace-nowrap transition-all;
+  }
+
+  .tab-active {
+    @apply bg-primary-500 text-white shadow-sm;
+  }
+
+  .tab-idle {
+    @apply bg-white border border-slate-200
+           text-slate-700 hover:border-slate-300;
+  }
+
+
+  /* ==============================
+     TYPOGRAPHY
+  ============================== */
+
+  .heading {
+    @apply font-extrabold text-slate-900;
+  }
+
+  .text-muted {
+    @apply text-xs text-slate-500;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase
+           tracking-wide text-slate-400;
+  }
+
+  .price {
+    @apply font-extrabold text-primary-600;
+  }
+
+  .price-old {
+    @apply text-slate-400 line-through;
+  }
+
+
+  /* ==============================
+     ICONS
+  ============================== */
+
+  .icon-box,
+  .icon-box-primary,
+  .logo-mark {
+    @apply inline-flex items-center justify-center
+           shrink-0 rounded-xl;
+  }
+
+  .icon-box-primary {
+    @apply bg-primary-50 text-primary-600;
+  }
+
+  .logo-mark {
+    @apply w-9 h-9 bg-primary-500 text-white;
+  }
+
+
+  /* ==============================
+     MODALS & DRAWERS
+  ============================== */
+
+  .overlay {
+    @apply fixed inset-0 z-50 flex items-center
+           justify-center p-4 bg-secondary/60 backdrop-blur-sm;
+  }
+
+  .modal {
+    @apply w-full bg-white rounded-3xl shadow-2xl
+           border border-slate-200;
+  }
+
+  .drawer-overlay {
+    @apply fixed inset-0 z-50 flex justify-end
+           bg-secondary/50 backdrop-blur-[2px];
+  }
+
+  .drawer {
+    @apply w-full max-w-md h-full flex flex-col
+           bg-white shadow-2xl;
+  }
+
+  .drawer-header {
+    @apply px-5 py-4 border-b border-slate-200
+           flex items-center justify-between;
+  }
+
+  .empty-state {
+    @apply flex-1 p-8 flex flex-col
+           items-center justify-center text-center;
+  }
+
+
+  /* ==============================
+     PRODUCTS
+  ============================== */
+
+  .product-img {
+    @apply w-[1200px]! h-full object-cover cursor-pointer
+           transition-transform duration-300
+           group-hover:scale-105;
+  }
+
+  .thumb {
+    @apply w-20 h-20 rounded-xl object-cover
+           bg-slate-100 shrink-0;
+  }
+
+  .list-item {
+    @apply flex gap-3.5 pb-4 border-b border-slate-100;
+  }
+
+}
+
+
+/* ==============================
+   UTILITIES
+============================== */
+
+@layer utilities {
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+}
+
+
+
+.active{
+
+@apply px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all;
+
+}
