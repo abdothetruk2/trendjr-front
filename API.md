@@ -131,13 +131,23 @@ Products are looked up by their **numeric `id`** (e.g. `/products/12`), not the 
 
 Optional query params:
 
-| Param      | Example          | Description                                    |
-| ---------- | ---------------- | ---------------------------------------------- |
-| `brand`    | `?brand=Nivea`   | Exact brand match                              |
-| `featured` | `?featured=true` | `true` or `false`                              |
-| `search`   | `?search=cream`  | Case-insensitive match on name (en/de/ar) or brand |
+| Param        | Example                  | Description                                    |
+| ------------ | ------------------------ | ---------------------------------------------- |
+| `brand`      | `?brand=Nivea`           | Exact brand match                              |
+| `featured`   | `?featured=true`         | `true` or `false`                              |
+| `search`     | `?search=cream`          | Case-insensitive match on name (en/de/ar) or brand |
+| `category`   | `?category=home-kitchen` | Category slug, numeric `id` or `_id`. Matches products tagged `category-request:<slug>` for that category or one of its sub-categories. Unknown category → empty list |
+| `discounted` | `?discounted=true`       | Only products with `discount > 0`              |
+| `maxPrice`   | `?maxPrice=25`           | Only products with `price <= maxPrice` (**400** if not a number) |
+| `sort`       | `?sort=price-asc`        | `newest`, `popular`, `rating`, `discount`, `price-asc`, `price-desc` (default: by `id`) |
+| `page`       | `?page=2`                | Page number, starts at 1                       |
+| `limit`      | `?limit=20`              | Page size, default 20, max 100                 |
 
-**200** — array of products, sorted by `id`.
+**200** — array of products, sorted by `id` unless `sort` is given.
+
+Pagination is opt-in: without `page`/`limit` the full list is returned (unchanged behavior).
+With them, only that page is returned and the total number of matching products is sent in
+the `X-Total-Count` response header (exposed to the browser through CORS).
 
 ### Product object
 
@@ -213,6 +223,10 @@ Categories are looked up by MongoDB `_id`.
   "updatedAt": "..."
 }
 ```
+
+Imported categories store a localized name (`"name": { "en": "Home & Kitchen Tools", "de": "...", "ar": "..." }`)
+and also carry the imported fields `id`, `parent_id` (numeric id of the parent, `null` for top-level),
+`subtitle`, `sort_order` and `is_active`. Categories created through the API may use a plain string name.
 
 ### POST `/categories`
 

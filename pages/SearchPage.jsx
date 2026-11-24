@@ -1,12 +1,54 @@
-import { Search, Star, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
+import ProductGrid from "../src/components/ProductGrid";
 
+// /search?q=... — results come from GET /api/products?search=
 export default function SearchPage() {
+  const [params] = useSearchParams();
+  const q = (params.get("q") || "").trim();
+
   return (
-    <main className="min-h-screen bg-surface py-8"><div className="container-page"><div className="mb-8"><p className="eyebrow">Find your next favorite</p><h1 className="mt-2 text-3xl font-black text-secondary">Search results</h1></div><div className="mb-6 flex flex-col gap-3 sm:flex-row"><div className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4"><Search className="text-primary-500" size={18} /><input className="w-full bg-transparent py-3 text-sm outline-none" defaultValue="wireless" aria-label="Search term" /></div><button className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-secondary"><SlidersHorizontal size={17} /> Filters</button></div><p className="mb-5 text-sm text-slate-500">Results for <strong className="text-secondary">“wireless”</strong> — 12 products found</p><div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-      <article className="card overflow-hidden"><a href="/product"><div className="h-48 bg-white p-4"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80" alt="Wireless headphones" className="h-full w-full object-contain" /></div></a><div className="p-4"><p className="text-xs text-slate-400">Audio</p><h2 className="mt-1 font-bold text-secondary">Wireless Headphones</h2><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.7</span></div><strong className="mt-3 block text-lg text-primary-600">$64.00</strong></div></article>
-      <article className="card overflow-hidden"><a href="/product"><div className="h-48 bg-white p-4"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80" alt="Smart watch" className="h-full w-full object-contain" /></div></a><div className="p-4"><p className="text-xs text-slate-400">Wearables</p><h2 className="mt-1 font-bold text-secondary">Smart Watch</h2><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.8</span></div><strong className="mt-3 block text-lg text-primary-600">$49.00</strong></div></article>
-      <article className="card overflow-hidden"><a href="/product"><div className="h-48 bg-white p-4"><img src="/product.jpg" alt="Wireless product" className="h-full w-full object-contain" /></div></a><div className="p-4"><p className="text-xs text-slate-400">Wellness</p><h2 className="mt-1 font-bold text-secondary">Portable Wireless Wand</h2><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.8</span></div><strong className="mt-3 block text-lg text-primary-600">$29.99</strong></div></article>
-      <article className="card overflow-hidden"><a href="/product"><div className="h-48 bg-white p-4"><img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=500&q=80" alt="Camera" className="h-full w-full object-contain" /></div></a><div className="p-4"><p className="text-xs text-slate-400">Photography</p><h2 className="mt-1 font-bold text-secondary">Instant Camera</h2><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.5</span></div><strong className="mt-3 block text-lg text-primary-600">$89.00</strong></div></article>
-    </div></div></main>
+    <main className="min-h-screen bg-surface py-8">
+      <div className="container-page">
+        <div className="mb-6">
+          <p className="eyebrow">Find your next favorite</p>
+          <h1 className="mt-2 text-3xl font-black text-secondary">Search results</h1>
+        </div>
+        <SearchForm key={q} initial={q} />
+        <p className="mb-2 text-sm text-slate-500">
+          {q ? <>Results for <strong className="text-secondary">“{q}”</strong></> : "Type what you are looking for above."}
+        </p>
+      </div>
+      {q && <ProductGrid id="search-results" search={q} />}
+    </main>
+  );
+}
+
+function SearchForm({ initial }) {
+  const navigate = useNavigate();
+  const [term, setTerm] = useState(initial);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const value = term.trim();
+    if (value) navigate(`/search?q=${encodeURIComponent(value)}`);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} role="search" className="mb-4 flex gap-3">
+      <div className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 focus-within:border-primary-500">
+        <Search className="text-primary-500" size={18} aria-hidden="true" />
+        <input
+          type="search"
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          className="w-full bg-transparent py-3 text-sm outline-none"
+          placeholder="Search products..."
+          aria-label="Search term"
+        />
+      </div>
+      <button type="submit" className="btn-primary">Search</button>
+    </form>
   );
 }

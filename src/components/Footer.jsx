@@ -1,29 +1,61 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Mail } from 'lucide-react';
 import bagLogo from '../data/trend_gr_bag_icon.svg';
+import { useAuth } from '../context/AuthContext';
 
-const DEPARTMENTS = [
-  'Electronics & Gadgets',
-  "Men's Clothing",
-  "Women's Clothing",
-  'Home & Kitchen',
-  'Smart Home',
+const SHOP_LINKS = [
+  { to: '/shop', label: 'All Products' },
+  { to: '/offers', label: 'Offers & Deals' },
+  { to: '/shop?sort=newest', label: 'New Arrivals' },
+  { to: '/shop?sort=popular', label: 'Best-Selling' },
+  { to: '/shop?sort=rating', label: 'Top Rated' },
+];
+
+const CARE_LINKS = [
+  { to: '/orders', label: 'Track Your Order' },
+  { to: '/faq', label: 'Shipping & Delivery Info' },
+  { to: '/faq', label: '100% Buyer Protection' },
+  { to: '/contact', label: 'Help Center & Returns' },
 ];
 
 export default function Footer() {
+  const { user } = useAuth();
+
+  const companyLinks = [
+    { to: '/about', label: 'About Trend Jr' },
+    { to: '/contact', label: 'Contact Us' },
+    user ? { to: '/profile', label: 'My Account' } : { to: '/login', label: 'Sign In' },
+    user ? { to: '/orders', label: 'My Orders' } : { to: '/register', label: 'Create Account' },
+    { to: '/wishlist', label: 'Wishlist' },
+  ];
+
+  const column = (title, links, span) => (
+    <div className={span}>
+      <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">{title}</h4>
+      <ul className="space-y-2 text-xs">
+        {links.map((link) => (
+          <li key={link.label}>
+            <Link to={link.to} className="link-muted">{link.label}</Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
   return (
     <footer className="bg-secondary text-slate-300 mt-8 pb-20 sm:pb-0">
       <div className="container-page py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
         {/* Brand Column */}
         <div className="lg:col-span-4">
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 w-fit">
             <div className="logo-mark bg-white p-0.5">
               <img src={bagLogo} alt="" className="w-full h-full" />
             </div>
             <div className="text-xl font-extrabold text-white">
               Trend<span className="text-primary-400">Jr</span>
             </div>
-          </div>
+          </Link>
           <p className="mt-3 text-xs text-slate-400 leading-relaxed max-w-xs">
             Trend Jr connects global shoppers directly with verified makers for curated electronics, everyday apparel, smart home essentials, and weekly flash drops.
           </p>
@@ -52,74 +84,12 @@ export default function Footer() {
           </form>
         </div>
 
-        {/* Shop Links */}
-        <div className="lg:col-span-2">
-          <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">
-            Departments
-          </h4>
-          <ul className="space-y-2 text-xs">
-            {DEPARTMENTS.map((label) => (
-              <li key={label}>
-                <a href="#" className="link-muted">
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {column('Shop', SHOP_LINKS, 'lg:col-span-2')}
+        {column('Customer Care', CARE_LINKS, 'lg:col-span-3')}
 
-        {/* Customer Care */}
         <div className="lg:col-span-3">
-          <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">
-            Customer Care
-          </h4>
-          <ul className="space-y-2 text-xs">
-            <li>
-              <button type="button" className="link-muted">
-                Track Your Order
-              </button>
-            </li>
-            <li>
-              <button type="button" className="link-muted">
-                Shipping &amp; Delivery Info
-              </button>
-            </li>
-            <li>
-              <button type="button" className="link-muted">
-                100% Buyer Protection
-              </button>
-            </li>
-            <li>
-              <button type="button" className="link-muted">
-                Help Center &amp; Returns
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        {/* Company */}
-        <div className="lg:col-span-3">
-          <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">
-            Partner With Trend Jr
-          </h4>
-          <ul className="space-y-2 text-xs">
-            <li>
-              <button type="button" className="link-muted">
-                Sell on Trend Jr
-              </button>
-            </li>
-            <li>
-              <button type="button" className="link-muted">
-                Download Mobile App
-              </button>
-            </li>
-            <li>
-              <button type="button" className="link-muted">
-                Weekly Promo Codes
-              </button>
-            </li>
-            <li className="text-slate-500 pt-1">support@trendjr.shop</li>
-          </ul>
+          {column('Company & Account', companyLinks, '')}
+          <p className="text-xs text-slate-500 pt-3">support@trendjr.shop</p>
         </div>
       </div>
 

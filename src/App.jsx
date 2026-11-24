@@ -1,8 +1,11 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import Header from './components/Header';
 import Footer from './components/Footer';
+import MobileBottomNav from './components/MobileBottomNav';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 
 // Pages
 import HomePage from '../pages/Homepage';
@@ -21,16 +24,32 @@ import OrdersPage from '../pages/OrdersPage';
 import AboutPage from '../pages/AboutPage';
 import ContactPage from '../pages/ContactPage';
 import FAQPage from '../pages/FAQPage';
+import NotFoundPage from '../pages/NotFoundPage';
+
+// Start every new page at the top (otherwise a product opens wherever the list was scrolled)
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
+      <CartProvider>
+
+      <ScrollToTop />
 
       <div className="min-h-screen flex flex-col">
 
         <Header />
 
-        <main className="flex-1">
+        <div className="flex-1">
 
           <Routes>
 
@@ -39,6 +58,7 @@ export default function App() {
 
             {/* Products */}
             <Route path="/shop" element={<ShopPage />} />
+            <Route path="/products" element={<Navigate to="/shop" replace />} />
             <Route path="/category/:id" element={<CategoryPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/search" element={<SearchPage />} />
@@ -62,14 +82,21 @@ export default function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/faq" element={<FAQPage />} />
 
+            {/* Anything else */}
+            <Route path="*" element={<NotFoundPage />} />
+
           </Routes>
 
-        </main>
+        </div>
 
         <Footer />
 
+        <MobileBottomNav />
+
       </div>
 
+      </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -1,26 +1,38 @@
-import { SlidersHorizontal, Search, Star, ChevronDown, Heart, ShoppingCart } from "lucide-react";
+import useApi from "../src/hooks/useApi";
+import useCategoryParam from "../src/hooks/useCategoryParam";
+import CategoryStrip from "../src/components/CategoryStrip";
+import ProductGrid from "../src/components/ProductGrid";
+import { getCategoryLabel } from "../src/utils/product";
 
 export default function ShopPage() {
+  const categories = useApi("/api/categories");
+  const [category, setCategory] = useCategoryParam();
+  const current = Array.isArray(categories.data)
+    ? categories.data.find((c) => c.slug === category)
+    : null;
+
   return (
-    <main className="min-h-screen bg-surface py-8">
-      <div className="container-page">
-        <div className="mb-8 rounded-3xl bg-secondary px-6 py-9 text-white sm:px-10"><p className="eyebrow !text-orange-200">Discover something good</p><h1 className="mt-2 text-3xl font-black sm:text-4xl">Shop all products</h1><p className="mt-3 max-w-xl text-sm leading-7 text-slate-300">Browse our collection of everyday essentials, trending finds, and products worth keeping.</p></div>
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row"><label className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4"><Search size={18} className="text-slate-400" /><input className="w-full border-0 bg-transparent py-3 text-sm outline-none" placeholder="Search products..." /></label><button type="button" className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-secondary"><SlidersHorizontal size={17} /> Filters</button><button type="button" className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-secondary">Sort by: Featured <ChevronDown size={16} /></button></div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[230px_1fr]">
-          <aside className="card h-fit p-5"><h2 className="font-extrabold text-secondary">Categories</h2><div className="mt-4 space-y-3 text-sm text-slate-600"><p className="flex justify-between font-bold text-primary-600">All products <span>124</span></p><p className="flex justify-between">Electronics <span>38</span></p><p className="flex justify-between">Fashion <span>29</span></p><p className="flex justify-between">Home & Living <span>24</span></p><p className="flex justify-between">Accessories <span>18</span></p><p className="flex justify-between">Beauty <span>15</span></p></div><hr className="my-5 border-slate-100" /><h3 className="font-extrabold text-secondary">Price range</h3><div className="mt-4 grid grid-cols-2 gap-2"><input className="input" placeholder="Min $" /><input className="input" placeholder="Max $" /></div><hr className="my-5 border-slate-100" /><h3 className="font-extrabold text-secondary">Customer rating</h3><div className="mt-3 space-y-3 text-sm text-slate-600"><p>★★★★★ <span className="ml-2">4 stars & up</span></p><p>★★★★☆ <span className="ml-2">3 stars & up</span></p></div><button type="button" className="btn-primary mt-6 w-full">Apply filters</button></aside>
-          <section><div className="mb-4 flex items-center justify-between"><p className="text-sm text-slate-500">Showing <strong className="text-secondary">1–12</strong> of 124 products</p><span className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700">Free shipping on selected items</span></div>
-            <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-              <article className="card group overflow-hidden"><a href="/product"><div className="relative h-44 bg-white p-4 sm:h-56"><span className="absolute left-3 top-3 rounded-md bg-rose-500 px-2 py-1 text-[10px] font-bold text-white">-20%</span><button type="button" aria-label="Save product" className="absolute right-3 top-3 rounded-full bg-slate-100 p-2 text-slate-500"><Heart size={16} /></button><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" alt="Watch" className="h-full w-full object-contain transition group-hover:scale-105" /></div></a><div className="p-4"><p className="text-[10px] font-bold uppercase text-slate-400">Accessories</p><a href="/product" className="mt-1 block text-sm font-extrabold text-secondary">Classic Minimal Watch</a><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.8 (96)</span></div><div className="mt-3 flex items-center justify-between"><strong className="text-lg text-primary-600">$49.00</strong><a href="/cart" className="rounded-lg bg-primary-500 p-2 text-white"><ShoppingCart size={16} /></a></div></div></article>
-              <article className="card group overflow-hidden"><a href="/product"><div className="relative h-44 bg-white p-4 sm:h-56"><button type="button" aria-label="Save product" className="absolute right-3 top-3 rounded-full bg-slate-100 p-2 text-slate-500"><Heart size={16} /></button><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" alt="Headphones" className="h-full w-full object-contain transition group-hover:scale-105" /></div></a><div className="p-4"><p className="text-[10px] font-bold uppercase text-slate-400">Electronics</p><a href="/product" className="mt-1 block text-sm font-extrabold text-secondary">Studio Wireless Headphones</a><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.7 (54)</span></div><div className="mt-3 flex items-center justify-between"><strong className="text-lg text-primary-600">$64.00</strong><a href="/cart" className="rounded-lg bg-primary-500 p-2 text-white"><ShoppingCart size={16} /></a></div></div></article>
-              <article className="card group overflow-hidden"><a href="/product"><div className="relative h-44 bg-white p-4 sm:h-56"><span className="absolute left-3 top-3 rounded-md bg-emerald-500 px-2 py-1 text-[10px] font-bold text-white">NEW</span><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" alt="Sneakers" className="h-full w-full object-contain transition group-hover:scale-105" /></div></a><div className="p-4"><p className="text-[10px] font-bold uppercase text-slate-400">Fashion</p><a href="/product" className="mt-1 block text-sm font-extrabold text-secondary">Everyday Sport Sneakers</a><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.9 (72)</span></div><div className="mt-3 flex items-center justify-between"><strong className="text-lg text-primary-600">$58.50</strong><a href="/cart" className="rounded-lg bg-primary-500 p-2 text-white"><ShoppingCart size={16} /></a></div></div></article>
-              <article className="card group overflow-hidden"><a href="/product"><div className="h-44 bg-white p-4 sm:h-56"><img src="https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=600&q=80" alt="Chair" className="h-full w-full object-contain transition group-hover:scale-105" /></div></a><div className="p-4"><p className="text-[10px] font-bold uppercase text-slate-400">Home & Living</p><a href="/product" className="mt-1 block text-sm font-extrabold text-secondary">Modern Lounge Chair</a><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.6 (31)</span></div><div className="mt-3 flex items-center justify-between"><strong className="text-lg text-primary-600">$129.00</strong><a href="/cart" className="rounded-lg bg-primary-500 p-2 text-white"><ShoppingCart size={16} /></a></div></div></article>
-              <article className="card group overflow-hidden"><a href="/product"><div className="h-44 bg-white p-4 sm:h-56"><img src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80" alt="Perfume" className="h-full w-full object-contain transition group-hover:scale-105" /></div></a><div className="p-4"><p className="text-[10px] font-bold uppercase text-slate-400">Beauty</p><a href="/product" className="mt-1 block text-sm font-extrabold text-secondary">Signature Eau de Parfum</a><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.8 (42)</span></div><div className="mt-3 flex items-center justify-between"><strong className="text-lg text-primary-600">$39.00</strong><a href="/cart" className="rounded-lg bg-primary-500 p-2 text-white"><ShoppingCart size={16} /></a></div></div></article>
-              <article className="card group overflow-hidden"><a href="/product"><div className="h-44 bg-white p-4 sm:h-56"><img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80" alt="Camera" className="h-full w-full object-contain transition group-hover:scale-105" /></div></a><div className="p-4"><p className="text-[10px] font-bold uppercase text-slate-400">Electronics</p><a href="/product" className="mt-1 block text-sm font-extrabold text-secondary">Instant Compact Camera</a><div className="mt-2 flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /><span className="text-xs text-slate-500">4.5 (28)</span></div><div className="mt-3 flex items-center justify-between"><strong className="text-lg text-primary-600">$89.00</strong><a href="/cart" className="rounded-lg bg-primary-500 p-2 text-white"><ShoppingCart size={16} /></a></div></div></article>
-            </div>
-            <div className="mt-8 flex justify-center gap-2"><button className="h-10 w-10 rounded-xl bg-primary-500 font-bold text-white">1</button><button className="h-10 w-10 rounded-xl border border-slate-200 bg-white font-bold text-slate-600">2</button><button className="h-10 w-10 rounded-xl border border-slate-200 bg-white font-bold text-slate-600">3</button><button className="rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-secondary">Next →</button></div>
-          </section>
+    <main className="min-h-screen bg-surface pb-8">
+      <CategoryStrip
+        categories={categories.data}
+        loading={categories.loading}
+        error={categories.error}
+        onRetry={categories.retry}
+        cat={category}
+        setCat={setCategory}
+      />
+      <div className="container-page pt-8">
+        <div className="mb-3 rounded-3xl bg-secondary px-6 py-9 text-white sm:px-10">
+          <p className="eyebrow text-primary-200!">Discover something good</p>
+          <h1 className="mt-2 text-3xl font-black sm:text-4xl">
+            {current ? getCategoryLabel(current) : "Shop all products"}
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-7 text-slate-300">
+            Browse our collection of everyday essentials, trending finds, and products worth keeping.
+          </p>
         </div>
       </div>
+      <ProductGrid id="shop-products" category={category} />
     </main>
   );
 }

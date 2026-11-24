@@ -5,17 +5,18 @@
 ============================== */
 
 @theme {
-  /* Primary - Orange */
-  --color-primary-50: rgb(255 244 237);
-  --color-primary-100: rgb(255 229 213);
-  --color-primary-200: rgb(255 199 170);
-  --color-primary-300: rgb(255 160 116);
-  --color-primary-400: rgb(255 110 59);
+  /* Primary - TREND JR purple (logo / hero). 600-900 follow the hero's purples. */
+  --color-primary: var(--color-primary-500);
+  --color-primary-50: rgb(250 245 253);
+  --color-primary-100: rgb(243 231 250);
+  --color-primary-200: rgb(231 208 244);
+  --color-primary-300: rgb(208 166 230);
+  --color-primary-400: rgb(160 82 201);
   --color-primary-500: #4e0d6c;
-  --color-primary-600: rgb(224 53 13);
-  --color-primary-700: rgb(186 37 12);
-  --color-primary-800: rgb(148 31 18);
-  --color-primary-900: rgb(120 29 18);
+  --color-primary-600: rgb(107 21 148);
+  --color-primary-700: rgb(91 16 125);
+  --color-primary-800: rgb(74 14 110);
+  --color-primary-900: rgb(56 9 84);
 
   /* Secondary - Navy */
   --color-secondary: rgb(17 26 46);
@@ -28,6 +29,7 @@
 
   /* Shadows */
   --shadow-card: 0 4px 18px rgb(17 26 46 / 8%);
+  --shadow-soft: 0 8px 30px rgb(15 23 42 / 6%);
 }
 
 
@@ -331,7 +333,7 @@
   ============================== */
 
   .product-img {
-    @apply w-[1200px]! h-full object-cover cursor-pointer
+    @apply w-full h-full object-cover cursor-pointer
            transition-transform duration-300
            group-hover:scale-105;
   }
@@ -371,4 +373,11 @@
 
 @apply px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all;
 
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }

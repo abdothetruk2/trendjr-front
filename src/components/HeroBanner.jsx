@@ -35,7 +35,7 @@ const TRUST_FEATURES = [
 ];
 
 export default function HeroBanner({
-  backgroundImage = "./src/ab.jpeg",
+  backgroundImage = "/ab.jpeg", // public/ab.jpeg (works in dev and in production builds)
   onShopNow,
   onBrowseOffers,
 }) {
@@ -51,7 +51,10 @@ export default function HeroBanner({
       >
         <img
           src={backgroundImage}
-          alt="خلفية منتجات Trend GR"
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
           className="h-full w-full scale-[1.03] object-cover object-[85%_center] transition-transform duration-700 md:object-right"
         />
 

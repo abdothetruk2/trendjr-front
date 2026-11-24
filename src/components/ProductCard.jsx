@@ -1,155 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
+import ProductImage from './ProductImage';
+import { useCart } from '../context/CartContext';
+import { formatPrice, getProductView, toNumber } from '../utils/product';
 
 export default function ProductCard({
   product,
-  cat_id,
-  filter,
   language = 'en',
   onAddToCart,
   onToggleWishlist
 }) {
 
-  // =====================================
-  // 1. Check Product
-  // =====================================
+  const { addItem } = useCart();
 
   if (!product) return null;
 
-
-  // =====================================
-  // 2. Helpers
-  // =====================================
-
-  // Get localized text
-  const getText = (value) => {
-
-    if (typeof value === 'string') {
-      return value;
-    }
-
-    if (typeof value === 'number') {
-      return String(value);
-    }
-
-    if (value && typeof value === 'object') {
-      return (
-        value[language] ||
-        value.en ||
-        value.ar ||
-        value.de ||
-        ''
-      );
-    }
-
-    return '';
-  };
-
-
-  // Convert values to numbers safely
-  const getNumber = (value) => {
-
-    const number = Number(value ?? 0);
-
-    return Number.isFinite(number) ? number : 0;
-  };
-
-
-  // Format prices
-  const formatPrice = (price) => {
-
-    return getNumber(price).toFixed(2);
-
-  };
-
-
-  // Format numbers
-  const formatNumber = (number) => {
-
-    return getNumber(number).toLocaleString();
-
-  };
-
-
-  // Get ID from populated MongoDB objects or strings
-  const getId = (value) => {
-
-    if (value && typeof value === 'object') {
-
-      return (
-        value._id ||
-        value.id ||
-        value.slug ||
-        ''
-      );
-
-    }
-
-    return value ?? '';
-
-  };
-
-
-  // =====================================
-  // 3. Product Data
-  // =====================================
-
-  const productId = product._id || product.id;
-
-  const title = getText(product.title || product.name);
-
-  const image =
-    typeof product.image === 'string'
-      ? product.image
-      : product.image?.url ||
-        product.images?.[0]?.url ||
-        product.images?.[0] ||
-        '';
-
-  const price = getNumber(product.price);
-
-  const originalPrice = getNumber(product.originalPrice);
-
-  const discount = getNumber(product.discount);
-
-  const rating = getNumber(product.rating);
-
-  const reviewsCount = getNumber(product.reviewsCount);
-
-  const sold = getNumber(product.sold);
-
-
-  // =====================================
-  // 4. Category Filtering
-  // =====================================
-
-  const selectedCategory = cat_id ?? filter;
-
-  const productCategory = getId(product.category);
-
-  const productFilter = getId(product.filter);
-
-  const matchesCategory =
-    !selectedCategory ||
-    selectedCategory === 'all' ||
-    String(productCategory) === String(selectedCategory) ||
-    String(productFilter) === String(selectedCategory);
-
-  // Don't render product if category doesn't match
-  if (!matchesCategory) return null;
-
-
-  // =====================================
-  // 5. Product URL
-  // =====================================
-
-  const productUrl = `/product/${productId}`;
-
-
-  // =====================================
-  // 6. Render
-  // =====================================
+  const { id, title, image, imageFallback, price, oldPrice, discount, rating, reviews } = getProductView(product, language);
+  const sold = toNumber(product.sold);
+  const productUrl = `/product/${id}`;
 
   return (
 
@@ -163,274 +32,122 @@ export default function ProductCard({
       transition-all duration-200
     ">
 
+      {/* PRODUCT IMAGE (square: matches the product photos, no layout shift) */}
 
-      {/* =====================================
-          PRODUCT IMAGE
-      ====================================== */}
+      <div className="relative">
 
-      <div className="
-        relative aspect-[4/3] h-[250px]
-        bg-slate-100 overflow-hidden
-      ">
-
-        <Link to={productUrl}>
-
-          {image ? (
-
-            <img
-              src={"/"+image}
-              alt={title}
-              loading="lazy"
-              className="
-                product-img
-                w-full h-full
-                object-cover
-                transition-transform duration-300
-                group-hover:scale-105
-              "
-            />
-
-          ) : (
-
-            <div className="
-              w-full h-full
-              flex items-center justify-center
-              text-slate-400
-            ">
-              No Image
-            </div>
-
-          )}
-
+        <Link to={productUrl} tabIndex={-1} aria-hidden="true">
+          <ProductImage
+            src={image}
+            fallbackSrc={imageFallback}
+            alt={title}
+            className="aspect-square"
+            imgClassName="group-hover:scale-105"
+          />
         </Link>
-
 
         {/* BADGES */}
 
-        <div className="
-          absolute top-2.5 left-2.5
-          flex flex-wrap gap-1.5
-        ">
+        <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 pointer-events-none">
 
           {discount > 0 && (
-
-            <span className="badge-primary">
-
-              -{discount}% OFF
-
-            </span>
-
+            <span className="badge-primary">-{discount}% OFF</span>
           )}
 
           {product.isNew && (
-
-            <span className="badge-secondary">
-
-              NEW
-
-            </span>
-
+            <span className="badge-secondary">NEW</span>
           )}
 
         </div>
-
 
         {/* WISHLIST BUTTON */}
 
         <button
           type="button"
           onClick={() => onToggleWishlist?.(product)}
-          className="
-            btn-wish
-            absolute top-2.5 right-2.5
-            w-8 h-8
-          "
-          aria-label="Save to wishlist"
+          className="btn-wish top-2.5 right-2.5 w-8 h-8"
+          aria-label={`Save ${title} to wishlist`}
         >
-
           <Heart className="w-4 h-4 text-slate-600" />
-
         </button>
 
       </div>
 
+      {/* PRODUCT DETAILS */}
 
-      {/* =====================================
-          PRODUCT DETAILS
-      ====================================== */}
-
-      <div className="
-        p-3.5 flex-1
-        flex flex-col
-        justify-between
-      ">
-
-
-        {/* PRODUCT TITLE */}
+      <div className="p-3.5 flex-1 flex flex-col justify-between">
 
         <div>
 
           <Link to={productUrl}>
-
             <h3 className="
-              mt-1
+              mt-1 min-h-[2.5rem]
               text-left text-sm
               font-bold text-slate-900
               line-clamp-2
               hover:text-primary-600
               leading-snug
-              cursor-pointer
             ">
-
-              {title || 'Unnamed Product'}
-
+              {title}
             </h3>
-
           </Link>
 
+          {/* RATING & SALES (only when there is data) */}
 
-          {/* =====================================
-              RATING & SALES
-          ====================================== */}
+          {(rating > 0 || reviews > 0 || sold > 0) && (
+            <div className="mt-2 flex items-center gap-1.5 text-muted">
 
-          <div className="
-            mt-2 flex items-center
-            gap-1.5 text-muted
-          ">
+              {rating > 0 && (
+                <span className="inline-flex items-center gap-0.5 font-bold text-slate-800">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  {rating.toFixed(1)}
+                </span>
+              )}
 
+              {reviews > 0 && <span>({reviews.toLocaleString()})</span>}
 
-            {/* RATING */}
+              {sold > 0 && <span>· {sold.toLocaleString()} sold</span>}
 
-            <span className="
-              inline-flex items-center gap-0.5
-              font-bold text-slate-800
-            ">
-
-              <Star className="
-                w-3.5 h-3.5
-                fill-amber-400
-                text-amber-400
-              " />
-
-              {rating.toFixed(1)}
-
-            </span>
-
-
-            {/* REVIEWS */}
-
-            <span>
-
-              ({formatNumber(reviewsCount)})
-
-            </span>
-
-
-            <span>·</span>
-
-
-            {/* SOLD */}
-
-            <span>
-
-              {formatNumber(sold)} sold
-
-            </span>
-
-          </div>
+            </div>
+          )}
 
         </div>
 
+        {/* PRICE & CART */}
 
-        {/* =====================================
-            PRICE & CART
-        ====================================== */}
-
-        <div className="
-          mt-3 pt-3
-          border-t border-slate-100
-          flex items-center
-          justify-between gap-2
-        ">
-
-
-          {/* PRICE */}
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
 
           <div>
 
-            <div className="
-              flex items-baseline gap-1.5
-            ">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
 
-
-              {/* CURRENT PRICE */}
-
-              <span className="
-                text-lg font-extrabold
-                text-slate-950
-              ">
-
-                ${formatPrice(price)}
-
+              <span className="text-lg font-extrabold text-slate-950">
+                {formatPrice(price)}
               </span>
 
-
-              {/* ORIGINAL PRICE */}
-
-              {originalPrice > price && (
-
-                <span className="
-                  price-old text-xs
-                ">
-
-                  ${formatPrice(originalPrice)}
-
-                </span>
-
+              {oldPrice > 0 && (
+                <span className="price-old text-xs">{formatPrice(oldPrice)}</span>
               )}
 
             </div>
 
-
-            {/* DISCOUNT INFO */}
-
-            {originalPrice > price && (
-
-              <div className="
-                flex items-center gap-1
-                text-[11px]
-                font-semibold
-                text-emerald-600
-                mt-0.5
-              ">
-
-                Save ${formatPrice(originalPrice - price)}
-
+            {oldPrice > 0 && (
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 mt-0.5">
+                Save {formatPrice(oldPrice - price)}
               </div>
-
             )}
 
           </div>
 
-
-          {/* =====================================
-              ADD TO CART
-          ====================================== */}
+          {/* ADD TO CART */}
 
           <button
             type="button"
-            onClick={() => onAddToCart?.(product)}
-            className="
-              btn-light p-2.5
-              hover:bg-primary-500
-              hover:text-white
-              transition-colors
-            "
+            onClick={() => (onAddToCart ? onAddToCart(product) : addItem(product))}
+            className="btn-light p-2.5 shrink-0 hover:bg-primary-500 hover:text-white transition-colors"
             aria-label={`Add ${title} to cart`}
           >
-
             <ShoppingCart className="w-4 h-4" />
-
           </button>
 
         </div>
@@ -441,4 +158,23 @@ export default function ProductCard({
 
   );
 
-} 
+}
+
+// Placeholder with the same layout as a product card (used while products load)
+export function ProductCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden flex flex-col" aria-hidden="true">
+      <div className="aspect-square bg-slate-200 animate-pulse" />
+      <div className="p-3.5 flex-1 flex flex-col justify-between">
+        <div className="mt-1 space-y-2">
+          <div className="h-3.5 w-11/12 rounded bg-slate-200 animate-pulse" />
+          <div className="h-3.5 w-2/3 rounded bg-slate-200 animate-pulse" />
+        </div>
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="h-6 w-20 rounded bg-slate-200 animate-pulse" />
+          <div className="h-9 w-9 rounded-xl bg-slate-200 animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
