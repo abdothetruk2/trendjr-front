@@ -34,6 +34,16 @@
 
 
 /* ==============================
+   LAYERS (z-index), lowest to highest
+   30   admin sidebar
+   40   sticky header, phone bottom navigation
+   60   drawer backdrop      61  drawer panel (side menu, categories, admin menu)
+   70   dialogs (Quick View, confirmations, admin forms)
+   80   notifications (toasts, "Added to cart")
+   9999 first-visit splash screen
+============================== */
+
+/* ==============================
    BASE
 ============================== */
 
@@ -59,7 +69,7 @@
 @layer components {
 
   .container-page {
-    @apply max-w-7xl mx-auto px-4 sm:px-6;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 2xl:max-w-[90rem];
   }
 
   .card {

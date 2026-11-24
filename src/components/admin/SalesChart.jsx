@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { formatPrice } from '../../utils/product';
 import { formatDayKey, formatNumber } from '../../utils/format';
+import { SITE, CURRENCY_SYMBOL } from '../../config/site';
 
 // Column chart of revenue per day (one series, so no legend: the card title names it).
 // Hover or arrow keys show a day's revenue and orders; "Table" lists every value.
@@ -11,9 +12,9 @@ const GAP = 2; // surface gap between neighbouring columns
 const RADIUS = 4; // rounded data end, square at the baseline
 
 const compactCurrency = new Intl.NumberFormat('en-US', {
-  style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1,
+  style: 'currency', currency: SITE.currency, notation: 'compact', maximumFractionDigits: 1,
 });
-const tickLabel = (v) => (v < 10000 ? `$${formatNumber(v)}` : compactCurrency.format(v));
+const tickLabel = (v) => (v < 10000 ? `${CURRENCY_SYMBOL}${formatNumber(v)}` : compactCurrency.format(v));
 
 // 0, step, 2·step, … with a "nice" step (1, 2, 2.5, 5 × 10ⁿ) that covers max
 function niceTicks(max, count = 4) {
@@ -173,9 +174,9 @@ export default function SalesChart({ data = [], refreshing = false }) {
                 {data.map((day, i) => (i % labelEvery === 0 || i === data.length - 1) && (i === data.length - 1 || data.length - 1 - i >= labelEvery) ? (
                   <text
                     key={day.date}
-                    x={i * slot + slot / 2}
+                    x={i === data.length - 1 && i > 0 ? innerW : i * slot + slot / 2}
                     y={innerH + 18}
-                    textAnchor="middle"
+                    textAnchor={i === data.length - 1 && i > 0 ? "end" : "middle"}
                     className="fill-slate-400 text-[11px]"
                   >
                     {formatDayKey(day.date)}

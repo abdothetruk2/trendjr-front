@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, PackageSearch, RotateCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard, { ProductCardSkeleton } from './ProductCard';
 import useApi from '../hooks/useApi';
+import SectionHeader from './SectionHeader';
+import { CURRENCY_SYMBOL } from '../config/site';
 
 export const PAGE_SIZE = 20; // products per page (fills the 4- and 5-column grids evenly)
 
@@ -24,8 +26,9 @@ const SORT_OPTIONS = [
   { value: 'discount', label: 'Biggest Discount' },
 ];
 
-const PRICE_MIN = 15;
-const PRICE_MAX = 250; // slider at max = no price filter
+// The catalog runs from about $2 to $100; at the top end the slider means "any price"
+const PRICE_MIN = 5;
+const PRICE_MAX = 100; // slider at max = no price filter
 
 // Paginated product list (server-side filters, PAGE_SIZE per page).
 // page, sort and price live in the URL (?page=2&sort=price-asc&maxPrice=50), so the
@@ -39,6 +42,9 @@ export default function ProductGrid({
   discounted = false,
   defaultSort = 'featured',
   onFirstLoad,
+  embedded = false, // inside a page layout with a sidebar: no outer padding, fewer columns
+  eyebrow = '',
+  title = '', // optional section heading (the homepage uses one)
 }) {
   const [params, setParams] = useSearchParams();
 
@@ -101,9 +107,14 @@ export default function ProductGrid({
   }, [loading, onFirstLoad]);
 
   const priceFiltered = maxPrice < PRICE_MAX;
+  const gridClass = embedded
+    ? 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4'
+    : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4';
 
   return (
-    <section id={id} className="container-page py-5 scroll-mt-24">
+    <section id={id} className={`${embedded ? '' : 'container-page '}py-5 scroll-mt-24 min-w-0`}>
+      {title && <SectionHeader eyebrow={eyebrow} title={title} id={`${id}-title`} />}
+
       {/* Control Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
@@ -124,7 +135,7 @@ export default function ProductGrid({
           {/* Price Cap */}
           <label className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700">
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
-            <span className="min-w-[4.5rem]">Under ${priceDraft}</span>
+            <span className="min-w-[4.5rem]">{priceDraft < PRICE_MAX ? `Under ${CURRENCY_SYMBOL}${priceDraft}` : 'Any price'}</span>
             <input
               type="range"
               min={PRICE_MIN}
@@ -166,7 +177,7 @@ export default function ProductGrid({
 
       {loading ? (
         /* Skeletons: same size as the cards, so nothing jumps */
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" aria-busy="true">
+        <div className={gridClass} aria-busy="true">
           {Array.from({ length: PAGE_SIZE }, (_, i) => <ProductCardSkeleton key={i} />)}
         </div>
       ) : error ? (
@@ -191,7 +202,7 @@ export default function ProductGrid({
             <>
               <p className="mt-3 font-bold text-slate-900">No products found</p>
               <p className="text-muted mt-1">
-                {priceFiltered ? `Nothing under $${maxPrice} here — try a higher price.` : 'Try another category or search term.'}
+                {priceFiltered ? `Nothing under ${CURRENCY_SYMBOL}${maxPrice} here — try a higher price.` : 'Try another category or search term.'}
               </p>
               {priceFiltered && (
                 <button type="button" onClick={() => setPriceDraft(PRICE_MAX)} className="btn-outline btn-sm mt-4">
@@ -202,7 +213,7 @@ export default function ProductGrid({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className={gridClass}>
           {items.map((product) => (
             <ProductCard key={product.id ?? product._id} product={product} />
           ))}

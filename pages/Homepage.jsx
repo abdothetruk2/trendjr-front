@@ -9,18 +9,20 @@ import ProductGrid from '../src/components/ProductGrid';
 import TrustSection from '../src/components/TrustSection';
 import Loader from '../src/components/Loader';
 import useApi from '../src/hooks/useApi';
+import useCategories from '../src/hooks/useCategories';
 import useCategoryParam from '../src/hooks/useCategoryParam';
 
 // The full-screen brand loader only covers the first homepage load of a visit —
 // not later visits to this page, and never category/filter changes.
 let splashShown = false;
+const SPLASH_MAX_MS = 1200;
 
 export default function Homepage() {
 
     const navigate = useNavigate();
 
     // Categories and flash deals from the API (each requested once)
-    const categories = useApi('/api/categories');
+    const categories = useCategories();
     const flash = useApi('/api/products/flash');
 
     // Selected category slug, kept in the URL (?category=...); 'all' = every product
@@ -30,7 +32,13 @@ export default function Homepage() {
     const [showSplash] = useState(() => !splashShown);
     const [gridReady, setGridReady] = useState(false);
     const handleGridReady = useCallback(() => setGridReady(true), []);
-    const initialLoading = categories.loading || flash.loading || !gridReady;
+    // ...but never longer than SPLASH_MAX_MS (a slow API must not hide the page)
+    const [splashExpired, setSplashExpired] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => setSplashExpired(true), SPLASH_MAX_MS);
+        return () => clearTimeout(timer);
+    }, []);
+    const initialLoading = !splashExpired && (categories.loading || flash.loading || !gridReady);
 
     useEffect(() => {
         if (!initialLoading) splashShown = true;
@@ -72,7 +80,7 @@ export default function Homepage() {
                     onRetry={flash.retry}
                 />
 
-                <ProductGrid category={cat} onFirstLoad={handleGridReady} />
+                <ProductGrid category={cat} onFirstLoad={handleGridReady} eyebrow="Just for you" title="Discover products" />
 
                 <TrustSection />
 

@@ -1,12 +1,62 @@
-import { UserRound, MapPin, Mail, Phone, Pencil, ShieldCheck } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserRound, Package, Heart, ShoppingBag, LogOut, LayoutDashboard } from "lucide-react";
+import { useAuth } from "../src/context/AuthContext";
+import { ProfileForm, AddressForm, PasswordForm } from "../src/components/account/AccountForms";
 
 export default function ProfilePage() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await logout();
+    navigate("/");
+  }
+
+  const links = [
+    { to: "/orders", label: "My orders", icon: Package },
+    { to: "/wishlist", label: "My wishlist", icon: Heart },
+    { to: "/cart", label: "Shopping cart", icon: ShoppingBag },
+    ...(user?.role === "admin" ? [{ to: "/admin", label: "Admin dashboard", icon: LayoutDashboard }] : []),
+  ];
+
   return (
-    <main className="min-h-screen bg-surface py-8"><div className="container-page"><div className="mb-8"><p className="eyebrow">Your personal space</p><h1 className="mt-2 text-3xl font-black text-secondary">My account</h1><p className="mt-2 text-sm text-slate-500">Manage your profile and account information.</p></div>
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]"><aside className="card h-fit p-5"><div className="flex items-center gap-3"><div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-50 text-primary-600"><UserRound size={26} /></div><div><h2 className="font-extrabold text-secondary">Alex Morgan</h2><p className="text-xs text-slate-400">alex@example.com</p></div></div><nav className="mt-6 space-y-1 text-sm"><a href="/profile" className="block rounded-xl bg-primary-50 px-4 py-3 font-bold text-primary-700">Personal information</a><a href="/orders" className="block rounded-xl px-4 py-3 text-slate-600 hover:bg-slate-50">My orders</a><a href="/wishlist" className="block rounded-xl px-4 py-3 text-slate-600 hover:bg-slate-50">My wishlist</a><a href="/cart" className="block rounded-xl px-4 py-3 text-slate-600 hover:bg-slate-50">Shopping cart</a><a href="/login" className="block rounded-xl px-4 py-3 text-rose-500 hover:bg-rose-50">Sign out</a></nav></aside>
-        <div className="space-y-6"><section className="card p-6"><div className="mb-6 flex items-center justify-between"><div><h2 className="text-lg font-black text-secondary">Personal information</h2><p className="mt-1 text-xs text-slate-400">Update your contact details.</p></div><button type="button" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-secondary"><Pencil size={14} /> Edit profile</button></div><div className="grid gap-5 sm:grid-cols-2"><div><p className="text-xs text-slate-400">Full name</p><p className="mt-1 font-bold text-secondary">Alex Morgan</p></div><div><p className="text-xs text-slate-400">Email address</p><p className="mt-1 flex items-center gap-2 font-bold text-secondary"><Mail size={15} className="text-primary-500" /> alex@example.com</p></div><div><p className="text-xs text-slate-400">Phone number</p><p className="mt-1 flex items-center gap-2 font-bold text-secondary"><Phone size={15} className="text-primary-500" /> +20 100 000 0000</p></div><div><p className="text-xs text-slate-400">Default address</p><p className="mt-1 flex items-center gap-2 font-bold text-secondary"><MapPin size={15} className="text-primary-500" /> Cairo, Egypt</p></div></div></section>
-          <section className="card p-6"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><ShieldCheck /></span><div><h2 className="font-extrabold text-secondary">Account security</h2><p className="text-xs text-slate-400">Keep your account details up to date.</p></div></div><div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-4"><div><p className="text-sm font-bold text-secondary">Password</p><p className="mt-1 text-xs text-slate-400">Last updated: Not available</p></div><a href="/login" className="text-xs font-extrabold text-primary-600">Change password</a></div></section>
-        </div></div>
-    </div></main>
+    <main className="min-h-screen bg-surface py-8">
+      <div className="container-page">
+        <div className="mb-8">
+          <p className="eyebrow">Your personal space</p>
+          <h1 className="mt-2 text-3xl font-black text-secondary">My account</h1>
+          <p className="mt-2 text-sm text-slate-500">Manage your profile and account information.</p>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+          <aside className="card h-fit p-5">
+            <div className="flex items-center gap-3">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary-50 text-xl font-extrabold uppercase text-primary-600">
+                {(user?.username || user?.email || "?").charAt(0) || <UserRound size={26} />}
+              </div>
+              <div className="min-w-0">
+                <h2 className="truncate font-extrabold text-secondary">{user?.username || "My account"}</h2>
+                <p className="truncate text-xs text-slate-400">{user?.email}</p>
+              </div>
+            </div>
+            <nav className="mt-6 space-y-1 text-sm" aria-label="Account">
+              <span className="block rounded-xl bg-primary-50 px-4 py-3 font-bold text-primary-700" aria-current="page">Personal information</span>
+              {links.map(({ to, label, icon: Icon }) => (
+                <Link key={to} to={to} className="flex items-center gap-2 rounded-xl px-4 py-3 text-slate-600 hover:bg-slate-50">
+                  <Icon size={16} className="text-slate-400" aria-hidden="true" /> {label}
+                </Link>
+              ))}
+              <button type="button" onClick={handleSignOut} className="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left text-rose-500 hover:bg-rose-50">
+                <LogOut size={16} aria-hidden="true" /> Sign out
+              </button>
+            </nav>
+          </aside>
+          <div className="space-y-6">
+            <ProfileForm title="Personal information" description="Update your contact details." />
+            <AddressForm />
+            <PasswordForm />
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

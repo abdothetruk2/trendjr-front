@@ -10,7 +10,7 @@ import ProductImage from "../../src/components/ProductImage";
 import {
   PageHeader, Panel, Toolbar, SearchBox, FilterSelect, StatusBadge, EmptyState, ErrorState, TableSkeleton, ListFooter,
 } from "../../src/components/admin/AdminUI";
-import { formatPrice, getCategoryLabel, getProductView, toNumber } from "../../src/utils/product";
+import { formatPrice, getCategoryLabel, getProductView, isStockTracked, productPath, toNumber, LOW_STOCK } from "../../src/utils/product";
 import { categoryOptions } from "../../src/utils/categories";
 import { formatNumber } from "../../src/utils/format";
 
@@ -25,6 +25,7 @@ const SORT_OPTIONS = [
   { value: "price-desc", label: "Price: high to low" },
   { value: "stock-asc", label: "Stock: low to high" },
   { value: "stock-desc", label: "Stock: high to low" },
+  { value: "sold-desc", label: "Best-selling" },
 ];
 
 export default function AdminProductsPage() {
@@ -112,7 +113,7 @@ export default function AdminProductsPage() {
         <FilterSelect label="Status" value={filters.status} onChange={setFilter("status")}
           options={[{ value: "active", label: "Visible" }, { value: "inactive", label: "Hidden" }]} />
         <FilterSelect label="Stock" value={filters.stock} onChange={setFilter("stock")}
-          options={[{ value: "in", label: "In stock" }, { value: "low", label: "Low (1–5)" }, { value: "none", label: "0 / not set" }]} />
+          options={[{ value: "in", label: "In stock" }, { value: "low", label: `Low (1–${LOW_STOCK})` }, { value: "out", label: "Out of stock" }, { value: "untracked", label: "Not tracked" }]} />
         <FilterSelect label="Show" value={filters.flag} onChange={setFilter("flag")}
           options={[{ value: "featured", label: "Featured" }, { value: "flash", label: "Flash sale" }, { value: "discounted", label: "Discounted" }]} />
         <FilterSelect label="Sort" value={filters.sort} onChange={(v) => update({ sort: v, page: null })} options={SORT_OPTIONS} allLabel={null} />
@@ -134,7 +135,7 @@ export default function AdminProductsPage() {
           />
         ) : (
           <>
-            <div className={`overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
+            <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[760px] text-sm">
                 <caption className="sr-only">Products</caption>
                 <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
@@ -182,9 +183,13 @@ export default function AdminProductsPage() {
                           {view.oldPrice > 0 && <span className="block text-xs text-slate-400 line-through">{formatPrice(view.oldPrice)}</span>}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums">
-                          <span className={toNumber(product.stock) > 0 && toNumber(product.stock) <= 5 ? "font-bold text-amber-600" : "text-slate-700"}>
-                            {formatNumber(product.stock)}
-                          </span>
+                          {isStockTracked(product) ? (
+                            <span className={toNumber(product.stock) <= 0 ? "font-bold text-rose-600" : toNumber(product.stock) <= LOW_STOCK ? "font-bold text-amber-600" : "text-slate-700"}>
+                              {formatNumber(Math.max(0, toNumber(product.stock)))}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400" title="Stock isn't tracked: always for sale">Not tracked</span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <StatusBadge kind="visibility" status={visible ? "active" : "hidden"} />
@@ -192,7 +197,7 @@ export default function AdminProductsPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
                             {visible && (
-                              <a href={`/product/${product.id}`} target="_blank" rel="noreferrer" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700" title="View in store" aria-label={`View ${view.title} in the store`}>
+                              <a href={productPath(product)} target="_blank" rel="noreferrer" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700" title="View in store" aria-label={`View ${view.title} in the store`}>
                                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
                               </a>
                             )}

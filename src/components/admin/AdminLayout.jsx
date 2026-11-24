@@ -1,14 +1,12 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, FolderTree, ShoppingCart, Users, TicketPercent, Settings,
+  LayoutDashboard, Package, Boxes, FolderTree, ShoppingCart, Users, TicketPercent, Settings,
   Menu, Store, LogOut, Loader2,
 } from 'lucide-react';
 import Drawer from '../Drawer';
 import bagLogo from '../../data/trend_gr_bag_icon.svg';
 import { useAuth } from '../../context/AuthContext';
-import { ToastProvider } from '../../context/ToastContext';
-import { ConfirmProvider } from './ConfirmDialog';
 
 const SECTIONS = [
   { title: 'Overview', items: [{ to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true }] },
@@ -16,6 +14,7 @@ const SECTIONS = [
     title: 'Catalog',
     items: [
       { to: '/admin/products', label: 'Products', icon: Package },
+      { to: '/admin/inventory', label: 'Inventory', icon: Boxes },
       { to: '/admin/categories', label: 'Categories', icon: FolderTree },
     ],
   },
@@ -134,8 +133,6 @@ export default function AdminLayout() {
   }
 
   return (
-    <ToastProvider>
-      <ConfirmProvider>
         <div className="min-h-screen bg-surface lg:pl-64">
           {/* Desktop sidebar */}
           <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
@@ -187,7 +184,5 @@ export default function AdminLayout() {
             </Suspense>
           </main>
         </div>
-      </ConfirmProvider>
-    </ToastProvider>
   );
 }

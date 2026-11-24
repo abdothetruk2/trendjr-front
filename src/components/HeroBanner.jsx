@@ -11,6 +11,8 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
+const DEFAULT_BACKGROUND = "/ab.jpeg";
+
 const TRUST_FEATURES = [
   {
     icon: ShieldCheck,
@@ -35,28 +37,35 @@ const TRUST_FEATURES = [
 ];
 
 export default function HeroBanner({
-  backgroundImage = "/ab.jpeg", // public/ab.jpeg (works in dev and in production builds)
+  backgroundImage = DEFAULT_BACKGROUND, // public/ab.jpeg (+ WebP copies from scripts/optimize-images.py)
   onShopNow,
   onBrowseOffers,
 }) {
   return (
     <section
       dir="ltr"
-      className="relative mx-auto w-full max-w-7xl overflow-hidden rounded-3xl bg-[#f8f2fa] shadow-2xl ring-1 ring-purple-900/10"
+      className="relative mx-auto w-full max-w-7xl 2xl:max-w-none overflow-hidden rounded-3xl bg-[#f8f2fa] shadow-2xl ring-1 ring-purple-900/10"
+      aria-labelledby="hero-title"
     >
+      <h1 id="hero-title" className="sr-only">Trend Jr: the latest trending products, all in one place</h1>
       {/* طبقة الخلفية (الصورة الثانية المحسنة في Element مستقل) */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden"
       >
-        <img
-          src={backgroundImage}
-          alt=""
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-          className="h-full w-full scale-[1.03] object-cover object-[85%_center] transition-transform duration-700 md:object-right"
-        />
+        <picture>
+          {backgroundImage === DEFAULT_BACKGROUND && (
+            <source type="image/webp" srcSet="/ab-1600.webp 1600w, /ab.webp 2400w" sizes="(min-width: 640px) 100vw, 300vw" />
+          )}
+          <img
+            src={backgroundImage}
+            alt=""
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            className="h-full w-full scale-[1.03] object-cover object-[85%_center] transition-transform duration-700 md:object-right"
+          />
+        </picture>
 
         {/* تدرّج جانبي ناعم لعزل الجزء الأيسر وإبراز النصوص والأزرار */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#fbf7fd] via-[#fbf7fd]/85 to-transparent sm:via-[#fbf7fd]/70 lg:w-[58%] lg:via-[#fbf7fd]/60" />
@@ -66,7 +75,7 @@ export default function HeroBanner({
       </div>
 
       {/* المحتوى الرئيسي */}
-      <div className="relative z-10 flex min-h-[460px] flex-col justify-between px-5 pt-8 pb-5 sm:px-8 sm:pt-10 lg:min-h-[520px] lg:px-12 lg:pt-12 lg:pb-6">
+      <div className="relative z-10 flex min-h-[420px] flex-col justify-between px-4 pt-7 pb-4 sm:min-h-[460px] sm:px-8 sm:pt-10 lg:min-h-[520px] lg:px-12 lg:pt-12 lg:pb-6">
         <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
           {/* العمود الأيسر: الشعار والنصوص والأزرار */}
           <div className="flex flex-col items-center text-center lg:col-span-5 lg:items-center">
@@ -107,14 +116,15 @@ export default function HeroBanner({
                 </defs>
               </svg>
 
-              <h1 className="mt-1 text-4xl font-extrabold tracking-tight text-[#4D0F6B] sm:text-5xl">
+              <p className="mt-1 text-4xl font-extrabold tracking-tight text-[#4D0F6B] sm:text-5xl" aria-hidden="true">
                 trend <span className="font-bold">gr</span>
-              </h1>
+              </p>
             </div>
 
             {/* شارة العنوان الرئيسي */}
             <div
               dir="rtl"
+              lang="ar"
               className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-l from-[#5B107D] to-[#410A5B] px-6 py-2.5 text-lg font-bold text-white shadow-lg shadow-purple-900/25 sm:text-2xl"
             >
               <span>أحدث المنتجات الرائجة</span>
@@ -123,6 +133,7 @@ export default function HeroBanner({
             {/* النص الفرعي */}
             <p
               dir="rtl"
+              lang="ar"
               className="mt-3 text-base font-bold text-[#4D0F6B] sm:text-xl"
             >
               كل جديد ومميز في مكان واحد
@@ -132,6 +143,7 @@ export default function HeroBanner({
             {/* الأزرار التفاعلية */}
             <div
               dir="rtl"
+              lang="ar"
               className="mt-6 flex w-full flex-wrap items-center justify-center gap-3 sm:w-auto"
             >
               <button
@@ -139,9 +151,9 @@ export default function HeroBanner({
                 onClick={onShopNow}
                 className="group inline-flex cursor-pointer items-center justify-center gap-2.5 rounded-full bg-gradient-to-l from-[#6B1594] to-[#4A0E6E] px-7 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:from-[#7A1CA4] hover:to-[#5B107D] hover:shadow-xl active:scale-95 sm:text-base"
               >
-                <ShoppingBag className="h-4 w-4 text-[#A7E642]" />
+                <ShoppingBag className="h-4 w-4 text-[#A7E642]" aria-hidden="true" />
                 <span>تسوق الآن</span>
-                <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+                <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" aria-hidden="true" />
               </button>
 
               <button
@@ -149,7 +161,7 @@ export default function HeroBanner({
                 onClick={onBrowseOffers}
                 className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-[#5B107D]/25 bg-white/85 px-6 py-3 text-sm font-bold text-[#4D0F6B] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#8AC926] hover:bg-white active:scale-95 sm:text-base"
               >
-                <Sparkles className="h-4 w-4 text-[#8AC926]" />
+                <Sparkles className="h-4 w-4 text-[#8AC926]" aria-hidden="true" />
                 <span>تصفح العروض</span>
               </button>
             </div>
@@ -171,6 +183,7 @@ export default function HeroBanner({
                   <div
                     key={index}
                     dir="rtl"
+                    lang="ar"
                     className="flex items-center justify-center gap-2.5 px-2 py-1 lg:px-4"
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-50 text-[#5B107D]">
@@ -199,7 +212,7 @@ export default function HeroBanner({
               className="group flex w-full shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#5B107D] to-[#4A0E6E] px-5 py-2.5 text-xs font-semibold text-white shadow-md transition-all duration-200 hover:from-[#6D1796] hover:to-[#5B107D] hover:shadow-lg sm:text-sm lg:w-auto"
             >
               <MapPin className="h-4 w-4 shrink-0 text-[#8AC926] transition-transform duration-200 group-hover:scale-110" />
-              <span className="tracking-wide">
+              <span className="truncate tracking-wide">
                 Münsterstraße 11, 49525 Lengerich
               </span>
             </a>

@@ -11,6 +11,7 @@ import {
   PageHeader, Panel, Toolbar, SearchBox, FilterSelect, StatusBadge, EmptyState, ErrorState, TableSkeleton, ListFooter, Field, Toggle,
 } from "../../src/components/admin/AdminUI";
 import { formatPrice } from "../../src/utils/product";
+import { CURRENCY_SYMBOL } from "../../src/config/site";
 import { formatDate, formatNumber, fromDateInput, toDateInput } from "../../src/utils/format";
 
 const PAGE_SIZE = 20;
@@ -122,7 +123,7 @@ export default function AdminCouponsPage() {
           />
         ) : (
           <>
-            <div className={`overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
+            <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[820px] text-sm">
                 <caption className="sr-only">Coupons</caption>
                 <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
@@ -307,14 +308,14 @@ function CouponForm({ coupon, onClose, onSaved }) {
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label={form.type === "percent" ? "Percent off" : "Amount off (USD)"} required error={errors.value}>
+        <Field label={form.type === "percent" ? "Percent off" : `Amount off (${CURRENCY_SYMBOL})`} required error={errors.value}>
           <input type="number" inputMode="decimal" min="0" step={form.type === "percent" ? "1" : "0.01"} value={form.value} onChange={setText("value")} className="input" />
         </Field>
-        <Field label="Minimum order (USD)" error={errors.minOrderAmount}>
+        <Field label={`Minimum order (${CURRENCY_SYMBOL})`} error={errors.minOrderAmount}>
           <input type="number" inputMode="decimal" min="0" step="0.01" value={form.minOrderAmount} onChange={setText("minOrderAmount")} className="input" placeholder="None" />
         </Field>
         {form.type === "percent" && (
-          <Field label="Max discount (USD)" error={errors.maxDiscount}>
+          <Field label={`Max discount (${CURRENCY_SYMBOL})`} error={errors.maxDiscount}>
             <input type="number" inputMode="decimal" min="0" step="0.01" value={form.maxDiscount} onChange={setText("maxDiscount")} className="input" placeholder="No limit" />
           </Field>
         )}

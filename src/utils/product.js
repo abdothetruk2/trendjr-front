@@ -1,6 +1,7 @@
 // Helpers shared by the product components.
 // API field names are documented in API.md (price, old_price and rating arrive as strings).
 import { API_URL } from '../services/api';
+import { SITE } from '../config/site';
 
 // Localized values look like { en, de, ar }; plain strings are returned as-is.
 export function getText(value, language = 'en') {
@@ -17,14 +18,42 @@ export function toNumber(value) {
   return Number.isFinite(number) ? number : 0;
 }
 
-const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+const currency = new Intl.NumberFormat(SITE.locale, { style: 'currency', currency: SITE.currency });
 export const formatPrice = (value) => currency.format(toNumber(value));
+
+// Stock rules (same as the backend's utils/inventory.js):
+// track_inventory true/false is explicit; unset means "tracked only when there is a
+// stock number" — imported products without one (stock 0) stay for sale.
+export function isStockTracked(product) {
+  if (typeof product?.track_inventory === 'boolean') return product.track_inventory;
+  if (typeof product?.tracked === 'boolean') return product.tracked; // cart/wishlist snapshots
+  return toNumber(product?.stock) > 0;
+}
+
+export const LOW_STOCK = 5;
+
+// Store link of a product: /product/12/gold-necklace (the slug is optional)
+export function productPath(product) {
+  const id = product?.id ?? product?.productId ?? product?._id;
+  if (id === undefined || id === null) return '/shop';
+  const slug = typeof product?.slug === 'string' ? product.slug : '';
+  return slug ? `/product/${id}/${encodeURIComponent(slug)}` : `/product/${id}`;
+}
 
 // Product images are read from the public folder: every file lives in /public/media
 // under its own name. The database stores either a path with a batch folder
 // ("media/jalila/abc.jpg") or the supplier's URL ("https://.../abc.jpg"); both point
 // to /media/abc.jpg.
 // Images uploaded from the admin dashboard ("uploads/abc.jpg") are served by the API.
+// Catalog photos (/media/<name>.jpg) also exist as small WebP copies in two widths,
+// made by scripts/optimize-images.py. The browser picks one using `sizes`.
+export function webpCopies(src) {
+  const match = /^\/media\/([^/?#]+)\.(jpe?g|png|webp)$/i.exec(src || '');
+  if (!match) return null;
+  const name = match[1];
+  return { src: `/media/w960/${name}.webp`, srcSet: `/media/w480/${name}.webp 480w, /media/w960/${name}.webp 960w` };
+}
+
 export function getImageUrl(path) {
   if (!path || typeof path !== 'string') return '';
   if (/^(data|blob):/.test(path)) return path;
@@ -57,18 +86,28 @@ export function getProductView(product, language = 'en') {
   const rawImage = typeof product.image === 'string'
     ? product.image
     : product.image?.url ?? product.images?.[0];
+  const stock = Math.max(0, Math.floor(toNumber(product.stock)));
+  const tracked = isStockTracked(product);
 
   return {
     id: product.id ?? product._id,
+    slug: typeof product.slug === 'string' ? product.slug : '',
+    url: productPath(product),
     title: getText(product.name ?? product.title, language) || 'Unnamed product',
     image: getImageUrl(rawImage),
     imageFallback: isExternalUrl(rawImage) ? rawImage : '',
     price,
     oldPrice: oldPrice > price ? oldPrice : 0,
     discount,
-    rating: toNumber(product.rating),
+    rating: Math.min(5, Math.max(0, toNumber(product.rating))),
     reviews: toNumber(product.reviews_count ?? product.reviewsCount),
-    stock: toNumber(product.stock),
+    sold: toNumber(product.sold_count ?? product.sold),
+    stock,
+    tracked,
+    // How many a customer may buy now (untracked products: up to 10 per order line)
+    maxQuantity: tracked ? stock : 10,
+    inStock: !tracked || stock > 0,
+    lowStock: tracked && stock > 0 && stock <= LOW_STOCK,
     brand: product.brand || '',
   };
 }

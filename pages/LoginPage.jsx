@@ -74,7 +74,7 @@ export default function LoginPage() {
               <label className="flex items-center gap-2 text-slate-500">
                 <input name="remember" type="checkbox" checked={form.remember} onChange={update} className="accent-primary" /> Remember me
               </label>
-              <Link to="/contact" className="font-bold text-primary-600">Forgot password?</Link>
+              <Link to="/contact" className="font-bold text-primary-600" title="Contact support and we'll help you reset it">Forgot password?</Link>
             </div>
             <button type="submit" disabled={submitting || !form.username.trim() || !form.password} className="btn-primary w-full py-3.5">
               {submitting ? <><Loader2 size={17} className="animate-spin" /> Signing in…</> : <>Sign in <ArrowRight size={17} /></>}

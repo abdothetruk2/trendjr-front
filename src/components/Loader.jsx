@@ -23,9 +23,9 @@ export default function Loader({ done = false }) {
         >
 
             {/* Logo */}
-            <h1 className="text-5xl font-black tracking-tighter text-white">
+            <div className="text-5xl font-black tracking-tighter text-white" aria-label="Trend Jr">
                 TREND<span className="text-[#B6F23A]">JR</span>
-            </h1>
+            </div>
 
             <p className="mt-3 text-xs tracking-[0.35em] text-gray-400">
                 DISCOVER YOUR NEXT TREND

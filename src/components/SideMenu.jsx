@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import Drawer from './Drawer';
 import bagLogo from '../data/trend_gr_bag_icon.svg';
-import useApi from '../hooks/useApi';
+import useCategories from '../hooks/useCategories';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -166,7 +166,7 @@ export default function SideMenu({ open, onClose, id = 'site-menu' }) {
 
 // Top-level categories; the ones with sub-categories can be expanded
 function CategoryLinks({ onNavigate }) {
-  const { data, loading, error, retry } = useApi('/api/categories');
+  const { data, loading, error, retry } = useCategories();
   const [expanded, setExpanded] = useState(null);
 
   const tree = useMemo(() => {

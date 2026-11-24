@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CircleDollarSign, ShoppingCart, Package, Users, RotateCw, ArrowRight, Trophy, Receipt } from "lucide-react";
+import { CircleDollarSign, ShoppingCart, Package, Users, RotateCw, ArrowRight, Trophy, Receipt, PackageX, AlertTriangle, Infinity as InfinityIcon } from "lucide-react";
 import useApi from "../../src/hooks/useApi";
 import useUrlParams from "../../src/hooks/useUrlParams";
 import SalesChart from "../../src/components/admin/SalesChart";
@@ -32,6 +32,25 @@ function StatCard({ icon: Icon, label, value, detail, loading }) {
         </>
       )}
     </div>
+  );
+}
+
+// Stock alerts: each links to the Inventory page with that filter
+function StockLink({ to, icon: Icon, tone, label, value, detail, loading }) {
+  return (
+    <Link to={to} className="card flex items-center gap-3 p-4 transition-shadow hover:shadow-md">
+      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}>
+        <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-xs font-semibold text-slate-500">{label}</span>
+        <span className="block truncate text-xs text-slate-400">{detail}</span>
+      </span>
+      {loading
+        ? <span className="h-6 w-10 animate-pulse rounded bg-slate-100" aria-hidden="true" />
+        : <span className="text-xl font-black tabular-nums text-secondary">{formatNumber(value)}</span>}
+      <ArrowRight className="h-4 w-4 shrink-0 text-slate-300" aria-hidden="true" />
+    </Link>
   );
 }
 
@@ -82,7 +101,7 @@ export default function AdminDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               icon={CircleDollarSign}
-              label="Total revenue"
+              label="Total sales"
               loading={firstLoad}
               value={formatPrice(totals?.revenue)}
               detail={<>{formatPrice(period?.revenue)} in the last {days} days · {formatPrice(totals?.paidRevenue)} paid</>}
@@ -108,6 +127,13 @@ export default function AdminDashboardPage() {
               value={formatNumber(totals?.customers)}
               detail={<>{formatNumber(period?.newCustomers)} new in the last {days} days</>}
             />
+          </div>
+
+          {/* Stock alerts */}
+          <div className="grid gap-3 sm:grid-cols-3">
+            <StockLink to="/admin/inventory?stock=out" icon={PackageX} tone="bg-rose-50 text-rose-600" label="Out of stock" detail="Tracked products with none left" value={totals?.outOfStockProducts} loading={firstLoad} />
+            <StockLink to="/admin/inventory?stock=low" icon={AlertTriangle} tone="bg-amber-50 text-amber-600" label="Low stock" detail="5 or fewer left" value={totals?.lowStockProducts} loading={firstLoad} />
+            <StockLink to="/admin/inventory?stock=untracked" icon={InfinityIcon} tone="bg-slate-100 text-slate-600" label="Not tracked" detail="Always for sale" value={totals?.untrackedProducts} loading={firstLoad} />
           </div>
 
           {/* Sales analytics */}

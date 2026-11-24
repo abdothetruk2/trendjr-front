@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Camera, ShoppingBag, Heart, User, LayoutGrid, ChevronDown, LogOut, Menu, LayoutDashboard } from 'lucide-react';
+import { Search, ShoppingBag, Heart, User, LayoutGrid, ChevronDown, LogOut, Menu, LayoutDashboard } from 'lucide-react';
 import bagLogo from "../data/trend_gr_bag_icon.svg";
 import SideMenu from './SideMenu';
 import { useAuth } from '../context/AuthContext';
@@ -86,36 +86,32 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Categories Button */}
-        <Link
-          to="/shop"
-          className="btn-light hidden md:inline-flex gap-2 px-3.5 font-semibold shrink-0"
+        {/* Categories: opens the side menu, which lists every category */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-haspopup="dialog"
+          aria-controls="site-menu"
+          className="btn-light hidden lg:inline-flex gap-2 px-3.5 font-semibold shrink-0"
         >
-          <LayoutGrid className="w-4 h-4 text-primary" />
+          <LayoutGrid className="w-4 h-4 text-primary" aria-hidden="true" />
           Categories
-          <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-        </Link>
+          <ChevronDown className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
+        </button>
 
         {/* Search Bar */}
-        <div className="relative flex-1 max-w-2xl">
+        <div className="relative min-w-0 flex-1 max-w-2xl">
           <form className="relative flex items-center" role="search" onSubmit={handleSearch}>
-            <Search className="input-icon" />
+            <Search className="input-icon" aria-hidden="true" />
             <input
               type="search"
               value={term}
               onChange={(e) => setTerm(e.target.value)}
-              placeholder="Search gadgets, fashion, smart home, deals..."
+              placeholder="Search gadgets, beauty, jewelry, deals..."
               aria-label="Search products"
-              className="input-with-icon pr-24 rounded-full bg-slate-100 border-2 border-transparent focus:bg-white [&::-webkit-search-cancel-button]:hidden"
+              enterKeyHint="search"
+              className="input-with-icon pr-16 rounded-full bg-slate-100 border-2 border-transparent focus:bg-white [&::-webkit-search-cancel-button]:hidden"
             />
-            <button
-              type="button"
-              title="Search by image"
-              className="btn-icon absolute right-11 hover:text-primary-600 hover:bg-primary-50"
-              aria-label="Search by image"
-            >
-              <Camera className="w-4 h-4" />
-            </button>
             <button
               type="submit"
               className="btn-secondary btn-sm absolute right-1.5 px-3.5 py-1.5 rounded-full"

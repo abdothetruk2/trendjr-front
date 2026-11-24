@@ -130,7 +130,7 @@ export default function AdminCategoriesPage() {
           />
         ) : (
           <>
-            <div className={`overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
+            <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[720px] text-sm">
                 <caption className="sr-only">Categories</caption>
                 <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">

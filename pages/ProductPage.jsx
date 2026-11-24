@@ -24,6 +24,7 @@ import {
   Store,
 } from "lucide-react";
 import useApi from "../src/hooks/useApi";
+import useCategories from "../src/hooks/useCategories";
 import ProductGallery from "../src/components/ProductGallery";
 import ProductCard, { ProductCardSkeleton } from "../src/components/ProductCard";
 import {
@@ -91,7 +92,7 @@ export default function ProductPage() {
 // Category of the product plus its parent (for the breadcrumb), from the category list
 function useProductCategory(product) {
   const slug = getProductCategory(product);
-  const { data } = useApi(slug ? "/api/categories" : null);
+  const { data } = useCategories();
   return useMemo(() => {
     if (!slug) return { slug: "", trail: [] };
     const list = Array.isArray(data) ? data : [];
@@ -110,7 +111,7 @@ function useProductCategory(product) {
 
 function ProductDetails({ product }) {
   const view = getProductView(product);
-  const { title, price, discount, stock, brand } = view;
+  const { title, discount, brand } = view;
   const images = useMemo(() => getProductImages(product), [product]);
   const { specs, paragraphs } = useMemo(() => splitDescription(getText(product.description)), [product.description]);
   const category = useProductCategory(product);
@@ -195,7 +196,7 @@ function ProductDetails({ product }) {
           </div>
 
           <div className="min-w-0 md:col-start-2 xl:col-start-3 xl:row-span-2 xl:row-start-1 xl:sticky xl:top-24">
-            <BuyBox product={product} title={title} price={price} stock={stock} saved={saved} onToggleSaved={() => wishlist.toggle(product)} />
+            <BuyBox product={product} view={view} saved={saved} onToggleSaved={() => wishlist.toggle(product)} />
           </div>
 
           <div className="min-w-0 md:col-start-2 xl:row-start-2">
@@ -228,13 +229,20 @@ function StarRow({ rating, size = 17 }) {
   );
 }
 
-function StockStatus({ stock }) {
-  // stock 0 means "not specified" in the imported data, not sold out
-  if (stock <= 0) return null;
-  if (stock <= LOW_STOCK) {
+function StockStatus({ view }) {
+  // Untracked stock (imported products without a stock number): no stock claim
+  if (!view.tracked) return null;
+  if (view.stock <= 0) {
+    return (
+      <p className="flex items-center gap-2 text-sm font-bold text-rose-600">
+        <PackageX size={17} aria-hidden="true" /> Out of stock
+      </p>
+    );
+  }
+  if (view.stock <= LOW_STOCK) {
     return (
       <p className="flex items-center gap-2 text-sm font-bold text-amber-600">
-        <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" /> Only {stock} left in stock — order soon
+        <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" /> Only {view.stock} left in stock — order soon
       </p>
     );
   }
@@ -247,7 +255,7 @@ function StockStatus({ stock }) {
 
 // Brand, title, rating, price and stock
 function ProductHeadline({ product, view, rewardPoints }) {
-  const { title, price, oldPrice, discount, rating, reviews, stock, brand } = view;
+  const { title, price, oldPrice, discount, rating, reviews, sold, brand } = view;
 
   return (
     <div className="min-w-0">
@@ -277,6 +285,7 @@ function ProductHeadline({ product, view, rewardPoints }) {
         ) : (
           <span className="text-sm text-slate-400">No reviews yet</span>
         )}
+        {sold > 0 && <span className="text-sm font-semibold text-slate-500">· {sold.toLocaleString()} sold</span>}
         {product.sku && (
           <span className="text-xs text-slate-400">
             <span className="mx-1 text-slate-300" aria-hidden="true">|</span> SKU: <span className="font-semibold text-slate-500">{product.sku}</span>
@@ -300,7 +309,7 @@ function ProductHeadline({ product, view, rewardPoints }) {
           <p className="mt-1.5 text-sm font-semibold text-emerald-600">You save {formatPrice(oldPrice - price)}</p>
         )}
         <div className="mt-3 empty:hidden">
-          <StockStatus stock={stock} />
+          <StockStatus view={view} />
         </div>
         {rewardPoints > 0 && (
           <p className="mt-3 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -385,11 +394,12 @@ function ProductMore({ category, summary, highlights }) {
   );
 }
 
-function BuyBox({ product, title, price, stock, saved, onToggleSaved }) {
+function BuyBox({ product, view, saved, onToggleSaved }) {
+  const { title, price, inStock } = view;
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const navigate = useNavigate();
-  const maxQuantity = stock > 0 ? stock : 10;
+  const maxQuantity = Math.max(1, view.maxQuantity);
 
   return (
     <aside aria-label="Purchase options">
@@ -441,12 +451,13 @@ function BuyBox({ product, title, price, stock, saved, onToggleSaved }) {
           )}
 
           <div className="grid gap-2.5">
-            <button type="button" onClick={() => addItem(product, quantity)} className="btn-primary rounded-2xl py-3.5 text-base">
-              <ShoppingBag size={19} aria-hidden="true" /> Add to cart
+            <button type="button" onClick={() => addItem(product, quantity)} disabled={!inStock} className="btn-primary rounded-2xl py-3.5 text-base">
+              <ShoppingBag size={19} aria-hidden="true" /> {inStock ? "Add to cart" : "Out of stock"}
             </button>
             <button
               type="button"
-              onClick={() => { addItem(product, quantity); navigate("/cart"); }}
+              onClick={() => { if (addItem(product, quantity)) navigate("/cart"); }}
+              disabled={!inStock}
               className="btn-secondary rounded-2xl py-3.5 text-base"
             >
               Buy now <ChevronRight size={18} aria-hidden="true" />

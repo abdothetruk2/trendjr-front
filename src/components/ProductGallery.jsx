@@ -128,6 +128,7 @@ export default function ProductGallery({ images, alt, children }) {
                   alt={count > 1 ? `${alt} — photo ${i + 1}` : alt}
                   fit="contain"
                   priority={i === 0}
+                  sizes="(min-width: 1024px) 600px, 100vw"
                   className="aspect-square"
                   imgClassName="p-4 sm:p-6"
                 />

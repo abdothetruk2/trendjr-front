@@ -1,10 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Heart, ShoppingCart, Star, Zap } from 'lucide-react';
+import { Check, Eye, Heart, PackageX, ShoppingCart, Star, Zap } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { formatPrice, getProductView, toNumber } from '../utils/product';
+import { formatPrice, getProductImages, getProductView, webpCopies } from '../utils/product';
+
+// Loaded the first time someone opens a Quick View
+const QuickView = lazy(() => import('./QuickView'));
 
 // "$1,234.56" shown as "$1,234" + smaller ".56"; screen readers get the plain price
 export function PriceTag({ value, className = '' }) {
@@ -21,17 +24,54 @@ export function PriceTag({ value, className = '' }) {
   );
 }
 
+// How wide a card photo is shown (2 columns on phones ... 6 on wide screens)
+const CARD_IMAGE_SIZES = '(min-width: 1536px) 240px, (min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw';
+
+// The product's second photo, shown over the first while the card is hovered.
+// Stays invisible until it has loaded, so there is never a grey flash.
+// Tries the small WebP copies, then the original, then the supplier's copy.
+function HoverPhoto({ photo }) {
+  const copies = webpCopies(photo.src);
+  const chain = [
+    copies && { src: copies.src, srcSet: copies.srcSet },
+    photo.src && { src: photo.src },
+    photo.fallbackSrc && { src: photo.fallbackSrc },
+  ].filter(Boolean);
+  const [step, setStep] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  const current = chain[step];
+  if (!current) return null;
+  return (
+    <img
+      key={current.src}
+      src={current.src}
+      srcSet={current.srcSet}
+      sizes={current.srcSet ? CARD_IMAGE_SIZES : undefined}
+      alt=""
+      decoding="async"
+      onLoad={() => setLoaded(true)}
+      onError={() => setStep((s) => s + 1)}
+      className={`absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 motion-reduce:transition-none ${
+        loaded ? 'group-hover:opacity-100' : ''
+      }`}
+    />
+  );
+}
+
 export default function ProductCard({
   product,
   language = 'en',
   onAddToCart,
-  onToggleWishlist
+  onToggleWishlist,
+  priority = false,
 }) {
 
   const { addItem } = useCart();
   const wishlist = useWishlist();
   const [added, setAdded] = useState(false);
   const [pop, setPop] = useState(false);
+  const [hovered, setHovered] = useState(false); // load the 2nd photo only once someone hovers
+  const [quickView, setQuickView] = useState(false);
   const addedTimer = useRef(null);
   const popTimer = useRef(null);
 
@@ -42,16 +82,15 @@ export default function ProductCard({
 
   if (!product) return null;
 
-  const { id, title, image, imageFallback, price, oldPrice, discount, rating, reviews, stock, brand } =
-    getProductView(product, language);
-  const sold = toNumber(product.sold);
-  const productUrl = `/product/${id}`;
+  const view = getProductView(product, language);
+  const { id, title, image, imageFallback, price, oldPrice, discount, rating, reviews, sold, brand, url } = view;
+  const secondPhoto = getProductImages(product)[1];
   const saved = wishlist.has(id);
-  const lowStock = stock > 0 && stock <= 5; // 0 means "not specified" in the imported data
+  const soldOut = !view.inStock;
 
   function handleAddToCart() {
-    if (onAddToCart) onAddToCart(product);
-    else addItem(product);
+    const ok = onAddToCart ? (onAddToCart(product), true) : addItem(product);
+    if (!ok) return;
     setAdded(true);
     clearTimeout(addedTimer.current);
     addedTimer.current = setTimeout(() => setAdded(false), 1600);
@@ -67,29 +106,36 @@ export default function ProductCard({
 
   return (
 
-    <article className="
-      group relative flex flex-col overflow-hidden
-      rounded-2xl border border-slate-200/80 bg-white
-      shadow-[0_1px_2px_rgb(15_23_42/0.04)]
-      transition-[translate,box-shadow,border-color] duration-300 ease-out
-      hover:-translate-y-1 hover:border-primary-200
-      hover:shadow-[0_22px_44px_-22px_rgb(78_13_108/0.38)]
-      focus-within:border-primary-300
-      motion-reduce:transition-none motion-reduce:hover:translate-y-0
-    ">
+    <article
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHovered(true); }}
+      className="
+        group relative flex flex-col overflow-hidden
+        rounded-2xl border border-slate-200/80 bg-white
+        shadow-[0_1px_2px_rgb(15_23_42/0.04)]
+        transition-[translate,box-shadow,border-color] duration-300 ease-out
+        hover:-translate-y-1 hover:border-primary-200
+        hover:shadow-[0_22px_44px_-22px_rgb(78_13_108/0.38)]
+        focus-within:border-primary-300
+        motion-reduce:transition-none motion-reduce:hover:translate-y-0
+      "
+    >
 
       {/* IMAGE (square: matches the product photos, no layout shift) */}
 
       <div className="relative">
 
-        <Link to={productUrl} tabIndex={-1} aria-hidden="true" className="block">
+        <Link to={url} tabIndex={-1} aria-hidden="true" className="block">
           <ProductImage
             src={image}
             fallbackSrc={imageFallback}
             alt={title}
+            priority={priority}
+            sizes={CARD_IMAGE_SIZES}
             className="aspect-square"
-            imgClassName="transition-transform duration-500 ease-out group-hover:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            imgClassName={`transition-transform duration-500 ease-out group-hover:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${soldOut ? 'opacity-60' : ''}`}
           />
+          {/* Second photo fades in on hover (mouse only; fetched on first hover) */}
+          {secondPhoto && hovered && <HoverPhoto photo={secondPhoto} />}
         </Link>
 
         {/* Soft shade that rises on hover, so the badges stay readable */}
@@ -100,16 +146,22 @@ export default function ProductCard({
 
         {/* BADGES */}
 
-        {(discount > 0 || product.flash_sale || product.isNew) && (
+        {(discount > 0 || product.flash_sale || product.isNew || soldOut) && (
           <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
 
-            {discount > 0 && (
+            {soldOut && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-secondary/90 px-2.5 py-1 text-[11px] font-extrabold leading-none text-white shadow-sm">
+                <PackageX className="h-3 w-3" aria-hidden="true" /> Sold out
+              </span>
+            )}
+
+            {discount > 0 && !soldOut && (
               <span className="inline-flex items-center rounded-full bg-gradient-to-r from-rose-600 to-pink-500 px-2.5 py-1 text-[11px] font-extrabold leading-none tracking-wide text-white shadow-md shadow-rose-600/25">
                 −{discount}%
               </span>
             )}
 
-            {product.flash_sale && (
+            {product.flash_sale && !soldOut && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-extrabold uppercase leading-none tracking-wide text-amber-950 shadow-sm">
                 <Zap className="h-3 w-3 fill-current" aria-hidden="true" /> Flash
               </span>
@@ -122,28 +174,45 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* WISHLIST */}
+        {/* WISHLIST + QUICK VIEW */}
 
-        <button
-          type="button"
-          onClick={handleWishlist}
-          aria-pressed={saved}
-          aria-label={saved ? `Remove ${title} from wishlist` : `Save ${title} to wishlist`}
-          title={saved ? 'Remove from wishlist' : 'Save to wishlist'}
-          className={`
-            absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-full
-            shadow-sm ring-1 backdrop-blur transition-all duration-200 active:scale-90
-            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500
-            ${saved ? 'bg-rose-50 ring-rose-200' : 'bg-white/90 ring-slate-200/70 hover:bg-white hover:ring-rose-200'}
-          `}
-        >
-          <Heart
-            className={`h-4.5 w-4.5 transition-transform duration-200 ${pop ? 'scale-125' : 'scale-100'} ${
-              saved ? 'fill-rose-500 text-rose-500' : 'text-slate-600'
-            }`}
-            aria-hidden="true"
-          />
-        </button>
+        <div className="absolute right-2.5 top-2.5 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleWishlist}
+            aria-pressed={saved}
+            aria-label={saved ? `Remove ${title} from wishlist` : `Save ${title} to wishlist`}
+            title={saved ? 'Remove from wishlist' : 'Save to wishlist'}
+            className={`
+              grid h-9 w-9 place-items-center rounded-full
+              shadow-sm ring-1 backdrop-blur transition-all duration-200 active:scale-90
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500
+              ${saved ? 'bg-rose-50 ring-rose-200' : 'bg-white/90 ring-slate-200/70 hover:bg-white hover:ring-rose-200'}
+            `}
+          >
+            <Heart
+              className={`h-4.5 w-4.5 transition-transform duration-200 ${pop ? 'scale-125' : 'scale-100'} ${
+                saved ? 'fill-rose-500 text-rose-500' : 'text-slate-600'
+              }`}
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuickView(true)}
+            aria-label={`Quick view: ${title}`}
+            title="Quick view"
+            className="
+              grid h-9 w-9 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm ring-1 ring-slate-200/70 backdrop-blur
+              transition-all duration-200 hover:bg-white hover:text-primary-600 active:scale-90
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500
+              pointer-fine:opacity-0 pointer-fine:translate-y-1 pointer-fine:group-hover:opacity-100 pointer-fine:group-hover:translate-y-0
+              pointer-fine:focus-visible:opacity-100 pointer-fine:focus-visible:translate-y-0
+            "
+          >
+            <Eye className="h-4.5 w-4.5" aria-hidden="true" />
+          </button>
+        </div>
 
       </div>
 
@@ -159,7 +228,7 @@ export default function ProductCard({
 
         <h3 className="mt-1 text-left text-sm font-semibold leading-snug text-slate-800">
           <Link
-            to={productUrl}
+            to={url}
             className="line-clamp-2 min-h-[2.5rem] transition-colors hover:text-primary-600 focus-visible:underline focus-visible:outline-none"
           >
             {title}
@@ -169,7 +238,7 @@ export default function ProductCard({
         {/* RATING & SALES (only when there is data) */}
 
         {(rating > 0 || reviews > 0 || sold > 0) && (
-          <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-500">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-slate-500">
 
             {rating > 0 && (
               <span className="inline-flex items-center gap-0.5 font-bold text-slate-700">
@@ -181,7 +250,7 @@ export default function ProductCard({
 
             {reviews > 0 && <span>({reviews.toLocaleString()} reviews)</span>}
 
-            {sold > 0 && <span>· {sold.toLocaleString()} sold</span>}
+            {sold > 0 && <span>{rating > 0 || reviews > 0 ? '· ' : ''}{sold.toLocaleString()} sold</span>}
 
           </div>
         )}
@@ -201,7 +270,7 @@ export default function ProductCard({
 
           <div className="mt-0.5 flex min-h-4 flex-wrap items-center gap-x-2 text-[11px] font-bold">
             {oldPrice > 0 && <span className="text-emerald-600">Save {formatPrice(oldPrice - price)}</span>}
-            {lowStock && <span className="text-amber-600">Only {stock} left</span>}
+            {view.lowStock && <span className="text-amber-600">Only {view.stock} left</span>}
           </div>
 
           {/* ADD TO CART */}
@@ -209,17 +278,21 @@ export default function ProductCard({
           <button
             type="button"
             onClick={handleAddToCart}
-            aria-label={`Add ${title} to cart`}
+            disabled={soldOut}
+            aria-label={soldOut ? `${title} is sold out` : `Add ${title} to cart`}
             className={`
               mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5
               text-xs font-bold transition-all duration-200 active:scale-[0.98] sm:text-sm
               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500
+              disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none
               ${added
                 ? 'bg-emerald-600 text-white'
                 : 'bg-secondary text-white hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/25'}
             `}
           >
-            {added ? (
+            {soldOut ? (
+              <>Sold out</>
+            ) : added ? (
               <><Check className="h-4 w-4" aria-hidden="true" /> Added</>
             ) : (
               <><ShoppingCart className="h-4 w-4" aria-hidden="true" /> Add to cart</>
@@ -229,6 +302,12 @@ export default function ProductCard({
         </div>
 
       </div>
+
+      {quickView && (
+        <Suspense fallback={null}>
+          <QuickView product={product} open={quickView} onClose={() => setQuickView(false)} />
+        </Suspense>
+      )}
 
     </article>
 

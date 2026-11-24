@@ -74,7 +74,7 @@ export default function AdminOrdersPage() {
           />
         ) : (
           <>
-            <div className={`overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
+            <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[820px] text-sm">
                 <caption className="sr-only">Orders</caption>
                 <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">

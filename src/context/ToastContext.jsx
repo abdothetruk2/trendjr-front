@@ -44,7 +44,7 @@ export function ToastProvider({ children }) {
     return (
         <ToastContext.Provider value={toast}>
             {children}
-            <div className="pointer-events-none fixed bottom-4 right-4 left-4 z-[80] flex flex-col items-end gap-2 sm:left-auto" aria-live="polite" aria-atomic="false">
+            <div className="pointer-events-none fixed bottom-4 right-4 left-4 z-80 flex flex-col items-end gap-2 sm:left-auto" aria-live="polite" aria-atomic="false">
                 {toasts.map(({ id, type, message }) => {
                     const { icon: Icon, ring, iconColor } = STYLES[type] || STYLES.info;
                     return (

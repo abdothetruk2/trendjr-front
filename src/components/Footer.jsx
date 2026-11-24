@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail } from 'lucide-react';
+import { Mail, Loader2, CheckCircle2, Banknote, Truck } from 'lucide-react';
 import bagLogo from '../data/trend_gr_bag_icon.svg';
 import { useAuth } from '../context/AuthContext';
+import api, { getErrorMessage } from '../services/api';
+import { SITE } from '../config/site';
 
 const SHOP_LINKS = [
   { to: '/shop', label: 'All Products' },
@@ -15,9 +17,61 @@ const SHOP_LINKS = [
 const CARE_LINKS = [
   { to: '/orders', label: 'Track Your Order' },
   { to: '/faq', label: 'Shipping & Delivery Info' },
-  { to: '/faq', label: '100% Buyer Protection' },
+  { to: '/faq#payments', label: 'Payment & Buyer Protection' },
   { to: '/contact', label: 'Help Center & Returns' },
 ];
+
+// Footer newsletter sign-up (POST /api/newsletter)
+function NewsletterForm() {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState({ status: 'idle', message: '' }); // idle | sending | done | error
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+      setState({ status: 'error', message: 'Please enter a valid email address.' });
+      return;
+    }
+    setState({ status: 'sending', message: '' });
+    try {
+      const res = await api.post('/api/newsletter', { email: email.trim() });
+      setState({ status: 'done', message: res.data?.message || "Thanks! You're on the list." });
+      setEmail('');
+    } catch (err) {
+      setState({ status: 'error', message: getErrorMessage(err) });
+    }
+  }
+
+  return (
+    <form className="mt-5 max-w-xs" onSubmit={handleSubmit} noValidate>
+      <label htmlFor="newsletter-email" className="text-xs font-bold text-white block mb-2">
+        Get weekly drop alerts &amp; private codes
+      </label>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Mail className="input-icon left-3" aria-hidden="true" />
+          <input
+            id="newsletter-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            placeholder="you@example.com"
+            aria-describedby="newsletter-status"
+            className="input-with-icon pl-9 py-2 text-xs bg-white/10 border-white/10 text-white focus:border-primary-400"
+          />
+        </div>
+        <button type="submit" className="btn-primary btn-sm" disabled={state.status === 'sending'}>
+          {state.status === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-label="Sending" /> : 'Join'}
+        </button>
+      </div>
+      <p id="newsletter-status" className="mt-2 min-h-4 text-[11px]" aria-live="polite">
+        {state.status === 'done' && <span className="inline-flex items-center gap-1 text-emerald-400"><CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> {state.message}</span>}
+        {state.status === 'error' && <span className="text-rose-300">{state.message}</span>}
+      </p>
+    </form>
+  );
+}
 
 export default function Footer() {
   const { user } = useAuth();
@@ -31,8 +85,8 @@ export default function Footer() {
   ];
 
   const column = (title, links, span) => (
-    <div className={span}>
-      <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">{title}</h4>
+    <nav className={span} aria-label={title}>
+      <h2 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">{title}</h2>
       <ul className="space-y-2 text-xs">
         {links.map((link) => (
           <li key={link.label}>
@@ -40,7 +94,7 @@ export default function Footer() {
           </li>
         ))}
       </ul>
-    </div>
+    </nav>
   );
 
   return (
@@ -57,31 +111,10 @@ export default function Footer() {
             </div>
           </Link>
           <p className="mt-3 text-xs text-slate-400 leading-relaxed max-w-xs">
-            Trend Jr connects global shoppers directly with verified makers for curated electronics, everyday apparel, smart home essentials, and weekly flash drops.
+            Trend Jr brings you trending gadgets, beauty tools, jewelry, accessories and home essentials at clear prices, with free shipping and cash on delivery.
           </p>
 
-          <form className="mt-5 max-w-xs">
-            <label className="text-xs font-bold text-white block mb-2">
-              Get weekly drop alerts &amp; private codes
-            </label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Mail className="input-icon left-3" />
-                <input
-                  type="email"
-                  required
-                  placeholder="you@example.com"
-                  className="input-with-icon pl-9 py-2 text-xs bg-white/10 border-white/10 text-white focus:border-primary-400"
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn-primary btn-sm"
-              >
-                Join
-              </button>
-            </div>
-          </form>
+          <NewsletterForm />
         </div>
 
         {column('Shop', SHOP_LINKS, 'lg:col-span-2')}
@@ -89,18 +122,20 @@ export default function Footer() {
 
         <div className="lg:col-span-3">
           {column('Company & Account', companyLinks, '')}
-          <p className="text-xs text-slate-500 pt-3">support@trendjr.shop</p>
+          <a href={`mailto:${SITE.supportEmail}`} className="mt-3 inline-block text-xs text-slate-400 link-muted">{SITE.supportEmail}</a>
         </div>
       </div>
 
       <div className="border-t border-white/10">
         <div className="container-page py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
-          <div>© 2026 Trend Jr Commerce. All rights reserved.</div>
-          <div className="flex items-center gap-3">
-            <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-semibold">VISA</span>
-            <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-semibold">Mastercard</span>
-            <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-semibold">Apple Pay</span>
-            <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-semibold">PayPal</span>
+          <div>© {new Date().getFullYear()} Trend Jr Commerce. All rights reserved.</div>
+          <div className="flex items-center gap-3" aria-label="Payment and delivery">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-slate-200 font-semibold">
+              <Banknote className="w-3.5 h-3.5" aria-hidden="true" /> Cash on delivery
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-slate-200 font-semibold">
+              <Truck className="w-3.5 h-3.5" aria-hidden="true" /> Free shipping
+            </span>
           </div>
         </div>
       </div>

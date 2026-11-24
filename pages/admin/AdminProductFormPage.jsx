@@ -9,7 +9,8 @@ import ImageField from "../../src/components/admin/ImageField";
 import GalleryField from "../../src/components/admin/GalleryField";
 import { Field, Panel, Toggle, ErrorState } from "../../src/components/admin/AdminUI";
 import { categoryOptions } from "../../src/utils/categories";
-import { formatPrice, toNumber } from "../../src/utils/product";
+import { formatPrice, isStockTracked, productPath, toNumber } from "../../src/utils/product";
+import { CURRENCY_SYMBOL } from "../../src/config/site";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -21,7 +22,8 @@ const EMPTY = {
   sku: "",
   price: "",
   old_price: "",
-  stock: "0",
+  stock: "",
+  track_inventory: true,
   category: "",
   image: "",
   images: [],
@@ -51,7 +53,8 @@ function toForm(product) {
     sku: product.sku || "",
     price: product.price != null ? String(toNumber(product.price)) : "",
     old_price: oldPrice > 0 ? String(oldPrice) : "",
-    stock: String(toNumber(product.stock)),
+    stock: String(Math.max(0, toNumber(product.stock))),
+    track_inventory: isStockTracked(product),
     category: product.category_slug || "",
     image: product.image || "",
     images: Array.isArray(product.images) ? product.images.filter((p) => typeof p === "string" && p) : [],
@@ -72,7 +75,9 @@ function validate(form) {
     else if (!errors.price && oldPrice <= price) errors.old_price = "The compare-at price must be higher than the price.";
   }
   const stock = Number(form.stock);
-  if (form.stock === "" || !Number.isInteger(stock) || stock < 0) errors.stock = "Enter a whole number, 0 or more.";
+  if (form.track_inventory && (form.stock === "" || !Number.isInteger(stock) || stock < 0 || stock > 1000000)) {
+    errors.stock = "Enter how many you have (0 or more), or turn off stock tracking.";
+  }
   if (form.slug && !SLUG_PATTERN.test(form.slug)) errors.slug = "Use lowercase letters, numbers and single hyphens.";
   if (form.sku.length > 64) errors.sku = "At most 64 characters.";
   return errors;
@@ -85,7 +90,7 @@ export default function AdminProductFormPage() {
   const location = useLocation();
   const toast = useToast();
   const confirm = useConfirm();
-  const backTo = `/admin/products${location.state?.from || ""}`;
+  const backTo = location.state?.back || `/admin/products${location.state?.from || ""}`;
 
   const productReq = useApi(isEdit ? `/api/admin/products/${encodeURIComponent(id)}` : null);
   const categories = useApi("/api/admin/categories");
@@ -142,7 +147,9 @@ export default function AdminProductFormPage() {
       price: Number(form.price),
       old_price: form.old_price === "" ? null : Number(form.old_price),
       discount,
-      stock: Number(form.stock),
+      // Untracked products keep their last count (or 0): it only matters again if tracking is turned back on
+      stock: form.stock !== "" && Number.isInteger(Number(form.stock)) && Number(form.stock) >= 0 ? Number(form.stock) : 0,
+      track_inventory: form.track_inventory,
       category: form.category || null,
       image: form.image.trim(),
       images: form.images,
@@ -231,7 +238,7 @@ export default function AdminProductFormPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isEdit && initial.is_active && (
-            <a href={`/product/${id}`} target="_blank" rel="noreferrer" className="btn-outline btn-sm">
+            <a href={productPath({ id, slug: initial.slug })} target="_blank" rel="noreferrer" className="btn-outline btn-sm">
               <ExternalLink className="h-4 w-4" aria-hidden="true" /> View in store
             </a>
           )}
@@ -304,20 +311,43 @@ export default function AdminProductFormPage() {
           </Panel>
 
           <Panel title="Pricing & stock" bodyClassName="grid gap-4 p-5 sm:grid-cols-3">
-            <Field label="Price (USD)" required error={errors.price}>
+            <Field label={`Price (${CURRENCY_SYMBOL})`} required error={errors.price}>
               <input type="number" inputMode="decimal" min="0" step="0.01" value={form.price} onChange={setText("price")} className="input" placeholder="0.00" />
             </Field>
             <Field label="Compare-at price" hint="The old price, shown crossed out." error={errors.old_price}>
               <input type="number" inputMode="decimal" min="0" step="0.01" value={form.old_price} onChange={setText("old_price")} className="input" placeholder="Optional" />
             </Field>
-            <Field label="Stock" hint="0 = not specified (still for sale)." error={errors.stock}>
-              <input type="number" inputMode="numeric" min="0" step="1" value={form.stock} onChange={setText("stock")} className="input" />
+            <Field
+              label="Units in stock"
+              required={form.track_inventory}
+              hint={form.track_inventory ? "Orders reduce it; at 0 the product shows as sold out." : "Not tracked: always for sale, no limit."}
+              error={errors.stock}
+            >
+              <input
+                type="number"
+                inputMode="numeric"
+                min="0"
+                step="1"
+                value={form.track_inventory ? form.stock : ""}
+                placeholder={form.track_inventory ? "e.g. 25" : "Not tracked"}
+                disabled={!form.track_inventory}
+                onChange={setText("stock")}
+                className="input disabled:bg-slate-50"
+              />
             </Field>
             <p className="text-xs text-slate-500 sm:col-span-3" aria-live="polite">
               {discount > 0
                 ? <>Customers see <strong className="text-emerald-600">−{discount}%</strong> and save {formatPrice(oldPrice - price)}.</>
                 : "No discount shown (add a compare-at price higher than the price to show one)."}
             </p>
+            <div className="border-t border-slate-100 pt-4 sm:col-span-3">
+              <Toggle
+                checked={form.track_inventory}
+                onChange={set("track_inventory")}
+                label="Track stock"
+                description="Customers can't order more than you have, and each order reduces the stock. Turn off for items that are always available."
+              />
+            </div>
           </Panel>
         </div>
 

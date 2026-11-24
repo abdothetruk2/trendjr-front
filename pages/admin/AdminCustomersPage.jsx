@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, Eye, ShieldCheck, ShieldOff, Ban, CircleCheck, Loader2, MapPin } from "lucide-react";
+import { Users, Eye, ShieldCheck, ShieldOff, Ban, CircleCheck, Loader2, MapPin, Mail, Trash2, Copy } from "lucide-react";
 import useApi from "../../src/hooks/useApi";
 import useUrlParams from "../../src/hooks/useUrlParams";
 import api, { getErrorMessage } from "../../src/services/api";
@@ -87,7 +87,7 @@ export default function AdminCustomersPage() {
           />
         ) : (
           <>
-            <div className={`overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
+            <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[880px] text-sm">
                 <caption className="sr-only">Customers</caption>
                 <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
@@ -167,10 +167,125 @@ export default function AdminCustomersPage() {
         )}
       </Panel>
 
+      <SubscribersPanel />
+
       <Modal open={Boolean(viewing)} onClose={() => setViewing(null)} title={viewing ? displayName(viewing) : ""} description={viewing?.email} size="md">
         {viewing && <CustomerDetail id={viewing._id} />}
       </Modal>
     </div>
+  );
+}
+
+const SUB_PAGE_SIZE = 10;
+
+// People who signed up with the footer newsletter form (they may not have an account)
+function SubscribersPanel() {
+  const toast = useToast();
+  const confirm = useConfirm();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [busy, setBusy] = useState(null);
+  const [copying, setCopying] = useState(false);
+
+  const query = new URLSearchParams({ page: String(page), limit: String(SUB_PAGE_SIZE) });
+  if (search) query.set("search", search);
+  const { data, total, loading, error, retry } = useApi(`/api/admin/subscribers?${query}`);
+  const subscribers = Array.isArray(data) ? data : [];
+
+  async function remove(sub) {
+    const ok = await confirm({
+      title: "Remove this subscriber?",
+      message: <><strong className="text-secondary">{sub.email}</strong> will be taken off the newsletter list.</>,
+      confirmLabel: "Remove",
+      tone: "danger",
+    });
+    if (!ok) return;
+    setBusy(sub._id);
+    try {
+      await api.delete(`/api/admin/subscribers/${sub._id}`);
+      toast.success("Subscriber removed");
+      if (subscribers.length === 1 && page > 1) setPage(page - 1);
+      else retry();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  // Copies every address (all pages), ready to paste into an email tool
+  async function copyAll() {
+    setCopying(true);
+    try {
+      const emails = [];
+      for (let p = 1; p <= 50; p++) {
+        const res = await api.get("/api/admin/subscribers", { params: { page: p, limit: 200 } });
+        emails.push(...res.data.map((s) => s.email));
+        if (res.data.length < 200) break;
+      }
+      await navigator.clipboard.writeText(emails.join(", "));
+      toast.success(`${formatNumber(emails.length)} email${emails.length === 1 ? "" : "s"} copied`);
+    } catch (err) {
+      toast.error(err?.name === "NotAllowedError" ? "Your browser blocked copying. Try again." : getErrorMessage(err));
+    } finally {
+      setCopying(false);
+    }
+  }
+
+  return (
+    <Panel
+      className="mt-6"
+      title="Newsletter subscribers"
+      description={total != null ? `${formatNumber(total)} email${total === 1 ? "" : "s"} from the sign-up form in the footer` : "Emails from the sign-up form in the footer"}
+      actions={(
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          <SearchBox value={search} onSearch={(v) => { setSearch(v); setPage(1); }} placeholder="Search emails" label="Search subscribers" />
+          <button type="button" onClick={copyAll} disabled={copying || !total} className="btn-outline btn-sm">
+            {copying ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
+            Copy all emails
+          </button>
+        </div>
+      )}
+    >
+      {loading && !data ? (
+        <TableSkeleton rows={4} cols={3} />
+      ) : error && !data ? (
+        <ErrorState message={error} onRetry={retry} />
+      ) : subscribers.length === 0 ? (
+        <EmptyState
+          icon={Mail}
+          title={search ? "No subscriber matches" : "No subscribers yet"}
+          message={search ? "Try another search." : "People who sign up in the footer will appear here."}
+        />
+      ) : (
+        <>
+          <ul className={`divide-y divide-slate-100 transition-opacity ${loading ? "opacity-60" : ""}`}>
+            {subscribers.map((sub) => (
+              <li key={sub._id} className="flex items-center gap-3 px-5 py-3">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-50 text-primary-600">
+                  <Mail className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <a href={`mailto:${sub.email}`} className="block truncate text-sm font-bold text-secondary hover:text-primary-600">{sub.email}</a>
+                  <span className="block text-xs text-slate-500">Signed up {formatDate(sub.createdAt)}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => remove(sub)}
+                  disabled={busy === sub._id}
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"
+                  aria-label={`Remove ${sub.email}`}
+                  title="Remove"
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <ListFooter page={page} pageSize={SUB_PAGE_SIZE} total={total ?? 0} shown={subscribers.length} onPage={setPage} />
+        </>
+      )}
+    </Panel>
   );
 }
 

@@ -1,58 +1,71 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, Star, ShoppingCart, Heart, ChevronRight, RotateCw } from 'lucide-react';
+import { Flame, Star, ShoppingCart, Heart, ChevronRight, RotateCw, Eye, BadgePercent } from 'lucide-react';
 import ProductImage from './ProductImage';
+import useApi from '../hooks/useApi';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { formatPrice, getProductView, toNumber } from '../utils/product';
 
+const QuickView = lazy(() => import('./QuickView'));
 const MAX_DEALS = 12;
+const TOP_DEALS_PATH = `/api/products?discounted=true&sort=discount&page=1&limit=6`;
 
-// Flash-sale products (GET /api/products/flash), loaded by the page.
+// Flash-sale products (GET /api/products/flash, loaded by the page). When there
+// are none, the section shows the real biggest discounts instead ("Top deals").
 export default function FlashDeals({ products = [], loading = false, error = '', onRetry }) {
-  const deals = (Array.isArray(products) ? products : []).slice(0, MAX_DEALS);
-  const hasDeals = !loading && !error && deals.length > 0;
+  const flash = (Array.isArray(products) ? products : []).slice(0, MAX_DEALS);
+  const useFallback = !loading && !error && flash.length === 0;
+  const top = useApi(useFallback ? TOP_DEALS_PATH : null);
+
+  const deals = useFallback ? (Array.isArray(top.data) ? top.data : []) : flash;
+  const busy = loading || (useFallback && top.loading);
+  const failed = error || (useFallback ? top.error : '');
+  const hasDeals = !busy && !failed && deals.length > 0;
+  const isFlash = !useFallback;
 
   return (
-    <section id="flash-deals" className="container-page py-5 scroll-mt-24">
+    <section id="flash-deals" className="container-page py-5 scroll-mt-24" aria-labelledby="deals-title">
       <div className="card p-5 sm:p-6">
         {/* Section Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="icon-box-primary w-8 h-8">
-                <Flame className="w-5 h-5 fill-primary text-primary" />
+                {isFlash
+                  ? <Flame className="w-5 h-5 fill-primary text-primary" aria-hidden="true" />
+                  : <BadgePercent className="w-5 h-5 text-primary" aria-hidden="true" />}
               </div>
               <div>
-                <h2 className="heading text-lg sm:text-xl leading-none">Flash Deals</h2>
-                <p className="text-muted mt-0.5">Today&apos;s lightning drops</p>
+                <h2 id="deals-title" className="heading text-lg sm:text-xl leading-none">{isFlash ? 'Flash Deals' : 'Top Deals'}</h2>
+                <p className="text-muted mt-0.5">{isFlash ? 'Today’s lightning drops' : 'The biggest discounts right now'}</p>
               </div>
             </div>
 
-            {hasDeals && <Countdown />}
+            {hasDeals && isFlash && <Countdown />}
           </div>
 
           {hasDeals && (
-            <Link to="/offers" className="link-primary text-xs sm:text-sm">
-              See all deals <ChevronRight className="w-4 h-4" />
+            <Link to="/offers" className="link-primary py-1 text-xs sm:text-sm">
+              See all deals <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           )}
         </div>
 
         {/* Cards */}
-        {loading ? (
+        {busy ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5" aria-hidden="true">
             {Array.from({ length: 6 }, (_, i) => <DealSkeleton key={i} />)}
           </div>
-        ) : error ? (
+        ) : failed ? (
           <div className="flex flex-wrap items-center gap-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700" role="alert">
-            <span>Couldn&apos;t load flash deals. {error}</span>
-            <button type="button" onClick={onRetry} className="btn-outline btn-sm">
-              <RotateCw className="w-3.5 h-3.5" /> Retry
+            <span>Couldn&apos;t load the deals. {failed}</span>
+            <button type="button" onClick={useFallback ? top.retry : onRetry} className="btn-outline btn-sm">
+              <RotateCw className="w-3.5 h-3.5" aria-hidden="true" /> Retry
             </button>
           </div>
         ) : deals.length === 0 ? (
-          <p className="text-sm text-slate-500">No flash deals right now — check back soon.</p>
+          <p className="text-sm text-slate-500">No deals right now — check back soon.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
             {deals.map((item) => (
@@ -68,52 +81,67 @@ export default function FlashDeals({ products = [], loading = false, error = '',
 function DealCard({ product }) {
   const { addItem } = useCart();
   const wishlist = useWishlist();
-  const { id, title, image, imageFallback, price, oldPrice, discount, rating } = getProductView(product);
-  const sold = toNumber(product.sold);
+  const [quickView, setQuickView] = useState(false);
+  const view = getProductView(product);
+  const { id, title, image, imageFallback, price, oldPrice, discount, rating, sold, url } = view;
   const claimed = Math.min(100, toNumber(product.claimedPercent));
-  const url = `/product/${id}`;
   const saved = wishlist.has(id);
 
   return (
-    <div className="group rounded-2xl border border-slate-100 hover:border-primary-200 hover:shadow-md bg-white overflow-hidden flex flex-col transition-all">
+    <article className="group relative rounded-2xl border border-slate-100 hover:border-primary-200 hover:shadow-md bg-white overflow-hidden flex flex-col transition-all">
       <div className="relative">
         <Link to={url} tabIndex={-1} aria-hidden="true">
-          <ProductImage src={image} fallbackSrc={imageFallback} alt={title} className="aspect-square" imgClassName="group-hover:scale-105" />
+          <ProductImage src={image} fallbackSrc={imageFallback} alt={title} sizes="(min-width: 1536px) 230px, (min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" className="aspect-square" imgClassName={`transition-transform duration-500 group-hover:scale-105 ${view.inStock ? '' : 'opacity-60'}`} />
         </Link>
-        {discount > 0 && <span className="badge-primary absolute top-2 left-2">-{discount}%</span>}
-        <button
-          type="button"
-          onClick={() => wishlist.toggle(product)}
-          aria-pressed={saved}
-          className="btn-wish top-2 right-2 w-7 h-7"
-          aria-label={saved ? `Remove ${title} from wishlist` : `Save ${title} to wishlist`}
-        >
-          <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-rose-500 text-rose-500' : 'text-slate-600'}`} />
-        </button>
+        {discount > 0 && view.inStock && (
+          <span className="absolute top-2 left-2 inline-flex items-center rounded-full bg-gradient-to-r from-rose-600 to-pink-500 px-2 py-0.5 text-[11px] font-extrabold text-white shadow-sm">
+            −{discount}%
+          </span>
+        )}
+        {!view.inStock && (
+          <span className="absolute top-2 left-2 rounded-full bg-secondary/90 px-2 py-0.5 text-[11px] font-extrabold text-white">Sold out</span>
+        )}
+        <div className="absolute top-2 right-2 flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={() => wishlist.toggle(product)}
+            aria-pressed={saved}
+            className="grid w-8 h-8 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-slate-200/70 transition active:scale-90 hover:bg-white"
+            aria-label={saved ? `Remove ${title} from wishlist` : `Save ${title} to wishlist`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-rose-500 text-rose-500' : 'text-slate-600'}`} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuickView(true)}
+            aria-label={`Quick view: ${title}`}
+            className="grid w-8 h-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm ring-1 ring-slate-200/70 transition hover:bg-white hover:text-primary-600 active:scale-90 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100"
+          >
+            <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       <div className="p-3 flex-1 flex flex-col justify-between">
         <div>
-          <Link to={url}>
-            <h3 className="text-left text-xs font-semibold text-slate-800 line-clamp-2 min-h-[2rem] hover:text-primary-600 leading-snug">
-              {title}
-            </h3>
-          </Link>
+          <h3 className="text-left text-xs font-semibold text-slate-800 leading-snug">
+            <Link to={url} className="line-clamp-2 min-h-[2rem] hover:text-primary-600">{title}</Link>
+          </h3>
 
           <div className="mt-2 flex items-baseline gap-1.5 flex-wrap">
-            <span className="price text-base">{formatPrice(price)}</span>
-            {oldPrice > 0 && <span className="price-old text-[11px]">{formatPrice(oldPrice)}</span>}
+            <span className="text-base font-extrabold text-slate-950">{formatPrice(price)}</span>
+            {oldPrice > 0 && <span className="price-old text-[11px]"><span className="sr-only">Was </span>{formatPrice(oldPrice)}</span>}
           </div>
 
           {(rating > 0 || sold > 0) && (
             <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-500">
               {rating > 0 && (
                 <>
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  <span className="font-semibold text-slate-700">{rating.toFixed(1)}</span>
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  <span className="font-semibold text-slate-700"><span className="sr-only">Rated </span>{rating.toFixed(1)}</span>
                 </>
               )}
-              {sold > 0 && <span>· {sold.toLocaleString()} sold</span>}
+              {sold > 0 && <span>{rating > 0 ? '· ' : ''}{sold.toLocaleString()} sold</span>}
             </div>
           )}
         </div>
@@ -127,10 +155,7 @@ function DealCard({ product }) {
                 <span className="text-primary-600">Fast selling</span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary-400 to-primary-600"
-                  style={{ width: `${claimed}%` }}
-                />
+                <div className="h-full rounded-full bg-gradient-to-r from-primary-400 to-primary-600" style={{ width: `${claimed}%` }} />
               </div>
             </>
           )}
@@ -138,15 +163,22 @@ function DealCard({ product }) {
           <button
             type="button"
             onClick={() => addItem(product)}
-            aria-label={`Add ${title} to cart`}
-            className="btn-light btn-sm mt-2.5 w-full py-1.5 rounded-lg hover:bg-secondary hover:text-white"
+            disabled={!view.inStock}
+            aria-label={view.inStock ? `Add ${title} to cart` : `${title} is sold out`}
+            className="btn-light btn-sm mt-2.5 w-full py-1.5 rounded-lg hover:bg-secondary hover:text-white disabled:hover:bg-slate-100"
           >
-            <ShoppingCart className="w-3.5 h-3.5" />
-            Add
+            <ShoppingCart className="w-3.5 h-3.5" aria-hidden="true" />
+            {view.inStock ? 'Add' : 'Sold out'}
           </button>
         </div>
       </div>
-    </div>
+
+      {quickView && (
+        <Suspense fallback={null}>
+          <QuickView product={product} open={quickView} onClose={() => setQuickView(false)} />
+        </Suspense>
+      )}
+    </article>
   );
 }
 
