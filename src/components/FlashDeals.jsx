@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Flame, Star, ShoppingCart, Heart, ChevronRight, RotateCw } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { formatPrice, getProductView, toNumber } from '../utils/product';
 
 const MAX_DEALS = 12;
@@ -66,10 +67,12 @@ export default function FlashDeals({ products = [], loading = false, error = '',
 
 function DealCard({ product }) {
   const { addItem } = useCart();
+  const wishlist = useWishlist();
   const { id, title, image, imageFallback, price, oldPrice, discount, rating } = getProductView(product);
   const sold = toNumber(product.sold);
   const claimed = Math.min(100, toNumber(product.claimedPercent));
   const url = `/product/${id}`;
+  const saved = wishlist.has(id);
 
   return (
     <div className="group rounded-2xl border border-slate-100 hover:border-primary-200 hover:shadow-md bg-white overflow-hidden flex flex-col transition-all">
@@ -80,10 +83,12 @@ function DealCard({ product }) {
         {discount > 0 && <span className="badge-primary absolute top-2 left-2">-{discount}%</span>}
         <button
           type="button"
+          onClick={() => wishlist.toggle(product)}
+          aria-pressed={saved}
           className="btn-wish top-2 right-2 w-7 h-7"
-          aria-label={`Save ${title} to wishlist`}
+          aria-label={saved ? `Remove ${title} from wishlist` : `Save ${title} to wishlist`}
         >
-          <Heart className="w-3.5 h-3.5 text-slate-600" />
+          <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-rose-500 text-rose-500' : 'text-slate-600'}`} />
         </button>
       </div>
 

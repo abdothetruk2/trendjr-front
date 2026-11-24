@@ -217,7 +217,7 @@ export default function ProductGrid({
 }
 
 // 1 … 4 5 6 … 18  (first, last, and the current page ± 1)
-function pageList(current, total) {
+export function pageList(current, total) {
   const pages = [];
   for (let p = 1; p <= total; p++) {
     if (p === 1 || p === total || Math.abs(p - current) <= 1) pages.push(p);
@@ -226,7 +226,8 @@ function pageList(current, total) {
   return pages;
 }
 
-function Pagination({ page, totalPages, onChange }) {
+// Also used by the admin tables
+export function Pagination({ page, totalPages, onChange }) {
   if (totalPages <= 1) return null;
 
   const arrow = 'inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-bold text-secondary transition-colors hover:border-primary-300 hover:text-primary-600 disabled:pointer-events-none disabled:opacity-40';

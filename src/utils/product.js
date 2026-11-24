@@ -1,5 +1,6 @@
 // Helpers shared by the product components.
 // API field names are documented in API.md (price, old_price and rating arrive as strings).
+import { API_URL } from '../services/api';
 
 // Localized values look like { en, de, ar }; plain strings are returned as-is.
 export function getText(value, language = 'en') {
@@ -23,11 +24,25 @@ export const formatPrice = (value) => currency.format(toNumber(value));
 // under its own name. The database stores either a path with a batch folder
 // ("media/jalila/abc.jpg") or the supplier's URL ("https://.../abc.jpg"); both point
 // to /media/abc.jpg.
+// Images uploaded from the admin dashboard ("uploads/abc.jpg") are served by the API.
 export function getImageUrl(path) {
   if (!path || typeof path !== 'string') return '';
   if (/^(data|blob):/.test(path)) return path;
+  if (/^\/?uploads\//.test(path)) return `${API_URL}/${path.replace(/^\//, '')}`;
   const fileName = path.split(/[?#]/)[0].split('/').pop();
   return fileName ? `/media/${fileName}` : '';
+}
+
+// Category slug of a product: the `category` field (set in the dashboard) or the
+// imported "category-request:<slug>" tag.
+export function getProductCategory(product) {
+  if (product?.category_slug) return product.category_slug;
+  if (product?.category) return product.category;
+  if (Array.isArray(product?.tags)) {
+    const tag = product.tags.find((t) => typeof t === 'string' && t.startsWith('category-request:'));
+    if (tag) return tag.slice('category-request:'.length);
+  }
+  return '';
 }
 
 // The supplier URL, used only if the file is missing from /public/media
@@ -66,4 +81,41 @@ export function getCategoryLabel(category, language = 'en') {
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+// Every photo of a product, main image first: [{ src, fallbackSrc }] without repeats.
+// `images` holds the extra gallery photos (same path formats as `image`).
+export function getProductImages(product) {
+  const main = typeof product?.image === 'string' ? product.image : product?.image?.url;
+  const extra = Array.isArray(product?.images) ? product.images : [];
+  const seen = new Set();
+  const list = [];
+  for (const path of [main, ...extra]) {
+    const src = getImageUrl(path);
+    if (!src || seen.has(src)) continue;
+    seen.add(src);
+    list.push({ src, fallbackSrc: isExternalUrl(path) ? path : '' });
+  }
+  return list;
+}
+
+// Splits a description into "Key: value" lines (shown as a specifications table)
+// and the remaining text paragraphs.
+// "Weight: 4 g." -> { label: "Weight", value: "4 g" }
+export function splitDescription(text) {
+  const specs = [];
+  const paragraphs = [];
+  for (const raw of String(text || '').split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const match = line.match(/^([^:]{2,45}):\s*(.+)$/);
+    const words = match ? match[1].trim().split(/\s+/).length : 0;
+    if (match && words <= 6 && !/https?$/i.test(match[1])) {
+      const label = match[1].trim().replace(/\s+as described by the supplier$/i, '');
+      specs.push({ label, value: match[2].trim().replace(/\.$/, '') });
+    } else {
+      paragraphs.push(line);
+    }
+  }
+  return { specs, paragraphs };
 }

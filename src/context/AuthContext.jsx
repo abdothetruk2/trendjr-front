@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import api, { getErrorMessage } from '../services/api';
+import api, { getErrorMessage, setUnauthorizedHandler } from '../services/api';
 import { clearToken, getToken, saveToken } from '../services/authToken';
 
 const AuthContext = createContext(null);
@@ -9,6 +9,15 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [checking, setChecking] = useState(() => Boolean(getToken())); // validating a saved token
 
+    // Any request that comes back 401 with our token: the session is over
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            clearToken();
+            setUser(null);
+        });
+        return () => setUnauthorizedHandler(null);
+    }, []);
+
     // A saved token may have expired (1h by default): confirm it with GET /api/auth/me
     useEffect(() => {
         if (!getToken()) return undefined;
@@ -17,7 +26,8 @@ export function AuthProvider({ children }) {
             .then((res) => setUser(res.data.user))
             .catch((err) => {
                 if (controller.signal.aborted) return;
-                if (err.response?.status === 401) clearToken();
+                // 401: expired/invalid token · 403: account blocked
+                if (err.response?.status === 401 || err.response?.status === 403) clearToken();
                 else console.warn('Could not restore the session:', getErrorMessage(err));
             })
             .finally(() => { if (!controller.signal.aborted) setChecking(false); });
@@ -49,8 +59,11 @@ export function AuthProvider({ children }) {
         setUser(null);
     }, []);
 
+    // After the user edits their own details (PATCH /api/auth/me)
+    const updateUser = useCallback((nextUser) => setUser(nextUser), []);
+
     return (
-        <AuthContext.Provider value={{ user, checking, login, register, logout }}>
+        <AuthContext.Provider value={{ user, checking, login, register, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

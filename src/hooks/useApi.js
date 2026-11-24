@@ -5,11 +5,16 @@ import api, { getErrorMessage } from '../services/api';
 // GET one backend path and track { data, total, loading, error, status }.
 // `total` comes from the X-Total-Count header of paginated lists (null otherwise).
 // The request is cancelled if the component unmounts or the path changes.
+// A falsy path means "nothing to load (yet)".
 export default function useApi(path) {
-    const [state, setState] = useState({ data: null, total: null, loading: true, error: '', status: 0 });
+    const [state, setState] = useState({ data: null, total: null, loading: Boolean(path), error: '', status: 0 });
     const [attempt, setAttempt] = useState(0);
 
     useEffect(() => {
+        if (!path) {
+            setState({ data: null, total: null, loading: false, error: '', status: 0 });
+            return undefined;
+        }
         const controller = new AbortController();
         setState((prev) => (prev.loading && !prev.error ? prev : { ...prev, loading: true, error: '' }));
 

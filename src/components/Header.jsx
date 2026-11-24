@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Camera, ShoppingBag, Heart, User, LayoutGrid, ChevronDown, LogOut } from 'lucide-react';
+import { Search, Camera, ShoppingBag, Heart, User, LayoutGrid, ChevronDown, LogOut, Menu, LayoutDashboard } from 'lucide-react';
 import bagLogo from "../data/trend_gr_bag_icon.svg";
+import SideMenu from './SideMenu';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { formatPrice } from '../utils/product';
 
 export const NAV_LINKS = [
@@ -26,6 +28,13 @@ export default function Header() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { count, subtotal } = useCart();
+  const { count: savedCount } = useWishlist();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the side menu whenever the page changes
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname, location.search]);
 
   // Keep the box in sync with the search page's ?q=
   const urlQuery = location.pathname === '/search'
@@ -51,6 +60,19 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
       <div className="container-page py-3 flex items-center gap-3 sm:gap-5">
+        {/* Side menu toggle */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Open menu"
+          aria-expanded={menuOpen}
+          aria-controls="site-menu"
+          aria-haspopup="dialog"
+          className="-ml-1.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+        >
+          <Menu className="h-5.5 w-5.5" aria-hidden="true" />
+        </button>
+
         {/* Brand Wordmark */}
         <Link to="/" className="flex items-center gap-2 shrink-0 group" aria-label="Trend Jr Home">
           <div className="logo-mark bg-white group-hover:scale-105 transition-transform">
@@ -113,10 +135,10 @@ export default function Header() {
             <div className={`w-8 h-8 rounded-full border flex items-center justify-center ${
               user ? 'bg-primary-500 border-primary-500 text-white text-xs font-extrabold uppercase' : 'bg-slate-100 border-slate-200 text-slate-700'
             }`}>
-              {user ? user.username.charAt(0) : <User className="w-4 h-4" />}
+              {user ? (user.username || user.email || '?').charAt(0) : <User className="w-4 h-4" />}
             </div>
             <div className="hidden lg:block leading-tight">
-              <div className="text-[11px] text-slate-500">{user ? `Hello, ${user.username}` : 'Hello'}</div>
+              <div className="text-[11px] text-slate-500">{user ? `Hello, ${user.username || 'there'}` : 'Hello'}</div>
               <div className="text-xs font-bold text-slate-900">{user ? 'My account' : 'Sign in / Register'}</div>
             </div>
           </Link>
@@ -133,13 +155,28 @@ export default function Header() {
             </button>
           )}
 
+          {/* Admin dashboard (admins only; the server checks the role again) */}
+          {user?.role === 'admin' && (
+            <Link
+              to="/admin"
+              className="p-2.5 rounded-xl hover:bg-primary-50 text-primary-600 transition-colors"
+              aria-label="Admin dashboard"
+              title="Admin dashboard"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+            </Link>
+          )}
+
           {/* Wishlist */}
           <Link
             to="/wishlist"
             className="relative p-2.5 rounded-xl hover:bg-slate-100 text-slate-700 transition-colors"
-            aria-label="Wishlist"
+            aria-label={savedCount ? `Wishlist, ${savedCount} saved` : 'Wishlist'}
           >
-            <Heart className="w-5 h-5" />
+            <Heart className={`w-5 h-5 ${savedCount ? 'fill-rose-500 text-rose-500' : ''}`} />
+            {savedCount > 0 && (
+              <span className="count-badge top-0.5 right-0.5 bg-rose-500">{savedCount > 99 ? '99+' : savedCount}</span>
+            )}
           </Link>
 
           {/* Cart */}
@@ -181,6 +218,8 @@ export default function Header() {
           </div>
         </nav>
       </div>
+
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} id="site-menu" />
     </header>
   );
 }

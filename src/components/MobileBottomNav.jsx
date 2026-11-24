@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { Home, LayoutGrid, ShoppingBag, Heart, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 
 const ITEMS = [
   { to: '/', label: 'Home', icon: Home, end: true },
@@ -16,6 +17,7 @@ const ITEMS = [
 export default function MobileBottomNav() {
   const { user } = useAuth();
   const { count } = useCart();
+  const { count: savedCount } = useWishlist();
 
   return (
     <nav
@@ -39,6 +41,9 @@ export default function MobileBottomNav() {
             <Icon className="w-5 h-5" aria-hidden="true" />
             {path === '/cart' && count > 0 && (
               <span className="count-badge -top-1.5 -right-2.5 min-w-[16px] h-4 text-[9px]">{count > 99 ? '99+' : count}</span>
+            )}
+            {path === '/wishlist' && savedCount > 0 && (
+              <span className="count-badge -top-1.5 -right-2.5 min-w-[16px] h-4 text-[9px] bg-rose-500">{savedCount > 99 ? '99+' : savedCount}</span>
             )}
           </span>
           {label}

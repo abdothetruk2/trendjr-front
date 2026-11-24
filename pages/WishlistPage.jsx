@@ -1,6 +1,18 @@
-import { Heart, ShoppingCart, Star, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Heart, ArrowRight, ShoppingCart, Trash2 } from "lucide-react";
+import ProductCard from "../src/components/ProductCard";
+import { useWishlist } from "../src/context/WishlistContext";
+import { useCart } from "../src/context/CartContext";
 
+// Saved products (kept in this browser; see WishlistContext)
 export default function WishlistPage() {
+  const { items, count, clear } = useWishlist();
+  const { addItem } = useCart();
+
+  function addAllToCart() {
+    items.forEach((item) => addItem(item));
+  }
+
   return (
     <main className="min-h-screen bg-surface py-8">
       <div className="container-page">
@@ -14,123 +26,46 @@ export default function WishlistPage() {
               Keep the products you love in one place.
             </p>
           </div>
-          <span className="rounded-xl bg-primary-50 px-4 py-2 text-sm font-bold text-primary-700">
-            3 saved items
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          <article className="card overflow-hidden">
-            <div className="relative h-52 bg-white p-4">
-              <button
-                type="button"
-                aria-label="Remove from wishlist"
-                className="absolute right-3 top-3 rounded-full bg-rose-50 p-2 text-rose-500"
-              >
-                <Heart size={17} fill="currentColor" />
+          {count > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-xl bg-primary-50 px-4 py-2 text-sm font-bold text-primary-700">
+                {count} saved item{count === 1 ? "" : "s"}
+              </span>
+              <button type="button" onClick={addAllToCart} className="btn-primary btn-sm">
+                <ShoppingCart size={15} aria-hidden="true" /> Add all to cart
               </button>
-              <img
-                src="/product.jpg"
-                alt="Wireless massage wand"
-                className="h-full w-full object-contain"
-              />
-            </div>
-            <div className="p-4">
-              <p className="text-xs text-slate-400">Electronics</p>
-              <h2 className="mt-1 font-extrabold text-secondary">
-                Portable Wireless Massage Wand
-              </h2>
-              <div className="mt-3 flex items-center gap-1 text-amber-400">
-                <Star size={13} fill="currentColor" />
-                <span className="text-xs text-slate-500">4.8 (128)</span>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <strong className="text-lg text-primary-600">$29.99</strong>
-                <a
-                  href="/cart"
-                  className="rounded-lg bg-primary-500 p-2 text-white"
-                >
-                  <ShoppingCart size={16} />
-                </a>
-              </div>
-            </div>
-          </article>
-          <article className="card overflow-hidden">
-            <div className="relative h-52 bg-white p-4">
-              <button
-                type="button"
-                aria-label="Remove from wishlist"
-                className="absolute right-3 top-3 rounded-full bg-rose-50 p-2 text-rose-500"
-              >
-                <Heart size={17} fill="currentColor" />
+              <button type="button" onClick={clear} className="btn-outline btn-sm text-slate-600">
+                <Trash2 size={15} aria-hidden="true" /> Clear
               </button>
-              <img
-                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80"
-                alt="Classic watch"
-                className="h-full w-full object-contain"
-              />
             </div>
-            <div className="p-4">
-              <p className="text-xs text-slate-400">Accessories</p>
-              <h2 className="mt-1 font-extrabold text-secondary">
-                Classic Minimal Watch
-              </h2>
-              <div className="mt-3 flex items-center gap-1 text-amber-400">
-                <Star size={13} fill="currentColor" />
-                <span className="text-xs text-slate-500">4.8 (96)</span>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <strong className="text-lg text-primary-600">$49.00</strong>
-                <a
-                  href="/cart"
-                  className="rounded-lg bg-primary-500 p-2 text-white"
-                >
-                  <ShoppingCart size={16} />
-                </a>
-              </div>
-            </div>
-          </article>
-          <article className="card overflow-hidden">
-            <div className="relative h-52 bg-white p-4">
-              <button
-                type="button"
-                aria-label="Remove from wishlist"
-                className="absolute right-3 top-3 rounded-full bg-rose-50 p-2 text-rose-500"
-              >
-                <Heart size={17} fill="currentColor" />
-              </button>
-              <img
-                src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80"
-                alt="Wireless headphones"
-                className="h-full w-full object-contain"
-              />
-            </div>
-            <div className="p-4">
-              <p className="text-xs text-slate-400">Electronics</p>
-              <h2 className="mt-1 font-extrabold text-secondary">
-                Wireless Headphones
-              </h2>
-              <div className="mt-3 flex items-center gap-1 text-amber-400">
-                <Star size={13} fill="currentColor" />
-                <span className="text-xs text-slate-500">4.7 (54)</span>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <strong className="text-lg text-primary-600">$64.00</strong>
-                <a
-                  href="/cart"
-                  className="rounded-lg bg-primary-500 p-2 text-white"
-                >
-                  <ShoppingCart size={16} />
-                </a>
-              </div>
-            </div>
-          </article>
+          )}
         </div>
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 text-center">
-          <p className="text-sm text-slate-500">Looking for something else?</p>
-          <a href="/products" className="link-primary mt-2 inline-flex">
-            Explore all products <ArrowRight size={16} />
-          </a>
-        </div>
+
+        {count === 0 ? (
+          <div className="card mx-auto max-w-lg p-10 text-center">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-rose-50 text-rose-500">
+              <Heart size={26} aria-hidden="true" />
+            </span>
+            <h2 className="mt-4 text-xl font-black text-secondary">Your wishlist is empty</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Tap the heart on any product to save it here for later.
+            </p>
+            <Link to="/shop" className="btn-primary mt-6">
+              Explore products <ArrowRight size={17} aria-hidden="true" />
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {items.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+            <p className="mt-6 text-xs text-slate-400">
+              Prices are shown as they were when you saved each item; the product page and checkout always use the current price.
+            </p>
+          </>
+        )}
       </div>
     </main>
   );
