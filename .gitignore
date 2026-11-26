@@ -1,19 +1,30 @@
-node_modules/
-.env
-.env.*
-!.env.example
-dist/
-build/
-.DS_Store
-npm-debug.log*
-
 # Dependencies
 node_modules/
 
-# Production build
+# Build files
 dist/
+build/
 
 # Environment variables
 .env
 .env.*
 !.env.example
+
+# Archives and large files
+*.zip
+*.rar
+*.7z
+
+# Logs
+npm-debug.log*
+*.log
+
+# Operating system
+.DS_Store
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
