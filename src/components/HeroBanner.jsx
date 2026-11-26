@@ -8,32 +8,17 @@ import {
   MapPin,
   ShoppingBag,
   Sparkles,
-  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
+import useLanguage from "../i18n/useLanguage";
 
 const DEFAULT_BACKGROUND = "/ab.jpeg";
 
 const TRUST_FEATURES = [
-  {
-    icon: ShieldCheck,
-    title: "فحص المنتجات",
-    subtitle: "قبل الشحن",
-  },
-  {
-    icon: Truck,
-    title: "شحن موثوق",
-    subtitle: "",
-  },
-  {
-    icon: Globe,
-    title: "أحدث",
-    subtitle: "المنتجات العالمية",
-  },
-  {
-    icon: ShoppingCart,
-    title: "تسوق بسهولة",
-    subtitle: "وأمان",
-  },
+  { icon: ShieldCheck, key: "inspected" },
+  { icon: Truck, key: "shipping" },
+  { icon: Globe, key: "latest" },
+  { icon: ShoppingCart, key: "easy" },
 ];
 
 export default function HeroBanner({
@@ -41,13 +26,17 @@ export default function HeroBanner({
   onShopNow,
   onBrowseOffers,
 }) {
+  const { t, lang, dir } = useLanguage();
+  // The photo layout stays left-to-right (text on the light side of the picture);
+  // the texts themselves follow the visitor's language.
+  const textProps = { dir, lang };
   return (
     <section
       dir="ltr"
       className="relative mx-auto w-full max-w-7xl 2xl:max-w-none overflow-hidden rounded-3xl bg-[#f8f2fa] shadow-2xl ring-1 ring-purple-900/10"
       aria-labelledby="hero-title"
     >
-      <h1 id="hero-title" className="sr-only">Trend Jr: the latest trending products, all in one place</h1>
+      <h1 id="hero-title" className="sr-only" {...textProps}>{t('hero.srTitle')}</h1>
       {/* طبقة الخلفية (الصورة الثانية المحسنة في Element مستقل) */}
       <div
         aria-hidden="true"
@@ -123,27 +112,24 @@ export default function HeroBanner({
 
             {/* شارة العنوان الرئيسي */}
             <div
-              dir="rtl"
-              lang="ar"
+              {...textProps}
               className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-l from-[#5B107D] to-[#410A5B] px-6 py-2.5 text-lg font-bold text-white shadow-lg shadow-purple-900/25 sm:text-2xl"
             >
-              <span>أحدث المنتجات الرائجة</span>
+              <span>{t('hero.badge')}</span>
             </div>
 
             {/* النص الفرعي */}
             <p
-              dir="rtl"
-              lang="ar"
+              {...textProps}
               className="mt-3 text-base font-bold text-[#4D0F6B] sm:text-xl"
             >
-              كل جديد ومميز في مكان واحد
+              {t('hero.subtitle')}
             </p>
             <div className="mt-2 h-1.5 w-24 rounded-full bg-[#8AC926]" />
 
             {/* الأزرار التفاعلية */}
             <div
-              dir="rtl"
-              lang="ar"
+              {...textProps}
               className="mt-6 flex w-full flex-wrap items-center justify-center gap-3 sm:w-auto"
             >
               <button
@@ -152,8 +138,8 @@ export default function HeroBanner({
                 className="group inline-flex cursor-pointer items-center justify-center gap-2.5 rounded-full bg-gradient-to-l from-[#6B1594] to-[#4A0E6E] px-7 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:from-[#7A1CA4] hover:to-[#5B107D] hover:shadow-xl active:scale-95 sm:text-base"
               >
                 <ShoppingBag className="h-4 w-4 text-[#A7E642]" aria-hidden="true" />
-                <span>تسوق الآن</span>
-                <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" aria-hidden="true" />
+                <span>{t('hero.shopNow')}</span>
+                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" aria-hidden="true" />
               </button>
 
               <button
@@ -162,7 +148,7 @@ export default function HeroBanner({
                 className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-[#5B107D]/25 bg-white/85 px-6 py-3 text-sm font-bold text-[#4D0F6B] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#8AC926] hover:bg-white active:scale-95 sm:text-base"
               >
                 <Sparkles className="h-4 w-4 text-[#8AC926]" aria-hidden="true" />
-                <span>تصفح العروض</span>
+                <span>{t('hero.browseOffers')}</span>
               </button>
             </div>
 
@@ -182,20 +168,19 @@ export default function HeroBanner({
                 return (
                   <div
                     key={index}
-                    dir="rtl"
-                    lang="ar"
+                    {...textProps}
                     className="flex items-center justify-center gap-2.5 px-2 py-1 lg:px-4"
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-50 text-[#5B107D]">
                       <Icon className="h-5 w-5" strokeWidth={2.2} />
                     </div>
-                    <div className="text-right leading-tight">
+                    <div className="text-start leading-tight">
                       <p className="text-xs font-extrabold text-[#4A0E6E] sm:text-sm">
-                        {item.title}
+                        {t(`hero.features.${item.key}.title`)}
                       </p>
-                      {item.subtitle && (
+                      {t(`hero.features.${item.key}.subtitle`, { defaultValue: '' }) && (
                         <p className="text-xs font-bold text-[#4A0E6E]/90 sm:text-sm">
-                          {item.subtitle}
+                          {t(`hero.features.${item.key}.subtitle`, { defaultValue: '' })}
                         </p>
                       )}
                     </div>
@@ -212,7 +197,8 @@ export default function HeroBanner({
               className="group flex w-full shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#5B107D] to-[#4A0E6E] px-5 py-2.5 text-xs font-semibold text-white shadow-md transition-all duration-200 hover:from-[#6D1796] hover:to-[#5B107D] hover:shadow-lg sm:text-sm lg:w-auto"
             >
               <MapPin className="h-4 w-4 shrink-0 text-[#8AC926] transition-transform duration-200 group-hover:scale-110" />
-              <span className="truncate tracking-wide">
+              <span className="sr-only">{t('hero.address')}: </span>
+              <span className="truncate tracking-wide" dir="ltr">
                 Münsterstraße 11, 49525 Lengerich
               </span>
             </a>

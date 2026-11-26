@@ -2,13 +2,16 @@
 // API field names are documented in API.md (price, old_price and rating arrive as strings).
 import { API_URL } from '../services/api';
 import { SITE } from '../config/site';
+import i18n, { currentLanguage, currentLocale } from '../i18n';
+import { BASE_CURRENCY, convertPrice, currencyDecimals, displayCurrency } from '../currency';
 
 // Localized values look like { en, de, ar }; plain strings are returned as-is.
-export function getText(value, language = 'en') {
+// Without a language, the visitor's current language is used (English if missing).
+export function getText(value, language = currentLanguage()) {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
   if (value && typeof value === 'object') {
-    return value[language] || value.en || value.ar || value.de || '';
+    return value[language] || value.en || value.de || value.fr || value.es || value.ar || '';
   }
   return '';
 }
@@ -18,8 +21,53 @@ export function toNumber(value) {
   return Number.isFinite(number) ? number : 0;
 }
 
-const currency = new Intl.NumberFormat(SITE.locale, { style: 'currency', currency: SITE.currency });
-export const formatPrice = (value) => currency.format(toNumber(value));
+// An amount that is already in `code`, written for the visitor's language
+// ($1,234.56 / 1.234,56 € / ‏1,234.56 ج.م.‏). whole: no decimals (filter labels).
+const currencyFormats = {};
+export function formatMoney(amount, code = SITE.currency, { whole = false } = {}) {
+  const locale = currentLocale();
+  const key = `${locale}|${code}|${whole}`;
+  if (!currencyFormats[key]) {
+    try {
+      currencyFormats[key] = new Intl.NumberFormat(locale, { style: 'currency', currency: code, ...(whole ? { maximumFractionDigits: 0 } : {}) });
+    } catch {
+      currencyFormats[key] = new Intl.NumberFormat(locale, { style: 'currency', currency: SITE.currency });
+    }
+  }
+  return currencyFormats[key].format(toNumber(amount));
+}
+
+// An order's amounts in the currency the customer saw at checkout, from the order's
+// own snapshot (never today's rates). Orders without one are in the base currency.
+//   const money = orderMoney(order); money.total(); money.subtotal(); money.unit(item.price); money.line(item)
+//   money.base(amount) always shows the stored base amount (admin)
+export function orderMoney(order) {
+  const snap = order?.currency;
+  const has = Boolean(snap?.code && snap.rate && snap.code !== BASE_CURRENCY);
+  const base = (amount) => formatMoney(amount, BASE_CURRENCY);
+  const unitValue = (price) => {
+    const factor = 10 ** currencyDecimals(snap.code);
+    return Math.round(toNumber(price) * snap.rate * factor) / factor;
+  };
+  const amount = (key, baseKey) => (has && typeof snap[key] === 'number' ? formatMoney(snap[key], snap.code) : base(order?.[baseKey ?? key]));
+  return {
+    code: has ? snap.code : BASE_CURRENCY,
+    converted: has,
+    base,
+    subtotal: () => amount('subtotal'),
+    shipping: () => amount('shippingFee'),
+    discount: () => amount('discount'),
+    total: () => amount('total', 'totalPrice'),
+    unit: (price) => (has ? formatMoney(unitValue(price), snap.code) : base(price)),
+    line: (item) => (has ? formatMoney(unitValue(item.price) * item.quantity, snap.code) : base(item.subtotal)),
+  };
+}
+
+// A price from the API (store base currency) in the visitor's display currency
+export const formatPrice = (value, options) => {
+  const code = displayCurrency();
+  return formatMoney(convertPrice(toNumber(value), code), code, options);
+};
 
 // Stock rules (same as the backend's utils/inventory.js):
 // track_inventory true/false is explicit; unset means "tracked only when there is a
@@ -78,7 +126,7 @@ export function getProductCategory(product) {
 export const isExternalUrl = (path) => typeof path === 'string' && /^(https?:)?\/\//i.test(path);
 
 // Everything a product card needs, read safely from an API product.
-export function getProductView(product, language = 'en') {
+export function getProductView(product, language = currentLanguage()) {
   const price = toNumber(product.price);
   const oldPrice = toNumber(product.old_price ?? product.originalPrice);
   const discount = toNumber(product.discount) ||
@@ -93,7 +141,7 @@ export function getProductView(product, language = 'en') {
     id: product.id ?? product._id,
     slug: typeof product.slug === 'string' ? product.slug : '',
     url: productPath(product),
-    title: getText(product.name ?? product.title, language) || 'Unnamed product',
+    title: getText(product.name ?? product.title, language) || i18n.t('product.unnamed'),
     image: getImageUrl(rawImage),
     imageFallback: isExternalUrl(rawImage) ? rawImage : '',
     price,
@@ -113,7 +161,7 @@ export function getProductView(product, language = 'en') {
 }
 
 // Category label: localized name, else a readable version of the slug.
-export function getCategoryLabel(category, language = 'en') {
+export function getCategoryLabel(category, language = currentLanguage()) {
   const name = getText(category?.name, language);
   if (name) return name;
   return String(category?.slug || '')
@@ -150,7 +198,7 @@ export function splitDescription(text) {
     const match = line.match(/^([^:]{2,45}):\s*(.+)$/);
     const words = match ? match[1].trim().split(/\s+/).length : 0;
     if (match && words <= 6 && !/https?$/i.test(match[1])) {
-      const label = match[1].trim().replace(/\s+as described by the supplier$/i, '');
+      const label = match[1].trim().replace(/\s+(as described by the supplier|laut Anbieter|selon le fournisseur|según el proveedor|(ب?حسب|وفق[اً]*) (المورد|وصف المورد))$/i, '');
       specs.push({ label, value: match[2].trim().replace(/\.$/, '') });
     } else {
       paragraphs.push(line);

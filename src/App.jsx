@@ -12,6 +12,8 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { ToastProvider } from './context/ToastContext';
+import { useTranslation } from 'react-i18next';
+import { useAlternateLinks } from './i18n/seo';
 
 // The homepage is part of the main bundle; every other page is downloaded when
 // it's first opened (the common ones are fetched in the background, see below).
@@ -84,9 +86,10 @@ function usePreloadCommonPages() {
 
 // Shown in the page area (header and footer stay) while a page's code downloads
 function PageLoading() {
+  const { t } = useTranslation();
   return (
     <div className="container-page py-8" role="status">
-      <span className="sr-only">Loading the page…</span>
+      <span className="sr-only">{t('app.loadingPage')}</span>
       <div className="h-7 w-56 max-w-full animate-pulse rounded-lg bg-slate-200" aria-hidden="true" />
       <div className="mt-3 h-4 w-80 max-w-full animate-pulse rounded bg-slate-100" aria-hidden="true" />
       <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4" aria-hidden="true">
@@ -111,6 +114,7 @@ function ScrollToTop() {
 function StoreLayout() {
   const { pathname } = useLocation();
   usePreloadCommonPages();
+  useAlternateLinks();
   return (
     <div className="min-h-screen flex flex-col">
 
@@ -133,10 +137,11 @@ function StoreLayout() {
 }
 
 function AdminShell() {
+  const { t } = useTranslation();
   return (
     <AdminRoute>
       <ErrorBoundary>
-        <Suspense fallback={<FullPageSpinner label="Loading the dashboard…" />}>
+        <Suspense fallback={<FullPageSpinner label={t('app.loadingDashboard')} />}>
           <AdminLayout />
         </Suspense>
       </ErrorBoundary>
@@ -151,11 +156,12 @@ function ProductFormRoute() {
 }
 
 function AdminNotFound() {
+  const { t } = useTranslation();
   return (
     <div className="card mx-auto max-w-lg p-8 text-center">
-      <h1 className="text-xl font-black text-secondary">Page not found</h1>
-      <p className="mt-2 text-sm text-slate-500">This part of the dashboard doesn&apos;t exist.</p>
-      <Link to="/admin" className="btn-primary mt-6">Back to the dashboard</Link>
+      <h1 className="text-xl font-black text-secondary">{t('notFound.title')}</h1>
+      <p className="mt-2 text-sm text-slate-500">{t('app.adminNotFound')}</p>
+      <Link to="/admin" className="btn-primary mt-6">{t('app.backToDashboard')}</Link>
     </div>
   );
 }

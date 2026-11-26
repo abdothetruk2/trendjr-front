@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Trans } from "react-i18next";
 import {
   Star,
   Heart,
@@ -39,13 +40,17 @@ import {
 } from "../src/utils/product";
 import { useCart } from "../src/context/CartContext";
 import { useWishlist } from "../src/context/WishlistContext";
+import useLanguage from "../src/i18n/useLanguage";
+import { usePageMeta, toMetaDescription } from "../src/i18n/seo";
+import { currentLocale } from "../src/i18n";
+import { formatNumber } from "../src/utils/format";
 
 const STORE_NAME = "Trend Jr";
 const LOW_STOCK = 5;
 // Same delivery promise as the home page (TrustSection): free, 7–21 days
 const DELIVERY_DAYS = [7, 21];
 
-const dayFormat = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" });
+const formatDay = (date) => new Intl.DateTimeFormat(currentLocale(), { weekday: "short", month: "short", day: "numeric" }).format(date);
 const addDays = (days) => {
   const date = new Date();
   date.setDate(date.getDate() + days);
@@ -55,6 +60,7 @@ const addDays = (days) => {
 export default function ProductPage() {
   const { id } = useParams();
   const { data: product, loading, error, status, retry } = useApi(`/api/products/${encodeURIComponent(id)}`);
+  const { t } = useLanguage();
 
   if (loading) return <ProductPageSkeleton />;
 
@@ -66,18 +72,18 @@ export default function ProductPage() {
           <div className="card mx-auto max-w-lg p-8 text-center" role="alert">
             <PackageX className="mx-auto h-12 w-12 text-slate-300" aria-hidden="true" />
             <h1 className="mt-4 text-xl font-black text-secondary">
-              {notFound ? "Product not found" : "We couldn't load this product"}
+              {notFound ? t("productPage.notFound") : t("productPage.loadError")}
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              {notFound ? "It may have been removed or the link is wrong." : error}
+              {notFound ? t("categoryPage.notFoundText") : error}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               {!notFound && (
                 <button type="button" onClick={retry} className="btn-primary">
-                  <RotateCw size={16} /> Try again
+                  <RotateCw size={16} /> {t("common.retry")}
                 </button>
               )}
-              <Link to="/shop" className="btn-outline">Browse products</Link>
+              <Link to="/shop" className="btn-outline">{t("notFound.browse")}</Link>
             </div>
           </div>
         </div>
@@ -93,6 +99,7 @@ export default function ProductPage() {
 function useProductCategory(product) {
   const slug = getProductCategory(product);
   const { data } = useCategories();
+  const { lang } = useLanguage();
   return useMemo(() => {
     if (!slug) return { slug: "", trail: [] };
     const list = Array.isArray(data) ? data : [];
@@ -106,28 +113,30 @@ function useProductCategory(product) {
         { slug: category.slug, label: getCategoryLabel(category) },
       ],
     };
-  }, [slug, data]);
+  }, [slug, data, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 function ProductDetails({ product }) {
+  const { t, lang, text } = useLanguage();
   const view = getProductView(product);
   const { title, discount, brand } = view;
   const images = useMemo(() => getProductImages(product), [product]);
-  const { specs, paragraphs } = useMemo(() => splitDescription(getText(product.description)), [product.description]);
+  const { specs, paragraphs } = useMemo(() => splitDescription(getText(product.description, lang)), [product.description, lang]);
   const category = useProductCategory(product);
   const rewardPoints = toNumber(product.reward_points);
   const wishlist = useWishlist();
   const saved = wishlist.has(product.id);
 
-  // Show the product name in the browser tab
-  useEffect(() => {
-    const previous = document.title;
-    document.title = `${title} | Trend Jr`;
-    return () => { document.title = previous; };
-  }, [title]);
+  // Title and description for the browser tab and search engines, in the visitor's
+  // language (the product's own SEO texts when the admin filled them in)
+  usePageMeta({
+    title: text(product.seo?.title) || title,
+    description: toMetaDescription(text(product.seo?.description) || getText(product.description, lang)),
+    image: view.image ? new URL(view.image, window.location.origin).href : "",
+  });
 
   // Jewelry descriptions are mostly "Key: value" lines: show the main ones as highlights
-  const highlights = specs.filter((row) => !/^care$/i.test(row.label)).slice(0, 4);
+  const highlights = specs.filter((row) => !/^(care|pflege|العناية|entretien|cuidado)$/i.test(row.label)).slice(0, 4);
   // Without highlights the overview already shows the first paragraph; a Description
   // tab is only worth it when there is more text than that
   const showDescriptionTab = highlights.length > 0
@@ -135,19 +144,19 @@ function ProductDetails({ product }) {
     : paragraphs.length > 1 || (paragraphs[0]?.length ?? 0) > 300;
 
   const details = [
-    brand && { label: "Brand", value: brand },
+    brand && { label: t("productPage.brand"), value: brand },
     ...specs,
-    category.trail.length > 0 && { label: "Category", value: category.trail.map((c) => c.label).join(" › ") },
-    product.sku && { label: "SKU", value: product.sku },
-    { label: "Product ID", value: String(product.id) },
+    category.trail.length > 0 && { label: t("productPage.category"), value: category.trail.map((c) => c.label).join(" › ") },
+    product.sku && { label: t("productPage.sku"), value: product.sku },
+    { label: t("productPage.productId"), value: String(product.id) },
   ].filter(Boolean);
 
   return (
     <main className="min-h-screen bg-surface pb-12 pt-4 sm:pt-6">
       <div className="container-page">
-        <nav className="mb-4 sm:mb-6" aria-label="Breadcrumb">
+        <nav className="mb-4 sm:mb-6" aria-label={t("productPage.breadcrumb")}>
           <ol className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-slate-400">
-            <li><Link to="/" className="hover:text-primary-500">Home</Link></li>
+            <li><Link to="/" className="hover:text-primary-500">{t("nav.home")}</Link></li>
             <BreadcrumbSep />
             {category.trail.length > 0 ? (
               category.trail.map((c) => (
@@ -158,7 +167,7 @@ function ProductDetails({ product }) {
               ))
             ) : (
               <>
-                <li><Link to="/shop" className="hover:text-primary-500">Products</Link></li>
+                <li><Link to="/shop" className="hover:text-primary-500">{t("productPage.products")}</Link></li>
                 <BreadcrumbSep />
               </>
             )}
@@ -172,17 +181,17 @@ function ProductDetails({ product }) {
           <div className="md:row-span-3 md:sticky md:top-24 xl:row-span-2">
             <ProductGallery images={images} alt={title}>
               {discount > 0 && (
-                <span className="pointer-events-none absolute left-4 top-4 z-10 rounded-xl bg-primary-500 px-3 py-1.5 text-sm font-extrabold text-white shadow-lg">
-                  {discount}% OFF
+                <span className="pointer-events-none absolute start-4 top-4 z-10 rounded-xl bg-primary-500 px-3 py-1.5 text-sm font-extrabold text-white shadow-lg">
+                  {t("productPage.percentOff", { discount })}
                 </span>
               )}
               <button
                 type="button"
                 onClick={() => wishlist.toggle(product)}
                 aria-pressed={saved}
-                aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
-                title={saved ? "Remove from wishlist" : "Add to wishlist"}
-                className={`absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full shadow-md transition-transform active:scale-90 ${
+                aria-label={saved ? t("product.removeFromWishlist") : t("productPage.addToWishlist")}
+                title={saved ? t("product.removeFromWishlist") : t("productPage.addToWishlist")}
+                className={`absolute end-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full shadow-md transition-transform active:scale-90 ${
                   saved ? "bg-rose-50 text-rose-500" : "bg-white text-slate-500 hover:text-primary-500"
                 }`}
               >
@@ -230,25 +239,26 @@ function StarRow({ rating, size = 17 }) {
 }
 
 function StockStatus({ view }) {
+  const { t } = useLanguage();
   // Untracked stock (imported products without a stock number): no stock claim
   if (!view.tracked) return null;
   if (view.stock <= 0) {
     return (
       <p className="flex items-center gap-2 text-sm font-bold text-rose-600">
-        <PackageX size={17} aria-hidden="true" /> Out of stock
+        <PackageX size={17} aria-hidden="true" /> {t("product.outOfStock")}
       </p>
     );
   }
   if (view.stock <= LOW_STOCK) {
     return (
       <p className="flex items-center gap-2 text-sm font-bold text-amber-600">
-        <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" /> Only {view.stock} left in stock — order soon
+        <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" /> {t("productPage.lowStock", { count: view.stock })}
       </p>
     );
   }
   return (
     <p className="flex items-center gap-2 text-sm font-bold text-emerald-600">
-      <CheckCircle2 size={17} aria-hidden="true" /> In stock — ready to ship
+      <CheckCircle2 size={17} aria-hidden="true" /> {t("productPage.inStock")}
     </p>
   );
 }
@@ -256,6 +266,7 @@ function StockStatus({ view }) {
 // Brand, title, rating, price and stock
 function ProductHeadline({ product, view, rewardPoints }) {
   const { title, price, oldPrice, discount, rating, reviews, sold, brand } = view;
+  const { t } = useLanguage();
 
   return (
     <div className="min-w-0">
@@ -264,10 +275,10 @@ function ProductHeadline({ product, view, rewardPoints }) {
           <span className="rounded-full bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700">{brand}</span>
         )}
         {product.featured && (
-          <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">Featured</span>
+          <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">{t("productPage.featured")}</span>
         )}
         {product.flash_sale && (
-          <span className="rounded-full bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600">Flash deal</span>
+          <span className="rounded-full bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600">{t("productPage.flashDeal")}</span>
         )}
       </div>
 
@@ -278,17 +289,17 @@ function ProductHeadline({ product, view, rewardPoints }) {
           <>
             <StarRow rating={rating} />
             <strong className="text-sm text-secondary">
-              <span className="sr-only">Rated </span>{rating.toFixed(1)}<span className="sr-only"> out of 5</span>
+              <span className="sr-only">{t("product.rated")} </span>{rating.toFixed(1)}<span className="sr-only"> {t("product.outOf5")}</span>
             </strong>
-            {reviews > 0 && <span className="text-sm text-slate-400">({reviews.toLocaleString()} reviews)</span>}
+            {reviews > 0 && <span className="text-sm text-slate-400">({t("product.reviewsCount", { count: reviews, formatted: formatNumber(reviews) })})</span>}
           </>
         ) : (
-          <span className="text-sm text-slate-400">No reviews yet</span>
+          <span className="text-sm text-slate-400">{t("product.noReviews")}</span>
         )}
-        {sold > 0 && <span className="text-sm font-semibold text-slate-500">· {sold.toLocaleString()} sold</span>}
+        {sold > 0 && <span className="text-sm font-semibold text-slate-500">· {t("product.soldCount", { count: sold, formatted: formatNumber(sold) })}</span>}
         {product.sku && (
           <span className="text-xs text-slate-400">
-            <span className="mx-1 text-slate-300" aria-hidden="true">|</span> SKU: <span className="font-semibold text-slate-500">{product.sku}</span>
+            <span className="mx-1 text-slate-300" aria-hidden="true">|</span> {t("productPage.sku")}: <span className="font-semibold text-slate-500">{product.sku}</span>
           </span>
         )}
       </div>
@@ -298,15 +309,15 @@ function ProductHeadline({ product, view, rewardPoints }) {
           <strong className="text-3xl font-black text-primary-600">{formatPrice(price)}</strong>
           {oldPrice > 0 && (
             <span className="text-lg text-slate-400 line-through">
-              <span className="sr-only">Was </span>{formatPrice(oldPrice)}
+              <span className="sr-only">{t("product.was")} </span>{formatPrice(oldPrice)}
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-extrabold text-rose-600">-{discount}%</span>
+            <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-extrabold text-rose-600"><bdi dir="ltr">-{discount}%</bdi></span>
           )}
         </div>
         {oldPrice > 0 && (
-          <p className="mt-1.5 text-sm font-semibold text-emerald-600">You save {formatPrice(oldPrice - price)}</p>
+          <p className="mt-1.5 text-sm font-semibold text-emerald-600">{t("product.youSave", { amount: formatPrice(oldPrice - price) })}</p>
         )}
         <div className="mt-3 empty:hidden">
           <StockStatus view={view} />
@@ -314,7 +325,7 @@ function ProductHeadline({ product, view, rewardPoints }) {
         {rewardPoints > 0 && (
           <p className="mt-3 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
             <Gift size={16} className="shrink-0" aria-hidden="true" />
-            Earn <strong>{rewardPoints.toLocaleString()} reward point{rewardPoints === 1 ? "" : "s"}</strong> with this item
+            <span>{t("productPage.rewardPoints", { count: rewardPoints, formatted: formatNumber(rewardPoints) })}</span>
           </p>
         )}
       </div>
@@ -324,14 +335,15 @@ function ProductHeadline({ product, view, rewardPoints }) {
 
 // Overview / highlights, delivery and category links
 function ProductMore({ category, summary, highlights }) {
-  const from = dayFormat.format(addDays(DELIVERY_DAYS[0]));
-  const to = dayFormat.format(addDays(DELIVERY_DAYS[1]));
+  const { t } = useLanguage();
+  const from = formatDay(addDays(DELIVERY_DAYS[0]));
+  const to = formatDay(addDays(DELIVERY_DAYS[1]));
 
   return (
     <div className="min-w-0 *:first:mt-0">
       {(highlights.length > 0 || summary) && (
         <div className="mt-5">
-          <h2 className="text-sm font-extrabold text-secondary">{highlights.length > 0 ? "Highlights" : "Overview"}</h2>
+          <h2 className="text-sm font-extrabold text-secondary">{highlights.length > 0 ? t("productPage.highlights") : t("productPage.overview")}</h2>
           {highlights.length > 0 ? (
             <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
               {highlights.map((row) => (
@@ -349,30 +361,30 @@ function ProductMore({ category, summary, highlights }) {
             onClick={() => document.getElementById("product-details")?.scrollIntoView({ behavior: "smooth", block: "start" })}
             className="link-primary mt-2 inline-flex items-center gap-1 text-sm"
           >
-            See full details <ChevronRight size={15} aria-hidden="true" />
+            {t("productPage.seeDetails")} <ChevronRight size={15} aria-hidden="true" />
           </button>
         </div>
       )}
 
       <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 className="text-sm font-extrabold text-secondary">Delivery</h2>
+        <h2 className="text-sm font-extrabold text-secondary">{t("productPage.delivery")}</h2>
         <ul className="mt-3 space-y-3 text-sm">
           <li className="flex gap-3">
             <Truck size={18} className="mt-0.5 shrink-0 text-primary-500" aria-hidden="true" />
             <span>
-              <strong className="text-secondary">Free delivery</strong>
+              <strong className="text-secondary">{t("productPage.freeDelivery")}</strong>
               <span className="block text-slate-500">
-                Estimated arrival <strong className="font-semibold text-slate-700">{from} – {to}</strong>
+                {t("productPage.estimatedArrival")} <strong className="font-semibold text-slate-700">{from} – {to}</strong>
               </span>
             </span>
           </li>
           <li className="flex gap-3">
             <MapPin size={18} className="mt-0.5 shrink-0 text-primary-500" aria-hidden="true" />
-            <span className="text-slate-500">Order tracking from dispatch to your door</span>
+            <span className="text-slate-500">{t("productPage.trackingLine")}</span>
           </li>
           <li className="flex gap-3">
             <PackageCheck size={18} className="mt-0.5 shrink-0 text-primary-500" aria-hidden="true" />
-            <span className="text-slate-500">Quality-checked before it ships</span>
+            <span className="text-slate-500">{t("productPage.qualityLine")}</span>
           </li>
         </ul>
       </div>
@@ -400,16 +412,17 @@ function BuyBox({ product, view, saved, onToggleSaved }) {
   const { addItem } = useCart();
   const navigate = useNavigate();
   const maxQuantity = Math.max(1, view.maxQuantity);
+  const { t } = useLanguage();
 
   return (
-    <aside aria-label="Purchase options">
+    <aside aria-label={t("productPage.purchaseOptions")}>
       <div className="card overflow-hidden">
         <div className="flex items-center gap-3 border-b border-slate-100 p-4">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-50 text-primary-600">
             <Store size={19} aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <p className="text-xs text-slate-400">Sold and shipped by</p>
+            <p className="text-xs text-slate-400">{t("productPage.soldBy")}</p>
             <p className="flex items-center gap-1 text-sm font-extrabold text-secondary">
               {STORE_NAME} <BadgeCheck size={15} className="text-primary-500" aria-hidden="true" />
             </p>
@@ -418,13 +431,13 @@ function BuyBox({ product, view, saved, onToggleSaved }) {
 
         <div className="space-y-4 p-4">
           <div className="flex items-center justify-between gap-3">
-            <span id="qty-label" className="text-sm font-bold text-secondary">Quantity</span>
+            <span id="qty-label" className="text-sm font-bold text-secondary">{t("product.quantity")}</span>
             <div className="inline-flex items-center overflow-hidden rounded-xl border border-slate-200 bg-white" role="group" aria-labelledby="qty-label">
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 disabled={quantity <= 1}
-                aria-label="Decrease quantity"
+                aria-label={t("product.decrease")}
                 className="grid h-10 w-10 place-items-center text-slate-500 hover:text-primary-500 disabled:opacity-40"
               >
                 <Minus size={16} aria-hidden="true" />
@@ -436,7 +449,7 @@ function BuyBox({ product, view, saved, onToggleSaved }) {
                 type="button"
                 onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
                 disabled={quantity >= maxQuantity}
-                aria-label="Increase quantity"
+                aria-label={t("product.increase")}
                 className="grid h-10 w-10 place-items-center text-slate-500 hover:text-primary-500 disabled:opacity-40"
               >
                 <Plus size={16} aria-hidden="true" />
@@ -445,14 +458,14 @@ function BuyBox({ product, view, saved, onToggleSaved }) {
           </div>
           {quantity > 1 && (
             <p className="flex justify-between text-sm text-slate-500">
-              <span>Total</span>
+              <span>{t("productPage.total")}</span>
               <strong className="text-secondary">{formatPrice(price * quantity)}</strong>
             </p>
           )}
 
           <div className="grid gap-2.5">
             <button type="button" onClick={() => addItem(product, quantity)} disabled={!inStock} className="btn-primary rounded-2xl py-3.5 text-base">
-              <ShoppingBag size={19} aria-hidden="true" /> {inStock ? "Add to cart" : "Out of stock"}
+              <ShoppingBag size={19} aria-hidden="true" /> {inStock ? t("product.addToCart") : t("product.outOfStock")}
             </button>
             <button
               type="button"
@@ -460,7 +473,7 @@ function BuyBox({ product, view, saved, onToggleSaved }) {
               disabled={!inStock}
               className="btn-secondary rounded-2xl py-3.5 text-base"
             >
-              Buy now <ChevronRight size={18} aria-hidden="true" />
+              {t("productPage.buyNow")} <ChevronRight size={18} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -469,15 +482,15 @@ function BuyBox({ product, view, saved, onToggleSaved }) {
               className={`btn-outline rounded-2xl py-3 ${saved ? "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100" : ""}`}
             >
               <Heart size={18} className={saved ? "fill-rose-500 text-rose-500" : ""} aria-hidden="true" />
-              {saved ? "Saved to wishlist" : "Add to wishlist"}
+              {saved ? t("productPage.savedToWishlist") : t("productPage.addToWishlist")}
             </button>
           </div>
 
           <ul className="space-y-2.5 border-t border-slate-100 pt-4 text-sm text-slate-600">
-            <li className="flex items-center gap-2.5"><CheckCircle2 size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> Item as described</li>
-            <li className="flex items-center gap-2.5"><Lock size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> Secure checkout</li>
-            <li className="flex items-center gap-2.5"><RotateCcw size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> Refund if it arrives damaged or not at all</li>
-            <li className="flex items-center gap-2.5"><ShieldCheck size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> Buyer protection on every order</li>
+            <li className="flex items-center gap-2.5"><CheckCircle2 size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> {t("productPage.asDescribed")}</li>
+            <li className="flex items-center gap-2.5"><Lock size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> {t("productPage.secureCheckout")}</li>
+            <li className="flex items-center gap-2.5"><RotateCcw size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> {t("productPage.refund")}</li>
+            <li className="flex items-center gap-2.5"><ShieldCheck size={16} className="shrink-0 text-emerald-500" aria-hidden="true" /> {t("productPage.protection")}</li>
           </ul>
         </div>
 
@@ -488,6 +501,7 @@ function BuyBox({ product, view, saved, onToggleSaved }) {
 }
 
 function ShareRow({ title }) {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const timer = useRef(null);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -502,13 +516,13 @@ function ShareRow({ title }) {
       clearTimeout(timer.current);
       timer.current = setTimeout(() => setCopied(false), 2000);
     } catch {
-      window.prompt("Copy this link:", url);
+      window.prompt(t("productPage.copyPrompt"), url);
     }
   }
 
   return (
     <div className="flex items-center gap-2 border-t border-slate-100 bg-slate-50 px-4 py-3">
-      <span className="mr-auto text-xs font-bold text-slate-500">Share</span>
+      <span className="me-auto text-xs font-bold text-slate-500">{t("productPage.share")}</span>
       <a
         href={whatsapp}
         target="_blank"
@@ -521,8 +535,8 @@ function ShareRow({ title }) {
         type="button"
         onClick={copy}
         className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 hover:text-primary-600"
-        aria-label={copied ? "Link copied" : "Copy link"}
-        title={copied ? "Link copied" : "Copy link"}
+        aria-label={copied ? t("productPage.linkCopied") : t("productPage.copyLink")}
+        title={copied ? t("productPage.linkCopied") : t("productPage.copyLink")}
       >
         {copied ? <Check size={16} className="text-emerald-600" aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}
       </button>
@@ -531,13 +545,13 @@ function ShareRow({ title }) {
           type="button"
           onClick={() => navigator.share({ title, url }).catch(() => {})}
           className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 hover:text-primary-600"
-          aria-label="Share"
-          title="Share"
+          aria-label={t("productPage.share")}
+          title={t("productPage.share")}
         >
           <Share2 size={16} aria-hidden="true" />
         </button>
       )}
-      <span className="sr-only" aria-live="polite">{copied ? "Link copied to clipboard" : ""}</span>
+      <span className="sr-only" aria-live="polite">{copied ? t("productPage.linkCopiedSr") : ""}</span>
     </div>
   );
 }
@@ -553,19 +567,22 @@ function WhatsAppIcon() {
 // Description / Specifications / Shipping & returns, as accessible tabs
 function ProductDetailsTabs({ paragraphs, details }) {
   const baseId = useId();
+  const { t, isRtl } = useLanguage();
   const tabs = [
-    paragraphs.length > 0 && { id: "description", label: "Description" },
-    { id: "specs", label: "Specifications" },
-    { id: "shipping", label: "Shipping & returns" },
+    paragraphs.length > 0 && { id: "description", label: t("productPage.tabs.description") },
+    { id: "specs", label: t("productPage.tabs.specs") },
+    { id: "shipping", label: t("productPage.tabs.shipping") },
   ].filter(Boolean);
   const [active, setActive] = useState(tabs[0].id);
   const tabRefs = useRef({});
 
   function onKeyDown(e) {
-    const index = tabs.findIndex((t) => t.id === active);
+    const index = tabs.findIndex((tab) => tab.id === active);
     let next = null;
-    if (e.key === "ArrowRight") next = tabs[(index + 1) % tabs.length];
-    if (e.key === "ArrowLeft") next = tabs[(index - 1 + tabs.length) % tabs.length];
+    const forward = isRtl ? "ArrowLeft" : "ArrowRight";
+    const backward = isRtl ? "ArrowRight" : "ArrowLeft";
+    if (e.key === forward) next = tabs[(index + 1) % tabs.length];
+    if (e.key === backward) next = tabs[(index - 1 + tabs.length) % tabs.length];
     if (e.key === "Home") next = tabs[0];
     if (e.key === "End") next = tabs[tabs.length - 1];
     if (!next) return;
@@ -576,7 +593,7 @@ function ProductDetailsTabs({ paragraphs, details }) {
 
   return (
     <section id="product-details" className="card mt-10 scroll-mt-24 overflow-hidden">
-      <div role="tablist" aria-label="Product information" onKeyDown={onKeyDown} className="no-scrollbar flex overflow-x-auto border-b border-slate-200 px-2 sm:px-4">
+      <div role="tablist" aria-label={t("productPage.information")} onKeyDown={onKeyDown} className="no-scrollbar flex overflow-x-auto border-b border-slate-200 px-2 sm:px-4">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -631,11 +648,12 @@ function ProductDetailsTabs({ paragraphs, details }) {
 }
 
 function ShippingInfo() {
+  const { t } = useLanguage();
   const items = [
-    { icon: Truck, title: "Free delivery", text: `Every order ships free, with no minimum basket. Delivery usually takes ${DELIVERY_DAYS[0]}–${DELIVERY_DAYS[1]} days depending on your location.` },
-    { icon: MapPin, title: "Order tracking", text: "Follow your parcel from dispatch to delivery on the My Orders page once tracking is available." },
-    { icon: PackageCheck, title: "Quality check", text: "Items are checked before they ship." },
-    { icon: RotateCcw, title: "Refunds", text: "If your order arrives damaged or doesn't arrive, contact us with your order number for a refund." },
+    { icon: Truck, title: t("productPage.freeDelivery"), text: t("productPage.shippingText", { from: DELIVERY_DAYS[0], to: DELIVERY_DAYS[1] }) },
+    { icon: MapPin, title: t("productPage.tracking"), text: t("productPage.trackingText") },
+    { icon: PackageCheck, title: t("productPage.qualityCheck"), text: t("productPage.qualityText") },
+    { icon: RotateCcw, title: t("productPage.refunds"), text: t("productPage.refundsText") },
   ];
   return (
     <div className="grid max-w-4xl gap-4 sm:grid-cols-2">
@@ -651,7 +669,7 @@ function ShippingInfo() {
         </div>
       ))}
       <p className="text-sm text-slate-500 sm:col-span-2">
-        More questions? See the <Link to="/faq" className="link-primary">FAQ</Link> or <Link to="/contact" className="link-primary">contact us</Link>.
+        <Trans i18nKey="productPage.moreQuestions" components={{ faq: <Link to="/faq" className="link-primary" />, contact: <Link to="/contact" className="link-primary" /> }} />
       </p>
     </div>
   );
@@ -662,6 +680,7 @@ function RelatedProducts({ product, categorySlug }) {
   const query = categorySlug ? `category=${encodeURIComponent(categorySlug)}` : "sort=newest";
   const { data, loading } = useApi(`/api/products?page=1&limit=9&${query}`);
   const items = (Array.isArray(data) ? data : []).filter((p) => p.id !== product.id).slice(0, 8);
+  const { t } = useLanguage();
 
   if (!loading && items.length === 0) return null;
 
@@ -669,11 +688,11 @@ function RelatedProducts({ product, categorySlug }) {
     <section className="mt-12">
       <div className="mb-5 flex items-end justify-between">
         <div>
-          <p className="eyebrow">You may also like</p>
-          <h2 className="mt-2 text-2xl font-black text-secondary">Similar products</h2>
+          <p className="eyebrow">{t("productPage.mayLike")}</p>
+          <h2 className="mt-2 text-2xl font-black text-secondary">{t("productPage.similar")}</h2>
         </div>
         <Link to={categorySlug ? `/category/${encodeURIComponent(categorySlug)}` : "/shop"} className="link-primary text-sm">
-          View all
+          {t("productPage.viewAll")}
         </Link>
       </div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

@@ -1,3 +1,4 @@
+import i18n from '../../i18n';
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { AlertTriangle, HelpCircle } from 'lucide-react';
 import Modal from './Modal';
@@ -31,12 +32,12 @@ export function ConfirmProvider({ children }) {
             <Modal
                 open={Boolean(request)}
                 onClose={() => answer(false)}
-                title={request?.title || 'Are you sure?'}
+                title={request?.title || i18n.t('confirm.title')}
                 size="sm"
                 footer={(
                     <>
                         <button type="button" onClick={() => answer(false)} className="btn-outline">
-                            {request?.cancelLabel || 'Cancel'}
+                            {request?.cancelLabel || i18n.t('common.cancel')}
                         </button>
                         <button
                             type="button"
@@ -44,7 +45,7 @@ export function ConfirmProvider({ children }) {
                             data-autofocus
                             className={danger ? 'btn bg-rose-600 text-white hover:bg-rose-700' : 'btn-primary'}
                         >
-                            {request?.confirmLabel || 'Confirm'}
+                            {request?.confirmLabel || i18n.t('confirm.confirm')}
                         </button>
                     </>
                 )}

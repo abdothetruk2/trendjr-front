@@ -4,6 +4,9 @@ import ProductImage from '../ProductImage';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl, isExternalUrl } from '../../utils/product';
 import { ALLOWED_IMAGE_TYPES, uploadImage } from './ImageField';
+import i18n from '../../i18n';
+
+const t = (key, options) => i18n.t(key, { ns: 'admin', ...options });
 
 export const MAX_GALLERY_IMAGES = 12; // same limit as the API
 
@@ -27,7 +30,7 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
   async function uploadFiles(fileList) {
     const files = [...(fileList || [])];
     if (files.length === 0) return;
-    if (files.length > room) toast.error(`Only ${room} more photo${room === 1 ? '' : 's'} can be added (max ${MAX_GALLERY_IMAGES}).`);
+    if (files.length > room) toast.error(t('gallery.roomLeft', { count: room, max: MAX_GALLERY_IMAGES }));
     const batch = files.slice(0, room);
     setUploading(batch.length);
     const paths = [];
@@ -41,7 +44,7 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
     }
     if (paths.length) {
       add(paths);
-      toast.success(paths.length === 1 ? 'Photo uploaded' : `${paths.length} photos uploaded`);
+      toast.success(t('gallery.uploaded', { count: paths.length }));
     }
     if (inputRef.current) inputRef.current.value = '';
   }
@@ -50,7 +53,7 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
     const path = url.trim();
     if (!path) return;
     if (!/^(https?:\/\/\S+|\/?(media|uploads)\/[\w\-./]+)$/i.test(path)) {
-      toast.error('Enter an http(s) URL or a media/… or uploads/… path.');
+      toast.error(t('gallery.badUrl'));
       return;
     }
     add([path]);
@@ -67,7 +70,7 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
   return (
     <div>
       <div className="mb-3 flex items-baseline justify-between gap-2">
-        <p className="text-xs font-bold text-slate-600">More photos</p>
+        <p className="text-xs font-bold text-slate-600">{t('gallery.more')}</p>
         <p className="text-[11px] text-slate-400">{value.length} / {MAX_GALLERY_IMAGES}</p>
       </div>
 
@@ -77,16 +80,16 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
             <ProductImage
               src={getImageUrl(path)}
               fallbackSrc={isExternalUrl(path) ? path : ''}
-              alt={`Photo ${index + 2}`}
+              alt={t('gallery.photo', { n: index + 2 })}
               fit="contain"
               className="aspect-square"
             />
             <button
               type="button"
               onClick={() => onChange(value.filter((p) => p !== path))}
-              className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/95 text-slate-500 shadow hover:text-rose-600"
-              aria-label={`Remove photo ${index + 2}`}
-              title="Remove"
+              className="absolute end-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/95 text-slate-500 shadow hover:text-rose-600"
+              aria-label={t('gallery.remove', { n: index + 2 })}
+              title={t('cartPage.remove')}
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
@@ -96,7 +99,7 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
                 onClick={() => move(index, -1)}
                 disabled={index === 0}
                 className="grid h-6 w-6 place-items-center rounded text-slate-500 hover:text-primary-600 disabled:opacity-30"
-                aria-label={`Move photo ${index + 2} earlier`}
+                aria-label={t('gallery.earlier', { n: index + 2 })}
               >
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
@@ -105,8 +108,8 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
                   type="button"
                   onClick={() => onMakeMain(path)}
                   className="grid h-6 w-6 place-items-center rounded text-slate-500 hover:text-amber-500"
-                  aria-label={`Use photo ${index + 2} as the main image`}
-                  title="Use as main image"
+                  aria-label={t('gallery.makeMain', { n: index + 2 })}
+                  title={t('gallery.useAsMain')}
                 >
                   <Star className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -116,7 +119,7 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
                 onClick={() => move(index, 1)}
                 disabled={index === value.length - 1}
                 className="grid h-6 w-6 place-items-center rounded text-slate-500 hover:text-primary-600 disabled:opacity-30"
-                aria-label={`Move photo ${index + 2} later`}
+                aria-label={t('gallery.later', { n: index + 2 })}
               >
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
@@ -140,7 +143,7 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
               ) : (
                 <>
                   <ImagePlus className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-[11px] font-semibold">Add photos</span>
+                  <span className="text-[11px] font-semibold">{t('gallery.add')}</span>
                 </>
               )}
             </button>
@@ -161,23 +164,23 @@ export default function GalleryField({ value, onChange, onMakeMain }) {
       {room > 0 && (
         // Not a <form>: this sits inside the product form
         <div className="mt-3">
-          <label htmlFor={urlId} className="mb-1 block text-[11px] font-semibold text-slate-500">…or add an image URL / media path</label>
+          <label htmlFor={urlId} className="mb-1 block text-[11px] font-semibold text-slate-500">{t('gallery.orUrl')}</label>
           <div className="flex gap-2">
             <input
               id={urlId}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addUrl(); } }}
-              placeholder="https://… or media/photo.jpg"
+              placeholder={t('image.urlPlaceholder')}
               className="input"
             />
-            <button type="button" onClick={addUrl} className="btn-outline px-3" aria-label="Add photo" disabled={!url.trim()}>
+            <button type="button" onClick={addUrl} className="btn-outline px-3" aria-label={t('gallery.addOne')} disabled={!url.trim()}>
               <Plus className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
       )}
-      <p className="mt-2 text-[11px] text-slate-400">Shown after the main image, in this order. JPEG, PNG, WebP or GIF · max 5 MB each.</p>
+      <p className="mt-2 text-[11px] text-slate-400">{t('gallery.hint')}</p>
     </div>
   );
 }

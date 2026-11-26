@@ -1,12 +1,20 @@
-// Date and number formatting shared by the admin pages (prices: formatPrice in ./product.js)
+// Date and number formatting in the visitor's language (prices: formatPrice in ./product.js)
+import { currentLocale } from '../i18n';
 
-const dateFormat = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
+const cache = {};
+function formatter(kind, Type, options) {
+  const locale = currentLocale();
+  const key = `${kind}|${locale}`;
+  cache[key] ??= new Type(locale, options);
+  return cache[key];
+}
+const dateFormat = { format: (d) => formatter('date', Intl.DateTimeFormat, { day: 'numeric', month: 'short', year: 'numeric' }).format(d) };
+const dateTimeFormat = { format: (d) => formatter('dateTime', Intl.DateTimeFormat, {
   day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
-});
-const shortDayFormat = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const numberFormat = new Intl.NumberFormat('en-US');
-const compactFormat = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+}).format(d) };
+const shortDayFormat = { format: (d) => formatter('shortDay', Intl.DateTimeFormat, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(d) };
+const numberFormat = { format: (n) => formatter('number', Intl.NumberFormat).format(n) };
+const compactFormat = { format: (n) => formatter('compact', Intl.NumberFormat, { notation: 'compact', maximumFractionDigits: 1 }).format(n) };
 
 const toDate = (value) => {
   if (!value) return null;

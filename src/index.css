@@ -182,11 +182,11 @@
   }
 
   .input-with-icon {
-    @apply pl-10;
+    @apply ps-10;
   }
 
   .input-icon {
-    @apply absolute left-3.5 top-1/2 -translate-y-1/2
+    @apply absolute start-3.5 top-1/2 -translate-y-1/2
            w-4 h-4 text-slate-400 pointer-events-none;
   }
 
@@ -412,4 +412,33 @@
   [class*="animate-[toast-in"] {
     animation: none !important;
   }
+}
+/* ==============================
+   LANGUAGES & RIGHT-TO-LEFT
+============================== */
+
+/* Arabic text gets a font that has Arabic letters (loaded only for Arabic) */
+html[lang="ar"] body {
+  font-family: "Noto Kufi Arabic", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Arrows that mean "forward"/"back" point the other way in right-to-left text.
+   :dir() follows the nearest dir attribute, so a part kept LTR stays as it is. */
+.lucide-chevron-right:dir(rtl),
+.lucide-chevron-left:dir(rtl),
+.lucide-arrow-right:dir(rtl),
+.lucide-arrow-left:dir(rtl),
+.lucide-chevrons-right:dir(rtl),
+.lucide-chevrons-left:dir(rtl),
+.lucide-move-right:dir(rtl),
+.lucide-arrow-up-right:dir(rtl) {
+  transform: scaleX(-1);
+}
+
+/* Prices, codes, e-mail addresses and phone numbers stay left-to-right inside Arabic text */
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="url"] {
+  direction: ltr;
+  text-align: right;
 }

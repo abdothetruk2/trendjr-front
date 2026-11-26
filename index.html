@@ -3,6 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Shop trending gadgets, beauty tools, jewelry, accessories and home essentials at Trend Jr. Clear prices, free shipping and cash on delivery." />
+    <script>
+      // Language and text direction before the first paint (same rules as src/i18n/languages.js)
+      (function () {
+        try {
+          var ok = { en: 1, de: 1, ar: 1, fr: 1, es: 1 };
+          var lang = new URLSearchParams(location.search).get('lang');
+          if (!ok[lang]) lang = localStorage.getItem('trendjr_lang');
+          if (!ok[lang]) {
+            var nav = String(navigator.language || '').toLowerCase();
+            lang = nav.slice(0, 2);
+            if (!ok[lang]) lang = 'en';
+          }
+          document.documentElement.lang = lang;
+          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/src/data/trend_gr_bag_icon.svg" />
     <title>Trend Jr | Direct Online Shopping for Tech, Fashion & Home</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

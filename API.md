@@ -4,6 +4,27 @@ Base URL: `http://localhost:3000/api` (port comes from `PORT` in `.env`, default
 
 All request and response bodies are JSON.
 
+### Currencies
+
+Product prices, coupon amounts and order amounts are stored in the base currency (`USD`) and never change.
+Other currencies are display conversions with exchange rates the backend fetches (open.er-api.com, falling
+back to the ECB rates of api.frankfurter.dev), caches in memory and in the `exchangerates` collection with
+the time of the last successful update, and refreshes every 6 hours (`RATES_TTL_HOURS`). When the rates
+services are down, the saved rates are used; with none saved, only USD is offered.
+
+Configuration (`.env`, all optional): `BASE_CURRENCY=USD`, `DEFAULT_CURRENCY=USD`,
+`SUPPORTED_CURRENCIES=USD,EUR,GBP,EGP,SAR,AED,KWD,QAR,CHF,TRY,CAD,AUD`,
+`COUNTRY_CURRENCY_MAP={"MA":"MAD"}` (merged over the built-in country map), `RATES_TTL_HOURS=6`.
+
+### Languages
+
+The store supports English (`en`, default), German (`de`), Arabic (`ar`), French (`fr`) and Spanish (`es`).
+Translatable content is stored as `{ "en": "...", "de": "...", "ar": "...", "fr": "...", "es": "..." }` (product `name`, `description`, `seo.title`, `seo.description`;
+category `name`, `subtitle`, `description`). Clients show the visitor's language and fall back to English
+when a translation is empty. The storefront sends `Accept-Language: en|de|ar|fr|es`; the API uses it for product
+names inside messages (e.g. `Only 2 left of Kabellose Kopfhörer`) and for the admin "Name A–Z" sort.
+Messages themselves stay English; the frontend translates them (`src/locales/<lang>/server.json`).
+
 ## Authentication
 
 Protected routes need a JWT in the `Authorization` header:
@@ -188,6 +209,7 @@ the `X-Total-Count` response header (exposed to the browser through CORS).
   "brand": "Nivea",
   "name": { "en": "Face Cream", "de": "Gesichtscreme", "ar": "كريم وجه" },
   "description": { "en": "...", "de": "...", "ar": "..." },
+  "seo": { "title": { "en": "...", "de": "...", "ar": "..." }, "description": { "en": "...", "de": "", "ar": "" } },
   "price": "4.99",
   "old_price": "6.99",
   "discount": 28,
@@ -219,6 +241,8 @@ Body: fields from the product object above. Validation:
 | Field | Rule |
 | ----- | ---- |
 | `name` | required: text or `{ en, de, ar }` with a non-empty `en` (max 200 characters) |
+| `description` | text or `{ en, de, ar }` (max 5000 characters each). Lines like `Material: Steel` show as the specifications table of that language |
+| `seo` | optional `{ title: { en, de, ar }, description: { en, de, ar } }` (max 120 / 300 characters); empty = use name / description |
 | `price` | required number, 0 – 1,000,000 (stored as a string with 2 decimals) |
 | `old_price` | number ≥ 0 or `null` |
 | `discount` | whole number 0 – 100; computed from `old_price` when omitted |
@@ -238,6 +262,8 @@ Body: fields from the product object above. Validation:
 ### PUT / PATCH `/products/:id`
 
 Body: only the fields you want to change (`id` cannot be changed). Both methods behave the same (partial update).
+For `name`, `description` and `seo`, only the languages you send are changed: `{ "name": { "de": "..." } }`
+updates the German name and keeps the English and Arabic ones.
 For `name` / `description`, only the languages you send are changed (other translations are kept).
 Sending `category` also removes the product's imported `category-request:` tags, so it doesn't stay in its old category.
 `sku: ""` removes the SKU.
@@ -280,6 +306,9 @@ Categories are looked up by MongoDB `_id`.
 }
 ```
 
+`name`, `subtitle` and `description` are localized (`{ en, de, ar }`); older categories may hold plain strings
+(read as English). Sending one of them on update merges the languages; an empty text removes that language
+(English names always stay).
 Imported categories store a localized name (`"name": { "en": "Home & Kitchen Tools", "de": "...", "ar": "..." }`)
 and also carry the imported fields `id`, `parent_id` (numeric id of the parent, `null` for top-level),
 `subtitle`, `sort_order` and `is_active`. Categories created through the API may use a plain string name.
@@ -293,7 +322,8 @@ and also carry the imported fields `id`, `parent_id` (numeric id of the parent, 
   "parent_id": 81,
   "sort_order": 10,
   "image": "uploads/3f9c….jpg",
-  "description": "...",
+  "subtitle": { "en": "Gentle care", "de": "Sanfte Pflege", "ar": "عناية لطيفة" },
+  "description": { "en": "...", "de": "...", "ar": "..." },
   "isActive": true
 }
 ```
@@ -535,6 +565,7 @@ Revenue counts orders that are **not cancelled**; nothing is estimated.
 
 Query: `search` (name, brand, SKU, slug or numeric id), `category` (slug; `none` = without category),
 `status` (`active` / `inactive`), `stock` (`in`, `low` = 1–5, `none` = 0), `flag` (`featured`, `flash`, `discounted`),
+`translation` (`missing` = a German, Arabic, French or Spanish name is empty, `missing-de`, `missing-ar`, `missing-fr`, `missing-es`, `complete`),
 `sort` (`id-desc` default, `id-asc`, `updated`, `name-asc`, `newest`, `price-asc`, `price-desc`, `stock-asc`, `stock-desc`, …),
 `page`, `limit`. Same product objects as the public API plus `category_slug` (from the `category` field or the imported tag).
 
@@ -568,3 +599,63 @@ Only JPEG, PNG, WebP and GIF are accepted, checked against the file's actual con
 
 Store `path` in a product's or category's `image`. Files are served at `/uploads/<file>` from the
 backend's `uploads/` folder (back that folder up with the database).
+
+### GET `/admin/translate/status`
+
+**200** — `{ "enabled": true, "model": "claude-opus-5-5" }`. `enabled` is `false` when `ANTHROPIC_API_KEY` is not set.
+
+### POST `/admin/translate`  (optional AI translation)
+
+```json
+{ "from": "en", "to": ["de", "ar"], "fields": { "name": "Wireless Headphones", "description": "..." } }
+```
+
+**200** — `{ "from": "en", "translations": { "de": { "name": "...", "description": "..." }, "ar": { ... } }, "model": "..." }`
+
+Suggestions only: nothing is saved. The dashboard fills them into **empty** fields (existing translations are
+never overwritten) and marks them as drafts to review before saving. Up to 10 fields, 5000 characters each.
+Needs `ANTHROPIC_API_KEY` in the backend `.env` (optional `TRANSLATION_MODEL`, default `claude-opus-5-5`);
+without it the answer is **503**. **502** / **503** when the translation service fails or is busy, **422** when it declines.
+
+## Currency — `/api/currency`
+
+### GET `/currency`
+
+Everything the store needs at start-up: `{ base, rates: { USD: 1, EUR: 0.91, EGP: 54.2, ... }, provider, providerUpdatedAt,
+updatedAt, stale, default, currencies: [{ code, decimals }] }`. `updatedAt` is the last successful update; `stale` is
+`true` when the rates are older than `RATES_TTL_HOURS` (a refresh then runs in the background). Only currencies with a
+rate are listed.
+
+### GET `/currency/currencies`
+
+`{ base, default, currencies: [{ code, decimals }], countries: { "EG": "EGP", "DE": "EUR", ... } }`
+
+### GET `/currency/rates`
+
+`{ base, rates, provider, providerUpdatedAt, updatedAt, stale }`
+
+### GET `/currency/detect`
+
+The visitor's country and its currency: `{ "country": "EG", "currency": "EGP", "source": "ip-lookup" }`.
+`source` is `header` (a CDN country header such as `CF-IPCountry`), `ip-lookup` (api.country.is, then ipapi.co;
+cached per IP for a day) or `default` (unknown country, local address or no rate: `DEFAULT_CURRENCY`). Limited to
+30 requests a minute per visitor. Outside production `?ip=<address>` tests another visitor's address.
+
+### GET `/currency/convert?amount=19.99&to=EGP[&from=USD]`
+
+`{ amount, from, to, rate, converted, updatedAt }` — `converted` is rounded to the currency's decimals.
+
+### POST `/admin/currency/refresh`  (Admin)
+
+Fetches new rates now and returns them like `GET /currency/rates`.
+
+### Orders in a display currency
+
+`POST /orders/quote` and `POST /orders` accept an optional `currency` (e.g. `"EGP"`). All prices are still taken from
+the database and converted on the server with its own rate — amounts sent by the browser are ignored. Each unit price
+is converted and rounded first, then multiplied, so lines and totals add up exactly.
+
+- The quote adds `currency` (the base, `"USD"`) and `display`: `{ code, rate, ratesUpdatedAt, items: [{ product, price,
+  subtotal }], subtotal, shippingFee, discount, total }` (`null` for USD or when no rate is available).
+- A new order keeps its amounts in USD as before and adds a snapshot `currency: { code, rate, ratesUpdatedAt, subtotal,
+  shippingFee, discount, total }`. Orders placed before this (or in USD) have no `currency` and are in USD.

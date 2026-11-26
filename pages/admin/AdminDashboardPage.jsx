@@ -7,6 +7,7 @@ import ProductImage from "../../src/components/ProductImage";
 import { PageHeader, Panel, StatusBadge, EmptyState, ErrorState } from "../../src/components/admin/AdminUI";
 import { formatPrice, getImageUrl, getText, isExternalUrl } from "../../src/utils/product";
 import { formatDateTime, formatNumber } from "../../src/utils/format";
+import useLanguage from "../../src/i18n/useLanguage";
 
 const PERIODS = ["7", "30", "90"];
 const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
@@ -56,6 +57,7 @@ function StockLink({ to, icon: Icon, tone, label, value, detail, loading }) {
 
 export default function AdminDashboardPage() {
   const { get, update } = useUrlParams({ days: "30" });
+  const { t } = useLanguage("admin");
   const days = PERIODS.includes(get("days")) ? get("days") : "30";
   const { data, loading, error, retry } = useApi(`/api/admin/stats?days=${days}&tz=${encodeURIComponent(TIME_ZONE)}`);
 
@@ -67,11 +69,11 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <PageHeader
-        title="Dashboard"
-        description="Live figures from your store's orders, products and customers."
+        title={t("layout.nav.dashboard")}
+        description={t("dashboard.intro")}
         actions={(
           <>
-            <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1" role="group" aria-label="Period">
+            <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1" role="group" aria-label={t("dashboard.period")}>
               {PERIODS.map((p) => (
                 <button
                   key={p}
@@ -82,12 +84,12 @@ export default function AdminDashboardPage() {
                     days === p ? "bg-secondary text-white" : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
-                  Last {p} days
+                  {t("dashboard.lastDays", { count: Number(p) })}
                 </button>
               ))}
             </div>
             <button type="button" onClick={retry} className="btn-outline btn-sm" disabled={loading}>
-              <RotateCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" /> Refresh
+              <RotateCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" /> {t("dashboard.refresh")}
             </button>
           </>
         )}
@@ -101,57 +103,57 @@ export default function AdminDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               icon={CircleDollarSign}
-              label="Total sales"
+              label={t("dashboard.totalSales")}
               loading={firstLoad}
               value={formatPrice(totals?.revenue)}
-              detail={<>{formatPrice(period?.revenue)} in the last {days} days · {formatPrice(totals?.paidRevenue)} paid</>}
+              detail={t("dashboard.salesDetail", { amount: formatPrice(period?.revenue), count: Number(days), paid: formatPrice(totals?.paidRevenue) })}
             />
             <StatCard
               icon={ShoppingCart}
-              label="Total orders"
+              label={t("dashboard.totalOrders")}
               loading={firstLoad}
               value={formatNumber(totals?.orders)}
-              detail={<>{formatNumber(period?.ordersPlaced)} in the last {days} days · {formatNumber(totals?.pendingOrders)} pending</>}
+              detail={t("dashboard.ordersDetail", { placed: formatNumber(period?.ordersPlaced), count: Number(days), pending: formatNumber(totals?.pendingOrders) })}
             />
             <StatCard
               icon={Package}
-              label="Total products"
+              label={t("dashboard.totalProducts")}
               loading={firstLoad}
               value={formatNumber(totals?.products)}
-              detail={<>{formatNumber(totals?.activeProducts)} visible · {formatNumber(totals?.hiddenProducts)} hidden</>}
+              detail={t("dashboard.productsDetail", { visible: formatNumber(totals?.activeProducts), hidden: formatNumber(totals?.hiddenProducts) })}
             />
             <StatCard
               icon={Users}
-              label="Total customers"
+              label={t("dashboard.totalCustomers")}
               loading={firstLoad}
               value={formatNumber(totals?.customers)}
-              detail={<>{formatNumber(period?.newCustomers)} new in the last {days} days</>}
+              detail={t("dashboard.customersDetail", { added: formatNumber(period?.newCustomers), count: Number(days) })}
             />
           </div>
 
           {/* Stock alerts */}
           <div className="grid gap-3 sm:grid-cols-3">
-            <StockLink to="/admin/inventory?stock=out" icon={PackageX} tone="bg-rose-50 text-rose-600" label="Out of stock" detail="Tracked products with none left" value={totals?.outOfStockProducts} loading={firstLoad} />
-            <StockLink to="/admin/inventory?stock=low" icon={AlertTriangle} tone="bg-amber-50 text-amber-600" label="Low stock" detail="5 or fewer left" value={totals?.lowStockProducts} loading={firstLoad} />
-            <StockLink to="/admin/inventory?stock=untracked" icon={InfinityIcon} tone="bg-slate-100 text-slate-600" label="Not tracked" detail="Always for sale" value={totals?.untrackedProducts} loading={firstLoad} />
+            <StockLink to="/admin/inventory?stock=out" icon={PackageX} tone="bg-rose-50 text-rose-600" label={t("status.stock.out")} detail={t("dashboard.outDetail")} value={totals?.outOfStockProducts} loading={firstLoad} />
+            <StockLink to="/admin/inventory?stock=low" icon={AlertTriangle} tone="bg-amber-50 text-amber-600" label={t("status.stock.low")} detail={t("dashboard.lowDetail", { count: 5 })} value={totals?.lowStockProducts} loading={firstLoad} />
+            <StockLink to="/admin/inventory?stock=untracked" icon={InfinityIcon} tone="bg-slate-100 text-slate-600" label={t("status.stock.untracked")} detail={t("dashboard.untrackedDetail")} value={totals?.untrackedProducts} loading={firstLoad} />
           </div>
 
           {/* Sales analytics */}
           <Panel
-            title="Revenue per day"
-            description={`Last ${days} days · orders that were not cancelled`}
+            title={t("dashboard.revenuePerDay")}
+            description={t("dashboard.revenueText", { count: Number(days) })}
             actions={!firstLoad && (
-              <dl className="flex flex-wrap gap-x-6 gap-y-1 text-right">
+              <dl className="flex flex-wrap gap-x-6 gap-y-1 text-end">
                 <div>
-                  <dt className="text-[11px] font-semibold text-slate-400">Revenue</dt>
+                  <dt className="text-[11px] font-semibold text-slate-400">{t("chart.revenue")}</dt>
                   <dd className="text-sm font-extrabold text-secondary">{formatPrice(period?.revenue)}</dd>
                 </div>
                 <div>
-                  <dt className="text-[11px] font-semibold text-slate-400">Orders</dt>
+                  <dt className="text-[11px] font-semibold text-slate-400">{t("chart.orders")}</dt>
                   <dd className="text-sm font-extrabold text-secondary">{formatNumber(period?.orders)}</dd>
                 </div>
                 <div>
-                  <dt className="text-[11px] font-semibold text-slate-400">Avg. order</dt>
+                  <dt className="text-[11px] font-semibold text-slate-400">{t("dashboard.avgOrder")}</dt>
                   <dd className="text-sm font-extrabold text-secondary">{formatPrice(period?.averageOrderValue)}</dd>
                 </div>
               </dl>
@@ -169,8 +171,8 @@ export default function AdminDashboardPage() {
             {/* Recent orders */}
             <Panel
               className="xl:col-span-3"
-              title="Recent orders"
-              actions={<Link to="/admin/orders" className="link-primary text-sm">All orders <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>}
+              title={t("dashboard.recentOrders")}
+              actions={<Link to="/admin/orders" className="link-primary text-sm">{t("orders.all")} <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>}
             >
               {firstLoad ? (
                 <div className="space-y-3 p-5" aria-hidden="true">
@@ -187,22 +189,22 @@ export default function AdminDashboardPage() {
                         <span className="min-w-0 flex-1">
                           <span className="block font-mono text-sm font-bold text-secondary">{order.orderNumber}</span>
                           <span className="block truncate text-xs text-slate-500">
-                            {order.customer?.username || order.customer?.email || "Deleted customer"} · {formatDateTime(order.createdAt)} · {order.itemsCount} item{order.itemsCount === 1 ? "" : "s"}
+                            {order.customer?.username || order.customer?.email || t("dashboard.deletedCustomer")} · {formatDateTime(order.createdAt)} · {t("orders.items", { count: order.itemsCount })}
                           </span>
                         </span>
                         <StatusBadge kind="order" status={order.status} />
-                        <span className="w-24 text-right text-sm font-extrabold tabular-nums text-secondary">{formatPrice(order.totalPrice)}</span>
+                        <span className="w-24 text-end text-sm font-extrabold tabular-nums text-secondary">{formatPrice(order.totalPrice)}</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <EmptyState icon={Receipt} title="No orders yet" message="New orders will show up here as soon as customers check out." />
+                <EmptyState icon={Receipt} title={t("orders.none")} message={t("dashboard.noOrdersText")} />
               )}
             </Panel>
 
             {/* Best sellers */}
-            <Panel className="xl:col-span-2" title="Best-selling products" description={`Units sold in the last ${days} days`}>
+            <Panel className="xl:col-span-2" title={t("dashboard.bestSellers")} description={t("dashboard.bestSellersText", { count: Number(days) })}>
               {firstLoad ? (
                 <div className="space-y-3 p-5" aria-hidden="true">
                   {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-50" />)}
@@ -211,7 +213,7 @@ export default function AdminDashboardPage() {
                 <ol className="space-y-4 p-5">
                   {data.bestSellers.map((item, index) => {
                     const top = data.bestSellers[0].units || 1;
-                    const title = getText(item.name) || "Unnamed product";
+                    const title = getText(item.name) || t("product.unnamed");
                     const content = (
                       <>
                         <span className="w-4 text-xs font-extrabold text-slate-400">{index + 1}</span>
@@ -227,8 +229,8 @@ export default function AdminDashboardPage() {
                             <span className="block h-full rounded-full bg-primary-400" style={{ width: `${Math.max(4, (item.units / top) * 100)}%` }} />
                           </span>
                         </span>
-                        <span className="text-right">
-                          <span className="block text-sm font-extrabold tabular-nums text-secondary">{formatNumber(item.units)} sold</span>
+                        <span className="text-end">
+                          <span className="block text-sm font-extrabold tabular-nums text-secondary">{t("product.soldCount", { count: item.units, formatted: formatNumber(item.units) })}</span>
                           <span className="block text-xs tabular-nums text-slate-500">{formatPrice(item.revenue)}</span>
                         </span>
                       </>
@@ -240,14 +242,14 @@ export default function AdminDashboardPage() {
                             {content}
                           </Link>
                         ) : (
-                          <div className="flex items-center gap-3" title="This product was deleted">{content}</div>
+                          <div className="flex items-center gap-3" title={t("dashboard.productDeleted")}>{content}</div>
                         )}
                       </li>
                     );
                   })}
                 </ol>
               ) : (
-                <EmptyState icon={Trophy} title="No sales in this period" message="Your best sellers appear here once orders come in." />
+                <EmptyState icon={Trophy} title={t("dashboard.noSales")} message={t("dashboard.noSalesText")} />
               )}
             </Panel>
           </div>

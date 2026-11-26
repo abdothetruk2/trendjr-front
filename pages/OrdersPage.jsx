@@ -5,18 +5,14 @@ import useUrlParams from "../src/hooks/useUrlParams";
 import ProductImage from "../src/components/ProductImage";
 import StatusBadge from "../src/components/StatusBadge";
 import { Pagination } from "../src/components/ProductGrid";
-import { formatPrice, getImageUrl, getText, isExternalUrl } from "../src/utils/product";
+import { getImageUrl, getText, isExternalUrl, orderMoney } from "../src/utils/product";
 import { formatDate } from "../src/utils/format";
+import useLanguage from "../src/i18n/useLanguage";
+import { usePageMeta } from "../src/i18n/seo";
+import { statusLabel } from "../src/components/StatusBadge";
 
 const PAGE_SIZE = 10;
-const FILTERS = [
-  { value: "", label: "All orders" },
-  { value: "pending", label: "Pending" },
-  { value: "processing", label: "Processing" },
-  { value: "shipped", label: "Shipped" },
-  { value: "delivered", label: "Delivered" },
-  { value: "cancelled", label: "Cancelled" },
-];
+const FILTERS = ["", "pending", "processing", "shipped", "delivered", "cancelled"];
 
 const itemsCount = (order) => (order.items || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
 
@@ -30,18 +26,21 @@ export default function OrdersPage() {
   const { data, total, loading, error, retry } = useApi(`/api/orders/my-orders?${query}`);
   const orders = Array.isArray(data) ? data : [];
   const totalPages = total ? Math.ceil(total / PAGE_SIZE) : 1;
+  const { t } = useLanguage();
+  usePageMeta({ title: t("nav.myOrders") });
 
   return (
     <main className="min-h-screen bg-surface py-8">
       <div className="container-page">
         <div className="mb-8">
-          <p className="eyebrow">Your purchases</p>
-          <h1 className="mt-2 text-3xl font-black text-secondary">My orders</h1>
-          <p className="mt-2 text-sm text-slate-500">Follow your orders and review previous purchases.</p>
+          <p className="eyebrow">{t("orders.eyebrow")}</p>
+          <h1 className="mt-2 text-3xl font-black text-secondary">{t("nav.myOrders")}</h1>
+          <p className="mt-2 text-sm text-slate-500">{t("orders.intro")}</p>
         </div>
 
-        <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Filter orders by status">
-          {FILTERS.map((filter) => {
+        <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label={t("orders.filter")}>
+          {FILTERS.map((value) => {
+            const filter = { value, label: value ? statusLabel("order", value) : t("orders.all") };
             const active = status === filter.value;
             return (
               <button
@@ -65,16 +64,16 @@ export default function OrdersPage() {
           </div>
         ) : error && !data ? (
           <div className="card p-8 text-center" role="alert">
-            <p className="font-bold text-secondary">We couldn&apos;t load your orders.</p>
+            <p className="font-bold text-secondary">{t("orders.loadError")}</p>
             <p className="mt-1 text-sm text-slate-500">{error}</p>
-            <button type="button" onClick={retry} className="btn-primary btn-sm mt-4"><RotateCw className="h-3.5 w-3.5" aria-hidden="true" /> Try again</button>
+            <button type="button" onClick={retry} className="btn-primary btn-sm mt-4"><RotateCw className="h-3.5 w-3.5" aria-hidden="true" /> {t("common.retry")}</button>
           </div>
         ) : orders.length === 0 ? (
           <div className="card mx-auto max-w-lg p-10 text-center">
             <Package className="mx-auto h-12 w-12 text-slate-300" aria-hidden="true" />
-            <h2 className="mt-4 text-xl font-black text-secondary">{status ? "No orders with this status" : "No orders yet"}</h2>
-            <p className="mt-2 text-sm text-slate-500">{status ? "Try another filter." : "When you place an order, you can follow it here."}</p>
-            {!status && <Link to="/shop" className="btn-primary mt-6"><ShoppingBag size={17} aria-hidden="true" /> Start shopping</Link>}
+            <h2 className="mt-4 text-xl font-black text-secondary">{status ? t("orders.noneStatus") : t("orders.none")}</h2>
+            <p className="mt-2 text-sm text-slate-500">{status ? t("orders.tryFilter") : t("orders.noneText")}</p>
+            {!status && <Link to="/shop" className="btn-primary mt-6"><ShoppingBag size={17} aria-hidden="true" /> {t("cartPage.startShopping")}</Link>}
           </div>
         ) : (
           <>
@@ -86,7 +85,7 @@ export default function OrdersPage() {
                   <article key={order._id} className="card p-5">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
                       <div>
-                        <p className="text-xs text-slate-400">Order number</p>
+                        <p className="text-xs text-slate-400">{t("orders.number")}</p>
                         <h2 className="mt-1 font-mono font-extrabold text-secondary">{order.orderNumber}</h2>
                       </div>
                       <StatusBadge kind="order" status={order.status} />
@@ -101,13 +100,13 @@ export default function OrdersPage() {
                       />
                       <div className="min-w-0 flex-1">
                         <h3 className="line-clamp-1 font-bold text-secondary">
-                          {getText(first?.name) || "Order"}{more > 0 && <span className="font-semibold text-slate-400"> and {more} more</span>}
+                          {getText(first?.name) || t("orders.order")}{more > 0 && <span className="font-semibold text-slate-400"> {t("orders.andMore", { count: more })}</span>}
                         </h3>
-                        <p className="mt-1 text-xs text-slate-400">Placed on {formatDate(order.createdAt)} · {itemsCount(order)} item{itemsCount(order) === 1 ? "" : "s"}</p>
-                        <strong className="mt-2 block text-primary-600">{formatPrice(order.totalPrice)}</strong>
+                        <p className="mt-1 text-xs text-slate-400">{t("orders.placedOn", { date: formatDate(order.createdAt) })} · {t("orders.items", { count: itemsCount(order) })}</p>
+                        <strong className="mt-2 block text-primary-600">{orderMoney(order).total()}</strong>
                       </div>
                       <Link to={`/orders/${order._id}`} className="inline-flex items-center gap-1 text-xs font-bold text-primary-600 hover:underline">
-                        View details <ChevronRight size={15} aria-hidden="true" />
+                        {t("orders.viewDetails")} <ChevronRight size={15} aria-hidden="true" />
                       </Link>
                     </div>
                   </article>

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Expand, ImageOff, X, ZoomIn, ZoomOut } from 
 import ProductImage from './ProductImage';
 import useFocusTrap from '../hooks/useFocusTrap';
 import useBodyScrollLock from '../hooks/useBodyScrollLock';
+import useLanguage from '../i18n/useLanguage';
 
 const smooth = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
@@ -14,8 +15,11 @@ function useScrollThumbIntoView(rowRef, index) {
     const row = rowRef.current;
     const thumb = row?.children[index];
     if (!row || !thumb) return;
-    const left = thumb.offsetLeft - (row.clientWidth - thumb.offsetWidth) / 2;
-    row.scrollTo({ left: Math.max(0, left), behavior: smooth() });
+    // Centre the thumbnail in its row (works for left-to-right and right-to-left rows)
+    const rowBox = row.getBoundingClientRect();
+    const box = thumb.getBoundingClientRect();
+    const delta = (box.left + box.width / 2) - (rowBox.left + rowBox.width / 2);
+    row.scrollBy({ left: delta, behavior: smooth() });
   }, [rowRef, index]);
 }
 
@@ -23,6 +27,8 @@ function useScrollThumbIntoView(rowRef, index) {
 // that opens a full-screen viewer with zoom.
 // images: [{ src, fallbackSrc }]; children: overlays on the main image (badges, buttons).
 export default function ProductGallery({ images, alt, children }) {
+  const { t, isRtl } = useLanguage();
+  const sign = isRtl ? -1 : 1; // right-to-left tracks scroll with negative scrollLeft
   const [index, setIndex] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [zoom, setZoom] = useState(null); // { x, y } in % while the mouse hovers the photo
@@ -39,15 +45,15 @@ export default function ProductGallery({ images, alt, children }) {
     setZoom(null);
     if (track) {
       targetRef.current = next;
-      track.scrollTo({ left: next * track.clientWidth, behavior: smooth() });
+      track.scrollTo({ left: sign * next * track.clientWidth, behavior: smooth() });
     }
-  }, [count]);
+  }, [count, sign]);
 
   // Swiping (or scrolling) the track picks the photo that is mostly in view
   function onScroll() {
     const track = trackRef.current;
     if (!track?.clientWidth) return;
-    const current = Math.round(track.scrollLeft / track.clientWidth);
+    const current = Math.round(Math.abs(track.scrollLeft) / track.clientWidth);
     if (targetRef.current !== null) {
       if (current !== targetRef.current) return; // still moving to the chosen photo
       targetRef.current = null;
@@ -65,7 +71,7 @@ export default function ProductGallery({ images, alt, children }) {
     });
     observer.observe(track);
     return () => observer.disconnect();
-  }, []);
+  }, [isRtl]);
 
   useScrollThumbIntoView(thumbsRef, index);
 
@@ -77,8 +83,8 @@ export default function ProductGallery({ images, alt, children }) {
 
   function onKeyDown(e) {
     if (!many || viewerOpen) return; // the viewer handles its own keys
-    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(index + 1); }
-    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(index - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(index + sign); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(index - sign); }
   }
 
   function onPointerMove(e, i) {
@@ -97,11 +103,10 @@ export default function ProductGallery({ images, alt, children }) {
   }
 
   return (
-    <div onKeyDown={onKeyDown} role="group" aria-roledescription="carousel" aria-label={`${alt} photos`}>
+    <div onKeyDown={onKeyDown} role="group" aria-roledescription={t('gallery.carousel')} aria-label={t('gallery.photosOf', { name: alt })}>
       <div className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white">
         <div
           ref={trackRef}
-          dir="ltr"
           onScroll={onScroll}
           onPointerDown={() => { targetRef.current = null; }}
           className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
@@ -114,7 +119,7 @@ export default function ProductGallery({ images, alt, children }) {
               onPointerMove={(e) => onPointerMove(e, i)}
               onPointerLeave={() => setZoom(null)}
               tabIndex={i === index ? 0 : -1}
-              aria-label={`Open photo ${i + 1} of ${count} full screen`}
+              aria-label={t('gallery.openPhoto', { n: i + 1, count })}
               aria-hidden={i === index ? undefined : true}
               className="relative w-full shrink-0 snap-center snap-always overflow-hidden cursor-zoom-in"
             >
@@ -125,7 +130,7 @@ export default function ProductGallery({ images, alt, children }) {
                 <ProductImage
                   src={image.src}
                   fallbackSrc={image.fallbackSrc}
-                  alt={count > 1 ? `${alt} — photo ${i + 1}` : alt}
+                  alt={count > 1 ? t('gallery.photoAlt', { name: alt, n: i + 1 }) : alt}
                   fit="contain"
                   priority={i === 0}
                   sizes="(min-width: 1024px) 600px, 100vw"
@@ -144,16 +149,16 @@ export default function ProductGallery({ images, alt, children }) {
             <button
               type="button"
               onClick={() => goTo(index - 1)}
-              aria-label="Previous photo"
-              className="absolute left-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-md transition hover:bg-white hover:text-primary-600"
+              aria-label={t('gallery.prev')}
+              className="absolute start-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-md transition hover:bg-white hover:text-primary-600"
             >
               <ChevronLeft size={20} aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={() => goTo(index + 1)}
-              aria-label="Next photo"
-              className="absolute right-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-md transition hover:bg-white hover:text-primary-600"
+              aria-label={t('gallery.next')}
+              className="absolute end-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-md transition hover:bg-white hover:text-primary-600"
             >
               <ChevronRight size={20} aria-hidden="true" />
             </button>
@@ -163,15 +168,15 @@ export default function ProductGallery({ images, alt, children }) {
         <div className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-2">
           {many && (
             <span className="rounded-full bg-secondary/75 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur" aria-live="polite">
-              {index + 1} / {count}
+              <bdi dir="ltr">{index + 1} / {count}</bdi>
             </span>
           )}
         </div>
         <button
           type="button"
           onClick={() => setViewerOpen(true)}
-          aria-label="View photos full screen"
-          className="absolute bottom-3 right-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-slate-600 shadow-md hover:text-primary-600"
+          aria-label={t('gallery.fullScreen')}
+          className="absolute bottom-3 end-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-slate-600 shadow-md hover:text-primary-600"
         >
           <Expand size={16} aria-hidden="true" />
         </button>
@@ -184,7 +189,7 @@ export default function ProductGallery({ images, alt, children }) {
               key={image.src}
               type="button"
               onClick={() => goTo(i)}
-              aria-label={`Show photo ${i + 1} of ${count}`}
+              aria-label={t('gallery.showPhoto', { n: i + 1, count })}
               aria-current={i === index ? 'true' : undefined}
               className={`w-[4.5rem] shrink-0 overflow-hidden rounded-xl border-2 bg-white transition sm:w-20 ${
                 i === index ? 'border-primary-500 shadow-sm' : 'border-slate-200 opacity-70 hover:border-primary-200 hover:opacity-100'
@@ -219,6 +224,8 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
   const ref = useRef(null);
   const thumbsRef = useRef(null);
   const pointer = useRef(null);
+  const { t, isRtl } = useLanguage();
+  const sign = isRtl ? -1 : 1;
   const [index, setIndex] = useState(startIndex);
   const [zoom, setZoom] = useState(null); // { x, y } in % when zoomed in
   const [failed, setFailed] = useState({}); // src -> true when it couldn't load
@@ -236,12 +243,12 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
 
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'ArrowRight' && count > 1) go(1);
-      if (e.key === 'ArrowLeft' && count > 1) go(-1);
+      if (e.key === 'ArrowRight' && count > 1) go(sign);
+      if (e.key === 'ArrowLeft' && count > 1) go(-sign);
     }
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [go, count]);
+  }, [go, count, sign]);
 
   const pointAt = (e) => {
     const box = e.currentTarget.getBoundingClientRect();
@@ -264,7 +271,7 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
       setZoom(zoom ? null : pointAt(e)); // a tap or click toggles zoom
     } else if (!zoom && count > 1 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      go(dx < 0 ? 1 : -1);
+      go(dx < 0 ? sign : -sign);
     }
   }
 
@@ -276,19 +283,19 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
       ref={ref}
       role="dialog"
       aria-modal="true"
-      aria-label={`${alt} — photo viewer`}
+      aria-label={t('gallery.viewer', { name: alt })}
       tabIndex={-1}
       className="fixed inset-0 z-[70] flex flex-col bg-secondary-950/95 text-white outline-none backdrop-blur-sm"
     >
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <p className="text-sm font-bold" aria-live="polite">
-          {count > 1 ? `${index + 1} / ${count}` : 'Photo'}
+          {count > 1 ? <bdi dir="ltr">{index + 1} / {count}</bdi> : t('gallery.photo')}
         </p>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setZoom(zoom ? null : { x: 50, y: 50 })}
-            aria-label={zoom ? 'Zoom out' : 'Zoom in'}
+            aria-label={zoom ? t('gallery.zoomOut') : t('gallery.zoomIn')}
             className="grid h-10 w-10 place-items-center rounded-full bg-white/10 hover:bg-white/20"
           >
             {zoom ? <ZoomOut size={19} aria-hidden="true" /> : <ZoomIn size={19} aria-hidden="true" />}
@@ -297,7 +304,7 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
             type="button"
             onClick={close}
             data-autofocus
-            aria-label="Close photo viewer"
+            aria-label={t('gallery.closeViewer')}
             className="grid h-10 w-10 place-items-center rounded-full bg-white/10 hover:bg-white/20"
           >
             <X size={20} aria-hidden="true" />
@@ -319,7 +326,7 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
             <img
               key={src}
               src={src}
-              alt={count > 1 ? `${alt} — photo ${index + 1}` : alt}
+              alt={count > 1 ? t('gallery.photoAlt', { name: alt, n: index + 1 }) : alt}
               draggable={false}
               onError={() => setFailed((f) => ({ ...f, [image.src]: true }))}
               className="h-full w-full object-contain p-2 transition-transform duration-200 ease-out sm:p-6"
@@ -337,16 +344,16 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
             <button
               type="button"
               onClick={() => go(-1)}
-              aria-label="Previous photo"
-              className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-lg hover:bg-white sm:left-4"
+              aria-label={t('gallery.prev')}
+              className="absolute start-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-lg hover:bg-white sm:start-4"
             >
               <ChevronLeft size={22} aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={() => go(1)}
-              aria-label="Next photo"
-              className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-lg hover:bg-white sm:right-4"
+              aria-label={t('gallery.next')}
+              className="absolute end-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-secondary shadow-lg hover:bg-white sm:end-4"
             >
               <ChevronRight size={22} aria-hidden="true" />
             </button>
@@ -361,7 +368,7 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
               key={item.src}
               type="button"
               onClick={() => { setZoom(null); setIndex(i); }}
-              aria-label={`Show photo ${i + 1} of ${count}`}
+              aria-label={t('gallery.showPhoto', { n: i + 1, count })}
               aria-current={i === index ? 'true' : undefined}
               className={`w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-white transition ${
                 i === index ? 'border-white' : 'border-transparent opacity-50 hover:opacity-90'
@@ -372,7 +379,7 @@ function PhotoViewer({ images, startIndex, alt, onClose }) {
           ))}
         </div>
       )}
-      <p className="sr-only">Use the left and right arrow keys to browse, Escape to close.</p>
+      <p className="sr-only">{t('gallery.keysHint')}</p>
     </div>
   );
 }

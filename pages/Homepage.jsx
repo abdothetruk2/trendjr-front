@@ -11,6 +11,8 @@ import Loader from '../src/components/Loader';
 import useApi from '../src/hooks/useApi';
 import useCategories from '../src/hooks/useCategories';
 import useCategoryParam from '../src/hooks/useCategoryParam';
+import useLanguage from '../src/i18n/useLanguage';
+import { usePageMeta } from '../src/i18n/seo';
 
 // The full-screen brand loader only covers the first homepage load of a visit —
 // not later visits to this page, and never category/filter changes.
@@ -20,6 +22,8 @@ const SPLASH_MAX_MS = 1200;
 export default function Homepage() {
 
     const navigate = useNavigate();
+    const { t } = useLanguage();
+    usePageMeta();
 
     // Categories and flash deals from the API (each requested once)
     const categories = useCategories();
@@ -80,7 +84,7 @@ export default function Homepage() {
                     onRetry={flash.retry}
                 />
 
-                <ProductGrid category={cat} onFirstLoad={handleGridReady} eyebrow="Just for you" title="Discover products" />
+                <ProductGrid category={cat} onFirstLoad={handleGridReady} eyebrow={t('home.eyebrow')} title={t('home.title')} />
 
                 <TrustSection />
 

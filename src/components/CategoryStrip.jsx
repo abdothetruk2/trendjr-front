@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
 import { getCategoryLabel } from '../utils/product';
+import useLanguage from '../i18n/useLanguage';
 
 // Top-level categories as filter pills. `cat` is the selected category slug ('all' = everything).
 // Categories are loaded once by the page and passed in (no extra request here).
@@ -14,6 +15,7 @@ export default function CategoryStrip({
     cat = 'all',
 }) {
     const scroller = useRef(null);
+    const { t, isRtl } = useLanguage();
     const [edges, setEdges] = useState({ start: false, end: false });
 
     const list = Array.isArray(categories) ? categories : [];
@@ -22,7 +24,7 @@ export default function CategoryStrip({
         list.filter((c) => c.parent_id != null && c.parent_id === category.id).reduce((sum, c) => sum + (c.productCount || 0), 0);
 
     const pills = [
-        { id: 'all', label: 'All' },
+        { id: 'all', label: t('categories.all') },
         ...list
             .filter((category) => category.parent_id == null)
             .filter((category) => !hasCounts || totalOf(category) > 0 || category.slug === cat)
@@ -35,7 +37,9 @@ export default function CategoryStrip({
     const updateEdges = useCallback(() => {
         const el = scroller.current;
         if (!el) return;
-        setEdges({ start: el.scrollLeft > 4, end: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
+        // Right-to-left rows scroll with negative scrollLeft values
+        const pos = Math.abs(el.scrollLeft);
+        setEdges({ start: pos > 4, end: pos + el.clientWidth < el.scrollWidth - 4 });
     }, []);
 
     useEffect(() => {
@@ -52,16 +56,18 @@ export default function CategoryStrip({
         const el = scroller.current;
         const pill = el?.querySelector('[aria-pressed="true"]');
         if (!el || !pill) return;
-        const left = pill.offsetLeft - el.offsetLeft;
-        if (left < el.scrollLeft || left + pill.offsetWidth > el.scrollLeft + el.clientWidth) {
-            el.scrollTo({ left: Math.max(0, left - 24), behavior: 'smooth' });
+        const box = el.getBoundingClientRect();
+        const rect = pill.getBoundingClientRect();
+        if (rect.left < box.left || rect.right > box.right) {
+            pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
         }
     }, [cat, loading]);
 
-    const scrollBy = (direction) => scroller.current?.scrollBy({ left: direction * scroller.current.clientWidth * 0.7, behavior: 'smooth' });
+    // direction: -1 = towards the start of the row, 1 = towards the end (mirrored in RTL)
+    const scrollBy = (direction) => scroller.current?.scrollBy({ left: (isRtl ? -direction : direction) * scroller.current.clientWidth * 0.7, behavior: 'smooth' });
 
     const fade = edges.start || edges.end
-        ? `linear-gradient(to right, ${edges.start ? 'transparent, black 32px' : 'black, black'}, ${edges.end ? 'black calc(100% - 32px), transparent' : 'black, black'})`
+        ? `linear-gradient(to ${isRtl ? 'left' : 'right'}, ${edges.start ? 'transparent, black 32px' : 'black, black'}, ${edges.end ? 'black calc(100% - 32px), transparent' : 'black, black'})`
         : undefined;
 
     const arrow = 'absolute top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-200 transition-colors hover:text-primary-600 sm:grid';
@@ -71,7 +77,7 @@ export default function CategoryStrip({
             <div className="container-page relative">
 
                 {edges.start && (
-                    <button type="button" onClick={() => scrollBy(-1)} className={`${arrow} left-2`} aria-label="Scroll categories left">
+                    <button type="button" onClick={() => scrollBy(-1)} className={`${arrow} start-2`} aria-label={t('categories.scrollBack')}>
                         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                     </button>
                 )}
@@ -82,7 +88,7 @@ export default function CategoryStrip({
                     className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2.5 snap-x scroll-px-4"
                     style={fade ? { maskImage: fade, WebkitMaskImage: fade } : undefined}
                     role="toolbar"
-                    aria-label="Filter products by category"
+                    aria-label={t('categories.filter')}
                 >
 
                     {loading ? (
@@ -118,10 +124,10 @@ export default function CategoryStrip({
                                 <button
                                     type="button"
                                     onClick={onRetry}
-                                    className="ml-1 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-rose-600 hover:text-rose-700"
+                                    className="ms-1 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-rose-600 hover:text-rose-700"
                                 >
                                     <RotateCw className="w-3.5 h-3.5" aria-hidden="true" />
-                                    Couldn&apos;t load categories — retry
+                                    {t('categories.loadError')}
                                 </button>
                             )}
                         </>
@@ -131,7 +137,7 @@ export default function CategoryStrip({
                 </div>
 
                 {edges.end && (
-                    <button type="button" onClick={() => scrollBy(1)} className={`${arrow} right-2`} aria-label="Scroll categories right">
+                    <button type="button" onClick={() => scrollBy(1)} className={`${arrow} end-2`} aria-label={t('categories.scrollMore')}>
                         <ChevronRight className="h-4 w-4" aria-hidden="true" />
                     </button>
                 )}

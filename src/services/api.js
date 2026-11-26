@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authToken';
+import i18n, { currentLanguage } from '../i18n';
+import { translateServerMessage } from '../i18n/serverMessages';
 
 // Backend base URL (VITE_API_URL in .env). Requests use paths like '/api/products'.
 export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/+$/, '');
@@ -13,6 +15,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
     const token = getToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
+    config.headers['Accept-Language'] = currentLanguage(); // lets the API pick the language where it can
     return config;
 });
 
@@ -32,12 +35,15 @@ api.interceptors.response.use(
     }
 );
 
-// Readable message for a failed request (the backend sends { message })
+// Readable message for a failed request (the backend sends { message }), in the visitor's language
 export function getErrorMessage(error) {
-    if (error?.response?.data?.message) return error.response.data.message;
-    if (error?.code === 'ECONNABORTED') return 'The server took too long to respond.';
-    if (!error?.response) return 'Cannot reach the server. Please check your connection and try again.';
-    return `Request failed (${error.response.status}).`;
+    if (error?.response?.data?.message) return translateServerMessage(error.response.data.message);
+    if (error?.code === 'ECONNABORTED') return i18n.t('errors.timeout');
+    if (!error?.response) return i18n.t('errors.offline');
+    return i18n.t('errors.requestFailed', { status: error.response.status });
 }
+
+// A success message from the API ({ message }), translated when known
+export const getServerMessage = (data, fallback = '') => translateServerMessage(data?.message) || fallback;
 
 export default api;

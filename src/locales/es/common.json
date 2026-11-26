@@ -1,0 +1,815 @@
+{
+ "nav": {
+  "home": "Inicio",
+  "shop": "Tienda",
+  "offers": "Ofertas",
+  "about": "Sobre nosotros",
+  "contact": "Contacto",
+  "faq": "Preguntas frecuentes",
+  "categories": "Categorías",
+  "cart": "Carrito",
+  "saved": "Guardados",
+  "account": "Cuenta",
+  "wishlist": "Favoritos",
+  "myAccount": "Mi cuenta",
+  "myOrders": "Mis pedidos",
+  "signIn": "Iniciar sesión",
+  "signOut": "Cerrar sesión",
+  "register": "Registrarse",
+  "adminDashboard": "Panel de administración",
+  "mobileNav": "Móvil"
+ },
+ "header": {
+  "openMenu": "Abrir menú",
+  "homeLink": "Inicio de Trend Jr",
+  "tagline": "Mercado directo",
+  "searchPlaceholder": "Buscar gadgets, belleza, joyas, ofertas...",
+  "searchLabel": "Buscar productos",
+  "go": "Ir",
+  "hello": "Hola",
+  "helloName": "Hola, {{name}}",
+  "there": "invitado",
+  "signInRegister": "Iniciar sesión / Registrarse",
+  "wishlistCount_one": "Favoritos, {{count}} guardado",
+  "wishlistCount_other": "Favoritos, {{count}} guardados",
+  "cartCount_one": "Carrito, {{count}} artículo",
+  "cartCount_other": "Carrito, {{count}} artículos",
+  "cartEmpty": "Carrito (vacío)",
+  "empty": "Vacío",
+  "mainNav": "Navegación principal",
+  "wishlistCount_many": "Favoritos, {{count}} guardados",
+  "cartCount_many": "Carrito, {{count}} artículos"
+ },
+ "language": {
+  "label": "Idioma",
+  "change": "Idioma: {{language}}. Cambiar idioma"
+ },
+ "promo": {
+  "copyCode": "Copiar el código de cupón {{code}}",
+  "copied": "¡Copiado!",
+  "coupon": "Cupón",
+  "code": "Código: {{code}}",
+  "freeShipping": "Envío gratis",
+  "onAllOrders": "en todos los pedidos ›",
+  "buyerProtected": "Comprador protegido",
+  "cashOnDelivery": "pago contra reembolso",
+  "help": "Ayuda",
+  "trackOrder": "Seguir pedido",
+  "helpCenter": "Centro de ayuda",
+  "sell": "Vende en Trend Jr"
+ },
+ "footer": {
+  "allProducts": "Todos los productos",
+  "offersDeals": "Ofertas y promociones",
+  "newArrivals": "Novedades",
+  "bestSelling": "Más vendidos",
+  "topRated": "Mejor valorados",
+  "trackOrder": "Seguir tu pedido",
+  "shippingInfo": "Envíos y entregas",
+  "paymentProtection": "Pago y protección al comprador",
+  "helpReturns": "Ayuda y devoluciones",
+  "newsletterDone": "¡Gracias! Ya estás en la lista.",
+  "newsletterLabel": "Recibe cada semana las novedades y códigos exclusivos",
+  "join": "Unirme",
+  "aboutUs": "Sobre Trend Jr",
+  "contactUs": "Contáctanos",
+  "createAccount": "Crear cuenta",
+  "about": "Trend Jr te trae gadgets de moda, herramientas de belleza, joyas, accesorios y artículos esenciales para el hogar a precios claros, con envío gratis y pago contra reembolso.",
+  "shop": "Tienda",
+  "customerCare": "Atención al cliente",
+  "companyAccount": "Empresa y cuenta",
+  "copyright": "© {{year}} Trend Jr Commerce. Todos los derechos reservados.",
+  "paymentDelivery": "Pago y entrega",
+  "cod": "Pago contra reembolso",
+  "freeShipping": "Envío gratis"
+ },
+ "menu": {
+  "shopAll": "Todos los productos",
+  "offers": "Ofertas y promociones",
+  "helpFaq": "Ayuda y preguntas frecuentes",
+  "title": "Menú",
+  "close": "Cerrar menú",
+  "welcome": "Bienvenido a Trend Jr",
+  "welcomeText": "Inicia sesión para seguir tus pedidos y guardar tus favoritos.",
+  "browse": "Explorar",
+  "yourAccount": "Tu cuenta"
+ },
+ "categories": {
+  "loading": "Cargando categorías",
+  "loadError": "No se pudieron cargar las categorías — reintentar",
+  "hideSub": "Ocultar las subcategorías de {{name}}",
+  "showSub": "Mostrar las subcategorías de {{name}}",
+  "all": "Todo",
+  "scrollBack": "Categorías anteriores",
+  "scrollMore": "Más categorías",
+  "filter": "Filtrar productos por categoría",
+  "categoryLabel": "Categoría:",
+  "allProducts": "Todos los productos",
+  "close": "Cerrar categorías",
+  "productCategories": "Categorías de productos"
+ },
+ "common": {
+  "sending": "Enviando",
+  "loading": "Cargando…",
+  "retry": "Reintentar",
+  "close": "Cerrar",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "back": "Volver",
+  "dismiss": "Cerrar notificación"
+ },
+ "validation": {
+  "email": "Introduce una dirección de correo electrónico válida."
+ },
+ "errors": {
+  "timeout": "El servidor tardó demasiado en responder.",
+  "offline": "No se puede conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.",
+  "requestFailed": "La solicitud falló ({{status}})."
+ },
+ "product": {
+  "unnamed": "Producto sin nombre",
+  "soldOut": "Agotado",
+  "flash": "Flash",
+  "new": "NUEVO",
+  "removeFromWishlistNamed": "Quitar {{name}} de favoritos",
+  "saveToWishlistNamed": "Guardar {{name}} en favoritos",
+  "removeFromWishlist": "Quitar de favoritos",
+  "saveToWishlist": "Guardar en favoritos",
+  "quickViewNamed": "Vista rápida: {{name}}",
+  "quickView": "Vista rápida",
+  "rated": "Valoración",
+  "reviewsCount_one": "{{formatted}} reseña",
+  "reviewsCount_other": "{{formatted}} reseñas",
+  "soldCount_one": "{{formatted}} vendido",
+  "soldCount_other": "{{formatted}} vendidos",
+  "was": "Antes",
+  "save": "Ahorra {{amount}}",
+  "onlyLeft_one": "Solo queda {{count}}",
+  "onlyLeft_other": "Solo quedan {{count}}",
+  "soldOutNamed": "{{name}} está agotado",
+  "addToCartNamed": "Añadir {{name}} al carrito",
+  "added": "Añadido",
+  "addToCart": "Añadir al carrito",
+  "noImageLabel": "Imagen no disponible",
+  "noImage": "Sin imagen",
+  "outOf5": "de 5",
+  "noReviews": "Aún no hay reseñas",
+  "youSave": "Ahorras {{amount}}",
+  "outOfStock": "Sin existencias",
+  "onlyLeftInStock_one": "Solo queda {{count}} en stock",
+  "onlyLeftInStock_other": "Solo quedan {{count}} en stock",
+  "inStock": "En stock",
+  "quantity": "Cantidad",
+  "decrease": "Reducir cantidad",
+  "increase": "Aumentar cantidad",
+  "addToCartPrice": "Añadir al carrito · {{price}}",
+  "viewDetails": "Ver todos los detalles",
+  "reviewsCount_many": "{{formatted}} reseñas",
+  "soldCount_many": "{{formatted}} vendidos",
+  "onlyLeft_many": "Solo quedan {{count}}",
+  "onlyLeftInStock_many": "Solo quedan {{count}} en stock"
+ },
+ "seo": {
+  "defaultTitle": "Trend Jr | Compras online directas de tecnología, moda y hogar",
+  "defaultDescription": "Gadgets de moda, herramientas de belleza, joyas, accesorios y artículos esenciales para el hogar en Trend Jr. Precios claros, envío gratis y pago contra reembolso."
+ },
+ "hero": {
+  "srTitle": "Trend Jr: las últimas tendencias, todas en un solo lugar",
+  "badge": "Los productos más en tendencia",
+  "subtitle": "Todo lo nuevo y especial en un solo lugar",
+  "shopNow": "Comprar ahora",
+  "browseOffers": "Ver ofertas",
+  "address": "Nuestra dirección",
+  "features": {
+   "inspected": {
+    "title": "Productos revisados",
+    "subtitle": "antes del envío"
+   },
+   "shipping": {
+    "title": "Envío fiable",
+    "subtitle": ""
+   },
+   "latest": {
+    "title": "Lo último",
+    "subtitle": "en productos del mundo"
+   },
+   "easy": {
+    "title": "Compra fácil",
+    "subtitle": "y segura"
+   }
+  }
+ },
+ "trust": {
+  "eyebrow": "¿Por qué elegir Trend Jr?",
+  "title": "De la fábrica a tu puerta, con total transparencia",
+  "text": "Entrega mundial en 7–21 días de media con seguimiento completo del paquete.",
+  "delivery": {
+   "title": "Envío gratis a todo el mundo",
+   "text": "Todos los pedidos se envían gratis, sin pedido mínimo y con seguimiento en tiempo real."
+  },
+  "qc": {
+   "title": "Control de calidad antes del envío",
+   "text": "Los artículos provienen directamente de talleres seleccionados y se revisan antes de salir del almacén."
+  },
+  "protection": {
+   "title": "100 % de protección al comprador",
+   "text": "Pago cifrado y reembolso sin complicaciones si un pedido llega dañado o no llega."
+  },
+  "support": {
+   "title": "Atención al cliente rápida",
+   "text": "Especialistas reales listos para ayudarte con el seguimiento, las tallas o las devoluciones en cualquier momento."
+  }
+ },
+ "loader": {
+  "tagline": "DESCUBRE TU PRÓXIMA TENDENCIA",
+  "loading": "CARGANDO..."
+ },
+ "errorPage": {
+  "title": "Algo salió mal",
+  "text": "No se pudo mostrar esta página. Recargarla suele solucionarlo; tu carrito se conserva.",
+  "reload": "Recargar la página"
+ },
+ "grid": {
+  "tabs": {
+   "all": "Explorar todo",
+   "popular": "Más vendidos",
+   "newest": "Novedades",
+   "rating": "Mejor valorados"
+  },
+  "sort": {
+   "featured": "Ordenar: recomendados",
+   "popular": "Más populares",
+   "newest": "Más recientes",
+   "rating": "Mejor valorados",
+   "priceAsc": "Precio: de menor a mayor",
+   "priceDesc": "Precio: de mayor a menor",
+   "discount": "Mayor descuento"
+  },
+  "under": "Menos de {{price}}",
+  "anyPrice": "Cualquier precio",
+  "maxPrice": "Precio máximo",
+  "sortLabel": "Ordenar productos",
+  "loading": "Cargando productos…",
+  "showingOf": "Mostrando {{from}}–{{to}} de {{total}} artículos",
+  "showing": "Mostrando {{from}}–{{to}} artículos",
+  "pageOf": "Página {{page}} de {{total}}",
+  "loadError": "No se pudieron cargar los productos.",
+  "noPage": "La página {{page}} no existe",
+  "firstPage": "Ir a la primera página",
+  "empty": "No se encontraron productos",
+  "emptyPrice": "No hay nada por menos de {{price}} — prueba con un precio mayor.",
+  "emptyHint": "Prueba otra categoría u otro término de búsqueda.",
+  "clearPrice": "Quitar el filtro de precio",
+  "pages": "Páginas de productos",
+  "prev": "Anterior",
+  "next": "Siguiente",
+  "page": "Página {{page}}"
+ },
+ "gallery": {
+  "carousel": "carrusel",
+  "photosOf": "Fotos de {{name}}",
+  "openPhoto": "Abrir la foto {{n}} de {{count}} a pantalla completa",
+  "photoAlt": "{{name}} — foto {{n}}",
+  "prev": "Foto anterior",
+  "next": "Foto siguiente",
+  "fullScreen": "Ver fotos a pantalla completa",
+  "showPhoto": "Mostrar la foto {{n}} de {{count}}",
+  "viewer": "{{name}} — visor de fotos",
+  "photo": "Foto",
+  "zoomOut": "Alejar",
+  "zoomIn": "Ampliar",
+  "closeViewer": "Cerrar el visor de fotos",
+  "keysHint": "Usa las flechas izquierda y derecha para navegar y Escape para cerrar."
+ },
+ "status": {
+  "unknown": "Desconocido",
+  "order": {
+   "pending": "Pendiente",
+   "confirmed": "Confirmado",
+   "processing": "En preparación",
+   "shipped": "Enviado",
+   "delivered": "Entregado",
+   "cancelled": "Cancelado"
+  },
+  "payment": {
+   "pending": "Sin pagar",
+   "paid": "Pagado",
+   "failed": "Fallido",
+   "refunded": "Reembolsado"
+  },
+  "coupon": {
+   "active": "Activo",
+   "scheduled": "Programado",
+   "expired": "Caducado",
+   "used-up": "Agotado",
+   "inactive": "Desactivado"
+  },
+  "visibility": {
+   "active": "Visible",
+   "hidden": "Oculto"
+  },
+  "customer": {
+   "active": "Activo",
+   "blocked": "Bloqueado"
+  },
+  "role": {
+   "admin": "Admin",
+   "user": "Cliente"
+  },
+  "stock": {
+   "in": "En stock",
+   "low": "Pocas existencias",
+   "out": "Sin existencias",
+   "untracked": "Sin control"
+  }
+ },
+ "auth": {
+  "checkingSession": "Comprobando tu sesión…",
+  "adminsOnly": "Solo administradores",
+  "noAccess": "Sin acceso",
+  "signedInAsNoAccess": "Has iniciado sesión como {{name}}, que no tiene acceso a esta página.",
+  "backToStore": "Volver a la tienda",
+  "otherAccount": "Usar otra cuenta"
+ },
+ "deals": {
+  "flashTitle": "Ofertas flash",
+  "topTitle": "Mejores ofertas",
+  "flashText": "Las ofertas relámpago de hoy",
+  "topText": "Los mayores descuentos ahora mismo",
+  "seeAll": "Ver todas las ofertas",
+  "loadError": "No se pudieron cargar las ofertas.",
+  "empty": "No hay ofertas ahora mismo — vuelve pronto.",
+  "claimed": "{{percent}} % vendido",
+  "fastSelling": "Se vende rápido",
+  "add": "Añadir",
+  "timeLeft": "Tiempo restante para las ofertas de hoy",
+  "endsIn": "Termina en"
+ },
+ "cart": {
+  "maxReached": "Ya tienes la cantidad máxima disponible ({{count}})",
+  "added": "Añadido al carrito",
+  "viewCart": "Ver carrito"
+ },
+ "account": {
+  "emailInvalid": "Introduce un correo electrónico válido.",
+  "phoneInvalid": "Introduce un número de teléfono válido.",
+  "profileUpdated": "Perfil actualizado",
+  "profile": "Perfil",
+  "profileText": "Cómo puede contactarte la tienda.",
+  "username": "Nombre de usuario",
+  "usernameHint": "Se usa para iniciar sesión. No se puede cambiar aquí.",
+  "email": "Correo electrónico",
+  "phone": "Teléfono",
+  "optional": "Opcional",
+  "saveProfile": "Guardar perfil",
+  "addressSaved": "Dirección de entrega guardada",
+  "address": "Dirección de entrega",
+  "addressText": "Se usa para rellenar el pago por ti.",
+  "saveAddress": "Guardar dirección",
+  "currentRequired": "Introduce tu contraseña actual.",
+  "minChars_one": "Al menos {{count}} carácter.",
+  "minChars_other": "Al menos {{count}} caracteres.",
+  "differentPassword": "Elige una contraseña distinta de la actual.",
+  "mismatch": "Las contraseñas no coinciden.",
+  "passwordChanged": "Contraseña cambiada",
+  "password": "Contraseña",
+  "passwordText": "Usa una contraseña larga que no uses en ningún otro sitio.",
+  "currentPassword": "Contraseña actual",
+  "newPassword": "Nueva contraseña",
+  "repeatPassword": "Repite la nueva contraseña",
+  "changePassword": "Cambiar contraseña",
+  "minChars_many": "Al menos {{count}} caracteres."
+ },
+ "address": {
+  "fullName": "Nombre completo",
+  "street": "Dirección",
+  "streetPlaceholder": "Calle, edificio, piso",
+  "city": "Ciudad",
+  "postalCode": "Código postal",
+  "country": "País"
+ },
+ "home": {
+  "eyebrow": "Solo para ti",
+  "title": "Descubre productos"
+ },
+ "shop": {
+  "title": "Todos los productos",
+  "eyebrow": "Descubre algo bueno",
+  "text": "Explora nuestra colección de básicos del día a día, hallazgos de moda y productos que merecen la pena.",
+  "metaDescription": "Todos los productos de Trend Jr: gadgets, herramientas de belleza, joyas, accesorios y artículos para el hogar con envío gratis y pago contra reembolso."
+ },
+ "categoryPage": {
+  "notFound": "Categoría no encontrada",
+  "loadError": "No se pudo cargar esta categoría",
+  "notFoundText": "Puede que se haya eliminado o que el enlace sea incorrecto.",
+  "browseAll": "Ver todos los productos",
+  "eyebrow": "Explora la colección",
+  "metaDescription": "Compra {{name}} en Trend Jr: precios claros, envío gratis y pago contra reembolso."
+ },
+ "search": {
+  "metaTitle": "Búsqueda: {{q}}",
+  "title": "Resultados de búsqueda",
+  "eyebrow": "Encuentra tu próximo favorito",
+  "resultsFor": "Resultados de",
+  "hint": "Escribe arriba lo que buscas.",
+  "placeholder": "Buscar productos...",
+  "term": "Término de búsqueda",
+  "button": "Buscar"
+ },
+ "offers": {
+  "metaTitle": "Ofertas y promociones",
+  "badge": "OFERTAS DESTACADAS",
+  "title": "Ofertas que merecen abrir la cartera.",
+  "text": "Disfruta de precios por tiempo limitado en favoritos seleccionados. Buenos hallazgos, precios claros, sin sorpresas.",
+  "limited": "Colección por tiempo limitado",
+  "eyebrow": "Ahorro seleccionado",
+  "best": "Las mejores ofertas de hoy",
+  "special": "Precios especiales"
+ },
+ "notFound": {
+  "eyebrow": "Error 404",
+  "title": "Página no encontrada",
+  "text": "La página que buscas no existe o se ha movido.",
+  "home": "Volver al inicio",
+  "browse": "Ver productos"
+ },
+ "about": {
+  "metaTitle": "Sobre nosotros",
+  "eyebrow": "Quiénes somos",
+  "title": "Comprar debería ser sencillo, inspirador y fiable.",
+  "text": "Reunimos productos útiles y hallazgos cuidadosamente elegidos en un solo lugar fácil de explorar. Nuestro objetivo es que descubrir y comprar lo que necesitas sea una experiencia mejor.",
+  "explore": "Explorar la tienda",
+  "values": {
+   "customer": {
+    "title": "El cliente primero",
+    "text": "Nos centramos en una compra clara, información útil y ayuda cuando la necesitas."
+   },
+   "trust": {
+    "title": "La confianza importa",
+    "text": "Detalles de producto transparentes y un pago seguro deben ir primero."
+   },
+   "discoveries": {
+    "title": "Buenos descubrimientos",
+    "text": "Queremos que te resulte más fácil encontrar productos que encajen con tu estilo, tus necesidades y tu presupuesto."
+   }
+  },
+  "approachEyebrow": "Nuestro enfoque",
+  "approachTitle": "Una mejor forma de comprar online.",
+  "approachText": "Desde explorar categorías hasta seguir un pedido, cada detalle debe ser fácil de entender. Seguimos mejorando nuestra selección y experiencia según lo que más valoran nuestros clientes.",
+  "customer": "Centrados",
+  "focused": "en el cliente",
+  "secure": "Experiencia",
+  "experience": "segura"
+ },
+ "faq": {
+  "eyebrow": "Centro de ayuda",
+  "title": "Preguntas frecuentes",
+  "text": "Respuestas rápidas a preguntas comunes sobre compras, pagos, envíos y devoluciones.",
+  "shipping": {
+   "title": "Envíos y entregas",
+   "cost": {
+    "q": "¿Cuánto cuesta el envío?",
+    "a": "El envío es gratis en todos los pedidos, sin pedido mínimo."
+   },
+   "time": {
+    "q": "¿Cuánto tarda la entrega?",
+    "a": "Los plazos de entrega dependen de tu ubicación y del producto. Después de tu pedido, te contactamos en el teléfono que indicaste para organizar la entrega."
+   },
+   "track": {
+    "q": "¿Puedo seguir mi pedido?",
+    "a": "Sí. Inicia sesión y abre <orders>Mis pedidos</orders> para ver el estado de cada pedido: realizado, confirmado, en preparación, enviado y entregado."
+   }
+  },
+  "payments": {
+   "title": "Pagos",
+   "methods": {
+    "q": "¿Qué métodos de pago hay?",
+    "a": "Pagas en efectivo cuando recibes tu pedido (pago contra reembolso). El pago con tarjeta aún no está disponible."
+   },
+   "coupon": {
+    "q": "¿Puedo usar un código de cupón?",
+    "a": "Sí. Introdúcelo en el campo de cupón al pagar; el descuento se comprueba y se aplica antes de realizar el pedido."
+   },
+   "safe": {
+    "q": "¿Están seguros mis datos?",
+    "a": "El sitio usa una conexión cifrada y, como pagas al recibir el pedido, nunca te pedimos los datos de tu tarjeta."
+   }
+  },
+  "returns": {
+   "title": "Devoluciones y reembolsos",
+   "request": {
+    "q": "¿Cómo solicito una devolución?",
+    "a": "<contact>Contacta con nuestro equipo de soporte</contact> con tu número de pedido y el motivo de la devolución, y te explicaremos los siguientes pasos."
+   },
+   "refund": {
+    "q": "¿Cuándo recibiré mi reembolso?",
+    "a": "Nuestro equipo de soporte confirma el plazo una vez revisada tu devolución."
+   }
+  },
+  "orders": {
+   "title": "Productos y pedidos",
+   "change": {
+    "q": "¿Puedo cambiar o cancelar un pedido?",
+    "a": "Puedes cancelar un pedido tú mismo desde <orders>Mis pedidos</orders> mientras esté pendiente o confirmado. Para cambios, contacta con soporte lo antes posible: puede que no sea posible una vez que el pedido se esté preparando o se haya enviado."
+   }
+  },
+  "stillNeedHelp": "¿Aún necesitas ayuda? <contact>Contacta con nuestro equipo</contact>"
+ },
+ "contact": {
+  "title": "Contáctanos",
+  "text": "¿Tienes una pregunta sobre un producto, un pedido o la entrega? Envíanos un mensaje y nuestro equipo te responderá.",
+  "nameRequired": "Introduce tu nombre.",
+  "topicRequired": "Elige un tema.",
+  "messageShort": "Escribe unas palabras más.",
+  "eyebrow": "Estamos aquí para ayudarte",
+  "formTitle": "Envíanos un mensaje",
+  "formHint": "Los campos marcados con * son obligatorios. Al enviar se abre tu aplicación de correo con el mensaje listo.",
+  "name": "Tu nombre",
+  "email": "Correo electrónico",
+  "subject": "Asunto",
+  "selectTopic": "Elige un tema",
+  "message": "Mensaje",
+  "messagePlaceholder": "¿Cómo podemos ayudarte? Añade tu número de pedido si se trata de un pedido.",
+  "send": "Enviar mensaje",
+  "opened": "Tu aplicación de correo debería haberse abierto. Si no es así, escríbenos directamente a",
+  "emailUs": "Escríbenos",
+  "callUs": "Llámanos",
+  "hours": "Horario",
+  "days": "Sábado – jueves",
+  "time": "10:00 – 20:00",
+  "quickHelp": "¿Necesitas ayuda rápida?",
+  "whatsapp": "Chatea con nuestro equipo de soporte por WhatsApp.",
+  "chat": "Chatear con soporte",
+  "topics": {
+   "order": "Consulta sobre un pedido",
+   "product": "Pregunta sobre un producto",
+   "shipping": "Envío y entrega",
+   "returns": "Devoluciones y reembolsos",
+   "selling": "Vender en Trend Jr",
+   "other": "Otro"
+  }
+ },
+ "productPage": {
+  "notFound": "Producto no encontrado",
+  "loadError": "No se pudo cargar este producto",
+  "brand": "Marca",
+  "category": "Categoría",
+  "sku": "Referencia",
+  "productId": "ID del producto",
+  "breadcrumb": "Ruta de navegación",
+  "products": "Productos",
+  "percentOff": "-{{discount}} %",
+  "addToWishlist": "Añadir a favoritos",
+  "savedToWishlist": "Guardado en favoritos",
+  "lowStock_one": "Solo queda {{count}} en stock — pídelo pronto",
+  "lowStock_other": "Solo quedan {{count}} en stock — pídelo pronto",
+  "inStock": "En stock — listo para enviar",
+  "featured": "Destacado",
+  "flashDeal": "Oferta flash",
+  "rewardPoints_one": "Gana {{formatted}} punto de recompensa con este artículo",
+  "rewardPoints_other": "Gana {{formatted}} puntos de recompensa con este artículo",
+  "highlights": "Lo más destacado",
+  "overview": "Resumen",
+  "seeDetails": "Ver todos los detalles",
+  "delivery": "Entrega",
+  "freeDelivery": "Envío gratis",
+  "estimatedArrival": "Llegada estimada",
+  "trackingLine": "Seguimiento del pedido desde el envío hasta tu puerta",
+  "qualityLine": "Revisado antes del envío",
+  "purchaseOptions": "Opciones de compra",
+  "soldBy": "Vendido y enviado por",
+  "total": "Total",
+  "buyNow": "Comprar ahora",
+  "asDescribed": "Artículo tal como se describe",
+  "secureCheckout": "Pago seguro",
+  "refund": "Reembolso si llega dañado o no llega",
+  "protection": "Protección al comprador en cada pedido",
+  "copyPrompt": "Copia este enlace:",
+  "share": "Compartir",
+  "linkCopied": "Enlace copiado",
+  "copyLink": "Copiar enlace",
+  "linkCopiedSr": "Enlace copiado al portapapeles",
+  "tabs": {
+   "description": "Descripción",
+   "specs": "Especificaciones",
+   "shipping": "Envío y devoluciones"
+  },
+  "information": "Información del producto",
+  "shippingText": "Todos los pedidos se envían gratis, sin pedido mínimo. La entrega suele tardar entre {{from}} y {{to}} días según tu ubicación.",
+  "tracking": "Seguimiento del pedido",
+  "trackingText": "Sigue tu paquete desde el envío hasta la entrega en la página Mis pedidos cuando el seguimiento esté disponible.",
+  "qualityCheck": "Control de calidad",
+  "qualityText": "Los artículos se revisan antes del envío.",
+  "refunds": "Reembolsos",
+  "refundsText": "Si tu pedido llega dañado o no llega, contáctanos con tu número de pedido para obtener un reembolso.",
+  "moreQuestions": "¿Más preguntas? Consulta las <faq>preguntas frecuentes</faq> o <contact>contáctanos</contact>.",
+  "mayLike": "También te puede gustar",
+  "similar": "Productos similares",
+  "viewAll": "Ver todo",
+  "lowStock_many": "Solo quedan {{count}} en stock — pídelo pronto",
+  "rewardPoints_many": "Gana {{formatted}} puntos de recompensa con este artículo"
+ },
+ "cartPage": {
+  "title": "Carrito de compra",
+  "eyebrow": "Casi tuyo",
+  "countIntro_one": "{{count}} artículo — revísalo antes de pasar al pago.",
+  "countIntro_other": "{{count}} artículos — revísalos antes de pasar al pago.",
+  "intro": "Revisa tus artículos antes de pasar al pago.",
+  "empty": "Tu carrito está vacío",
+  "emptyText": "Encuentra algo que te guste y añádelo aquí.",
+  "startShopping": "Empezar a comprar",
+  "items": "Artículos del carrito",
+  "blocked_one": "Un artículo no se puede pedir ahora mismo. Quítalo para continuar.",
+  "blocked_other": "{{count}} artículos no se pueden pedir ahora mismo. Quítalos para continuar.",
+  "remove": "Quitar",
+  "unavailable": "Ya no está disponible",
+  "priceUpdated": "Precio actualizado al de hoy",
+  "removeNamed": "Quitar {{name}}",
+  "decreaseNamed": "Reducir la cantidad de {{name}}",
+  "increaseNamed": "Aumentar la cantidad de {{name}}",
+  "continue": "Seguir comprando",
+  "clear": "Vaciar carrito",
+  "summary": "Resumen del pedido",
+  "subtotalItems_one": "Subtotal ({{count}} artículo)",
+  "subtotalItems_other": "Subtotal ({{count}} artículos)",
+  "youSave": "Ahorras",
+  "shipping": "Envío",
+  "free": "Gratis",
+  "checking": "Comprobando los precios actuales…",
+  "couponHint": "Los cupones se añaden al pagar.",
+  "proceed": "Pasar al pago",
+  "protection": "Protección al comprador en pedidos aptos",
+  "freeShipping": "Envío gratis en todos los pedidos",
+  "countIntro_many": "{{count}} artículos — revísalos antes de pasar al pago.",
+  "blocked_many": "{{count}} artículos no se pueden pedir ahora mismo. Quítalos para continuar.",
+  "subtotalItems_many": "Subtotal ({{count}} artículos)"
+ },
+ "checkout": {
+  "title": "Pago",
+  "eyebrow": "Un último paso",
+  "intro": "Introduce los datos de entrega para completar tu pedido.",
+  "errors": {
+   "fullName": "Introduce el nombre de la persona que recibirá el pedido.",
+   "phone": "Introduce un teléfono al que pueda llamar el repartidor.",
+   "address": "Introduce la dirección.",
+   "city": "Introduce la ciudad.",
+   "country": "Introduce el país."
+  },
+  "completeDetails": "Completa tus datos de entrega.",
+  "reviewCart": "Revisa tu carrito antes de hacer el pedido.",
+  "emptyText": "Añade primero algunos productos y vuelve para pagar.",
+  "unavailable_one": "{{count}} artículo ya no está disponible y no se pedirá.",
+  "unavailable_other": "{{count}} artículos ya no están disponibles y no se pedirán.",
+  "reviewCartLink": "Revisar carrito",
+  "shippingInfo": "Información de envío",
+  "shippingText": "¿Dónde entregamos tu pedido?",
+  "namePlaceholder": "Nombre y apellidos",
+  "phone": "Número de teléfono",
+  "phonePlaceholder": "Para el repartidor",
+  "emailHint": "Las novedades del pedido se envían al correo de tu cuenta.",
+  "notes": "Notas del pedido (opcional)",
+  "notesPlaceholder": "¿Alguna indicación para la entrega?",
+  "saveAddress": "Guardar esta dirección en mi cuenta",
+  "payment": "Método de pago",
+  "paymentText": "Elige cómo quieres pagar.",
+  "codText": "Paga cuando llegue tu pedido",
+  "card": "Tarjeta de crédito / débito",
+  "comingSoon": "Próximamente",
+  "yourOrder": "Tu pedido",
+  "qty": "Cant.: {{count}} × {{price}}",
+  "couponApplied": "{{code}} aplicado: ahorras {{amount}}",
+  "couponAppliedShort": "{{code}} aplicado",
+  "removeCoupon": "Quitar cupón",
+  "couponCode": "Código de cupón",
+  "enterCode": "Introduce el código",
+  "apply": "Aplicar",
+  "subtotal": "Subtotal",
+  "discount": "Descuento",
+  "calculating": "Calculando",
+  "attention": "Algunos artículos necesitan tu atención:",
+  "updateCart": "Actualizar el carrito",
+  "placing": "Realizando tu pedido…",
+  "place": "Realizar pedido · {{total}}",
+  "payOnArrival": "Pagas en efectivo cuando llegue el pedido",
+  "protection": "La protección al comprador se aplica a los pedidos aptos.",
+  "unavailable_many": "{{count}} artículos ya no están disponibles y no se pedirán."
+ },
+ "login": {
+  "metaTitle": "Iniciar sesión",
+  "sideTitle": "Qué bien verte de nuevo.",
+  "sideText": "Inicia sesión para tener tus favoritos a mano y hacer tu próximo pedido aún más fácil.",
+  "sideFooter": "Tus hallazgos de cada día, en un solo lugar.",
+  "eyebrow": "Bienvenido de nuevo",
+  "title": "Inicia sesión en tu cuenta",
+  "intro": "Introduce tus datos para continuar.",
+  "usernamePlaceholder": "Tu nombre de usuario",
+  "passwordPlaceholder": "Introduce tu contraseña",
+  "remember": "Recordarme",
+  "forgotHint": "Contacta con soporte y te ayudaremos a restablecerla",
+  "forgot": "¿Olvidaste tu contraseña?",
+  "signingIn": "Iniciando sesión…",
+  "noAccount": "¿No tienes cuenta?",
+  "createOne": "Crea una",
+  "terms": "Al continuar, aceptas nuestras Condiciones de servicio y nuestra Política de privacidad."
+ },
+ "register": {
+  "title": "Crea tu cuenta",
+  "usernameRequired": "Elige un nombre de usuario.",
+  "passwordMin_one": "La contraseña debe tener al menos {{count}} carácter.",
+  "passwordMin_other": "La contraseña debe tener al menos {{count}} caracteres.",
+  "acceptTerms": "Acepta las Condiciones de servicio y la Política de privacidad.",
+  "sideTitle": "Haz sitio para grandes hallazgos.",
+  "sideText": "Crea una cuenta para guardar productos, seguir tus pedidos y disfrutar de una compra más cómoda.",
+  "sideFooter": "Empezar solo lleva un momento.",
+  "eyebrow": "Únete a nuestra comunidad",
+  "intro": "Rellena tus datos para empezar.",
+  "usernamePlaceholder": "Elige un nombre de usuario",
+  "phonePlaceholder": "Tu número de teléfono",
+  "passwordPlaceholder_one": "Al menos {{count}} carácter",
+  "passwordPlaceholder_other": "Al menos {{count}} caracteres",
+  "confirm": "Confirmar contraseña",
+  "confirmPlaceholder": "Repite tu contraseña",
+  "agree": "Acepto las Condiciones de servicio y la Política de privacidad.",
+  "creating": "Creando la cuenta…",
+  "haveAccount": "¿Ya tienes una cuenta?",
+  "passwordMin_many": "La contraseña debe tener al menos {{count}} caracteres.",
+  "passwordPlaceholder_many": "Al menos {{count}} caracteres"
+ },
+ "wishlist": {
+  "title": "Mis favoritos",
+  "eyebrow": "Tus hallazgos guardados",
+  "intro": "Guarda los productos que te encantan en un solo lugar.",
+  "count_one": "{{count}} artículo guardado",
+  "count_other": "{{count}} artículos guardados",
+  "addAll": "Añadir todo al carrito",
+  "clear": "Vaciar",
+  "empty": "Tu lista de favoritos está vacía",
+  "emptyText": "Toca el corazón de cualquier producto para guardarlo aquí.",
+  "explore": "Explorar productos",
+  "priceNote": "Los precios se muestran tal como estaban cuando guardaste cada artículo; la página del producto y el pago usan siempre el precio actual.",
+  "count_many": "{{count}} artículos guardados"
+ },
+ "profile": {
+  "eyebrow": "Tu espacio personal",
+  "intro": "Gestiona tu perfil y la información de tu cuenta.",
+  "personal": "Información personal",
+  "personalText": "Actualiza tus datos de contacto."
+ },
+ "orders": {
+  "eyebrow": "Tus compras",
+  "intro": "Sigue tus pedidos y revisa tus compras anteriores.",
+  "filter": "Filtrar pedidos por estado",
+  "all": "Todos los pedidos",
+  "loadError": "No se pudieron cargar tus pedidos.",
+  "noneStatus": "No hay pedidos con este estado",
+  "none": "Aún no hay pedidos",
+  "tryFilter": "Prueba otro filtro.",
+  "noneText": "Cuando hagas un pedido, podrás seguirlo aquí.",
+  "number": "Número de pedido",
+  "order": "Pedido",
+  "andMore_one": "y {{count}} más",
+  "andMore_other": "y {{count}} más",
+  "placedOn": "Realizado el {{date}}",
+  "items_one": "{{count}} artículo",
+  "items_other": "{{count}} artículos",
+  "viewDetails": "Ver detalles",
+  "andMore_many": "y {{count}} más",
+  "items_many": "{{count}} artículos"
+ },
+ "orderDetail": {
+  "progress": "Progreso del pedido",
+  "placed": "Realizado",
+  "metaTitle": "Pedido {{number}}",
+  "cancelTitle": "¿Cancelar este pedido?",
+  "cancelText": "No lo prepararemos ni lo enviaremos. Si cambias de opinión, podrás hacer un nuevo pedido.",
+  "cancel": "Cancelar pedido",
+  "keep": "Mantener pedido",
+  "cancelled": "Tu pedido se ha cancelado",
+  "loading": "Cargando tu pedido…",
+  "notFound": "Pedido no encontrado",
+  "loadError": "No se pudo cargar este pedido",
+  "notFoundText": "Comprueba el enlace o búscalo en tus pedidos.",
+  "thanks": "¡Gracias, tu pedido se ha realizado!",
+  "thanksText": "Te contactaremos en el {{phone}} para organizar la entrega. Pagas en efectivo cuando llegue.",
+  "yourPhone": "teléfono indicado",
+  "placedAt": "Realizado el {{date}}",
+  "wasCancelledOn": "Este pedido se canceló el {{date}}.",
+  "wasCancelled": "Este pedido se canceló.",
+  "items": "Artículos",
+  "product": "Producto",
+  "payment": "Pago",
+  "card": "Tarjeta",
+  "note": "Tu nota",
+  "cancelHint": "Puedes cancelar hasta que el pedido se empiece a preparar."
+ },
+ "app": {
+  "loadingPage": "Cargando la página…",
+  "loadingDashboard": "Cargando el panel…",
+  "adminNotFound": "Esta parte del panel no existe.",
+  "backToDashboard": "Volver al panel"
+ },
+ "currency": {
+  "label": "Moneda",
+  "change": "Moneda: {{currency}}. Cambiar moneda"
+ }
+}

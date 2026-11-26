@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import { webpCopies } from '../utils/product';
+import i18n from '../i18n';
 
 // Image with a skeleton while it loads and a placeholder when it can't be shown.
 // Tries the WebP copies first, then `src`, then `fallbackSrc` (if given), so no
@@ -53,11 +54,11 @@ export default function ProductImage({
       ) : (
         <div
           role="img"
-          aria-label={alt || 'Image not available'}
+          aria-label={alt || i18n.t('product.noImageLabel')}
           className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-slate-400"
         >
           <ImageOff className="w-7 h-7" aria-hidden="true" />
-          <span className="text-[11px] font-semibold">No image</span>
+          <span className="text-[11px] font-semibold">{i18n.t('product.noImage')}</span>
         </div>
       )}
     </div>

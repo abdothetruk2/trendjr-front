@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
@@ -44,7 +45,7 @@ export function ToastProvider({ children }) {
     return (
         <ToastContext.Provider value={toast}>
             {children}
-            <div className="pointer-events-none fixed bottom-4 right-4 left-4 z-80 flex flex-col items-end gap-2 sm:left-auto" aria-live="polite" aria-atomic="false">
+            <div className="pointer-events-none fixed bottom-4 end-4 start-4 z-80 flex flex-col items-end gap-2 sm:start-auto" aria-live="polite" aria-atomic="false">
                 {toasts.map(({ id, type, message }) => {
                     const { icon: Icon, ring, iconColor } = STYLES[type] || STYLES.info;
                     return (
@@ -58,8 +59,8 @@ export function ToastProvider({ children }) {
                             <button
                                 type="button"
                                 onClick={() => dismiss(id)}
-                                className="-mr-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                                aria-label="Dismiss notification"
+                                className="-me-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                                aria-label={i18n.t('common.dismiss')}
                             >
                                 <X className="h-4 w-4" aria-hidden="true" />
                             </button>

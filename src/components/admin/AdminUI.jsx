@@ -3,6 +3,9 @@ import { Search, X, RotateCw, AlertTriangle, Inbox } from 'lucide-react';
 import { Pagination } from '../ProductGrid';
 import useDebouncedValue from '../../hooks/useDebouncedValue';
 import { formatNumber } from '../../utils/format';
+import i18n from '../../i18n';
+
+const t = (key, options) => i18n.t(key, { ns: 'admin', ...options });
 
 // Shared with the store's order pages
 export { default as StatusBadge, ORDER_STATUS_OPTIONS, PAYMENT_STATUS_OPTIONS } from '../StatusBadge';
@@ -21,7 +24,7 @@ export function PageHeader({ title, description, actions }) {
 }
 
 // Search box: types freely, reports the (debounced) value after a short pause
-export function SearchBox({ value, onSearch, placeholder = 'Search…', label = 'Search' }) {
+export function SearchBox({ value, onSearch, placeholder, label }) {
   const [draft, setDraft] = useState(value);
   const debounced = useDebouncedValue(draft, 350);
 
@@ -38,16 +41,16 @@ export function SearchBox({ value, onSearch, placeholder = 'Search…', label = 
         type="search"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        placeholder={placeholder}
-        aria-label={label}
-        className="input-with-icon pr-9 [&::-webkit-search-cancel-button]:hidden"
+        placeholder={placeholder || t('ui.searchPlaceholder')}
+        aria-label={label || t('ui.search')}
+        className="input-with-icon pe-9 [&::-webkit-search-cancel-button]:hidden"
       />
       {draft && (
         <button
           type="button"
           onClick={() => { setDraft(''); onSearch(''); }}
-          className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-          aria-label="Clear search"
+          className="absolute end-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          aria-label={t('ui.clearSearch')}
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -56,16 +59,16 @@ export function SearchBox({ value, onSearch, placeholder = 'Search…', label = 
   );
 }
 
-export function FilterSelect({ label, value, onChange, options, allLabel = 'All', className = '' }) {
+export function FilterSelect({ label, value, onChange, options, allLabel, className = '' }) {
   return (
-    <label className={`flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-white pl-3 text-xs font-semibold text-slate-500 focus-within:border-primary-500 ${className}`}>
+    <label className={`flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-white ps-3 text-xs font-semibold text-slate-500 focus-within:border-primary-500 ${className}`}>
       <span className="whitespace-nowrap">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-w-0 flex-1 cursor-pointer rounded-r-xl bg-transparent py-2.5 pr-3 text-sm font-bold text-slate-800 outline-none sm:flex-none"
+        className="min-w-0 flex-1 cursor-pointer rounded-e-xl bg-transparent py-2.5 pe-3 text-sm font-bold text-slate-800 outline-none sm:flex-none"
       >
-        {allLabel !== null && <option value="">{allLabel}</option>}
+        {allLabel !== null && <option value="">{allLabel ?? t('ui.all')}</option>}
         {options.map((option) => (
           <option key={option.value} value={option.value}>{option.label}</option>
         ))}
@@ -99,11 +102,11 @@ export function ErrorState({ message, onRetry }) {
       <span className="grid h-12 w-12 place-items-center rounded-2xl bg-rose-50 text-rose-500">
         <AlertTriangle className="h-6 w-6" aria-hidden="true" />
       </span>
-      <p className="mt-4 font-bold text-secondary">Something went wrong</p>
+      <p className="mt-4 font-bold text-secondary">{t('errorPage.title')}</p>
       <p className="mt-1 max-w-sm text-sm text-slate-500">{message}</p>
       {onRetry && (
         <button type="button" onClick={onRetry} className="btn-outline btn-sm mt-5">
-          <RotateCw className="h-3.5 w-3.5" aria-hidden="true" /> Try again
+          <RotateCw className="h-3.5 w-3.5" aria-hidden="true" /> {t('common.retry')}
         </button>
       )}
     </div>
@@ -113,7 +116,7 @@ export function ErrorState({ message, onRetry }) {
 // Grey rows while a table loads the first time
 export function TableSkeleton({ rows = 6, cols = 5 }) {
   return (
-    <div className="divide-y divide-slate-100" aria-busy="true" aria-label="Loading">
+    <div className="divide-y divide-slate-100" aria-busy="true" aria-label={t('common.loading')}>
       {Array.from({ length: rows }, (_, r) => (
         <div key={r} className="flex items-center gap-4 px-4 py-4">
           {Array.from({ length: cols }, (_, c) => (
@@ -134,8 +137,8 @@ export function ListFooter({ page, pageSize, total, shown, onPage }) {
     <div className="flex flex-col items-center gap-3 border-t border-slate-100 px-4 py-4 sm:flex-row sm:justify-between">
       <p className="text-xs text-slate-500" aria-live="polite">
         {shown > 0
-          ? <>Showing <strong className="text-slate-700">{formatNumber(first)}–{formatNumber(first + shown - 1)}</strong> of <strong className="text-slate-700">{formatNumber(total)}</strong></>
-          : <>{formatNumber(total)} in total</>}
+          ? t('ui.showing', { from: formatNumber(first), to: formatNumber(first + shown - 1), total: formatNumber(total) })
+          : t('ui.inTotal', { total: formatNumber(total) })}
       </p>
       {totalPages > 1 && (
         <div className="[&_nav]:mt-0">
@@ -189,7 +192,7 @@ export function Toggle({ checked, onChange, label, description, disabled = false
           className="peer sr-only"
         />
         <span className="h-6 w-11 rounded-full bg-slate-200 transition-colors peer-checked:bg-primary-500 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500" />
-        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
+        <span className="absolute start-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5 rtl:peer-checked:-translate-x-5" />
       </span>
     </label>
   );

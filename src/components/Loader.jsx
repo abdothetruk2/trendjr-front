@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import i18n from '../i18n';
 
 // Full-screen brand loader. When `done` becomes true it fades out, then unmounts.
 export default function Loader({ done = false }) {
@@ -28,7 +29,7 @@ export default function Loader({ done = false }) {
             </div>
 
             <p className="mt-3 text-xs tracking-[0.35em] text-gray-400">
-                DISCOVER YOUR NEXT TREND
+                {i18n.t('loader.tagline')}
             </p>
 
             {/* Loading Bar */}
@@ -39,7 +40,7 @@ export default function Loader({ done = false }) {
             </div>
 
             <p className="mt-5 text-[10px] tracking-[0.3em] text-gray-500">
-                LOADING EXPERIENCE...
+                {i18n.t('loader.loading')}
             </p>
 
             <style>{`
@@ -50,6 +51,7 @@ export default function Loader({ done = false }) {
                     100% {
                         transform: translateX(210%);
                     }
+
                 }
             `}</style>
 

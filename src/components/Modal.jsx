@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import useBodyScrollLock from '../hooks/useBodyScrollLock';
 import useFocusTrap from '../hooks/useFocusTrap';
+import i18n from '../i18n';
 
 const SIZES = { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl', xl: 'max-w-4xl' };
 
@@ -48,8 +49,8 @@ function ModalPanel({ onClose, title, description, size, footer, busy, children 
                         type="button"
                         onClick={close}
                         disabled={busy}
-                        className="-mr-2 grid h-9 w-9 shrink-0 place-items-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
-                        aria-label="Close"
+                        className="-me-2 grid h-9 w-9 shrink-0 place-items-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                        aria-label={i18n.t('common.close')}
                     >
                         <X className="h-5 w-5" aria-hidden="true" />
                     </button>

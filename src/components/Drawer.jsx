@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import useBodyScrollLock from '../hooks/useBodyScrollLock';
 import useFocusTrap from '../hooks/useFocusTrap';
+import i18n from '../i18n';
 
 // Off-canvas panel that slides in from the side, over a blurred backdrop.
 // Closes on Escape, on a click outside the panel and with the close button;
@@ -17,7 +18,7 @@ export default function Drawer({
   side = 'left',
   id,
   footer = null,
-  closeLabel = 'Close',
+  closeLabel,
   panelClassName = '',
   children,
 }) {
@@ -27,8 +28,8 @@ export default function Drawer({
   useBodyScrollLock(open);
   useFocusTrap(panelRef, open, onClose);
 
-  const edge = side === 'left' ? 'left-0' : 'right-0';
-  const offscreen = side === 'left' ? '-translate-x-full' : 'translate-x-full';
+  const edge = side === 'left' ? 'start-0' : 'end-0';
+  const offscreen = side === 'left' ? '-translate-x-full rtl:translate-x-full' : 'translate-x-full rtl:-translate-x-full';
 
   return createPortal(
     <>
@@ -64,7 +65,7 @@ export default function Drawer({
             type="button"
             onClick={onClose}
             data-autofocus
-            aria-label={closeLabel}
+            aria-label={closeLabel || i18n.t('common.close')}
             className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
           >
             <X className="h-5 w-5" aria-hidden="true" />

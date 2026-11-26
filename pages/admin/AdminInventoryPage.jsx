@@ -12,25 +12,25 @@ import {
 import { getCategoryLabel, getProductView, isStockTracked, toNumber, LOW_STOCK } from "../../src/utils/product";
 import { categoryOptions } from "../../src/utils/categories";
 import { formatNumber } from "../../src/utils/format";
+import useLanguage from "../../src/i18n/useLanguage";
+import i18n from "../../src/i18n";
+
+const tr = (key, options) => i18n.t(key, { ns: "admin", ...options });
 
 const PAGE_SIZE = 20;
 const MAX_STOCK = 1000000;
 
-const STOCK_OPTIONS = [
-  { value: "out", label: "Out of stock" },
-  { value: "low", label: `Low (1–${LOW_STOCK})` },
-  { value: "in", label: "In stock" },
-  { value: "tracked", label: "Tracked" },
-  { value: "untracked", label: "Not tracked" },
+// Labels are read when shown, so they follow the current language
+const stockOptions = () => [
+  { value: "out", label: tr("status.stock.out") },
+  { value: "low", label: tr("products.lowRange", { max: LOW_STOCK }) },
+  { value: "in", label: tr("status.stock.in") },
+  { value: "tracked", label: tr("inventory.tracked") },
+  { value: "untracked", label: tr("status.stock.untracked") },
 ];
 
-const SORT_OPTIONS = [
-  { value: "id-desc", label: "Newest first" },
-  { value: "stock-asc", label: "Stock: low to high" },
-  { value: "stock-desc", label: "Stock: high to low" },
-  { value: "sold-desc", label: "Best-selling" },
-  { value: "name-asc", label: "Name A–Z" },
-];
+const sortOptions = () => ["id-desc", "stock-asc", "stock-desc", "sold-desc", "name-asc"]
+  .map((value) => ({ value, label: tr(`products.sorts.${value}`) }));
 
 // Same rules as the server (utils/inventory.js)
 function stockState(product) {
@@ -41,10 +41,10 @@ function stockState(product) {
 }
 
 const TILES = [
-  { key: "out", label: "Out of stock", icon: PackageX, tone: "text-rose-600 bg-rose-50", value: (s) => s.outOfStock, detail: () => "Tracked products with none left" },
-  { key: "low", label: "Low stock", icon: AlertTriangle, tone: "text-amber-600 bg-amber-50", value: (s) => s.lowStock, detail: () => `${LOW_STOCK} or fewer left` },
-  { key: "in", label: "In stock", icon: CheckCircle2, tone: "text-emerald-600 bg-emerald-50", value: (s) => s.inStock, detail: (s) => `${formatNumber(s.unitsInStock)} units on hand` },
-  { key: "untracked", label: "Not tracked", icon: InfinityIcon, tone: "text-slate-600 bg-slate-100", value: (s) => s.untracked, detail: () => "Always for sale, no limit" },
+  { key: "out", label: "status.stock.out", icon: PackageX, tone: "text-rose-600 bg-rose-50", value: (s) => s.outOfStock, detail: () => tr("dashboard.outDetail") },
+  { key: "low", label: "status.stock.low", icon: AlertTriangle, tone: "text-amber-600 bg-amber-50", value: (s) => s.lowStock, detail: () => tr("dashboard.lowDetail", { count: LOW_STOCK }) },
+  { key: "in", label: "status.stock.in", icon: CheckCircle2, tone: "text-emerald-600 bg-emerald-50", value: (s) => s.inStock, detail: (s) => tr("inventory.unitsOnHand", { count: s.unitsInStock, formatted: formatNumber(s.unitsInStock) }) },
+  { key: "untracked", label: "status.stock.untracked", icon: InfinityIcon, tone: "text-slate-600 bg-slate-100", value: (s) => s.untracked, detail: () => tr("inventory.untrackedDetail") },
 ];
 
 function SummaryTiles({ summary, active, onPick }) {
@@ -58,13 +58,13 @@ function SummaryTiles({ summary, active, onPick }) {
             type="button"
             onClick={() => onPick(pressed ? null : key)}
             aria-pressed={pressed}
-            className={`card flex items-start gap-3 p-4 text-left transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 ${pressed ? "ring-2 ring-primary-500" : ""}`}
+            className={`card flex items-start gap-3 p-4 text-start transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 ${pressed ? "ring-2 ring-primary-500" : ""}`}
           >
             <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}>
               <Icon className="h-4.5 w-4.5" aria-hidden="true" />
             </span>
             <span className="min-w-0">
-              <span className="block text-xs font-semibold text-slate-500">{label}</span>
+              <span className="block text-xs font-semibold text-slate-500">{tr(label)}</span>
               {summary.data ? (
                 <>
                   <span className="mt-0.5 block text-2xl font-black tracking-tight text-secondary tabular-nums">{formatNumber(value(summary.data))}</span>
@@ -84,6 +84,7 @@ function SummaryTiles({ summary, active, onPick }) {
 // One product: tracking switch and stock count, saved straight away
 function InventoryRow({ product, categoryLabel, from, onSaved }) {
   const toast = useToast();
+  const { t } = useLanguage("admin");
   const view = getProductView(product);
   const tracked = isStockTracked(product);
   const state = stockState(product);
@@ -110,19 +111,19 @@ function InventoryRow({ product, categoryLabel, from, onSaved }) {
   function saveStock() {
     if (!dirty || saving) return;
     if (!valid) {
-      toast.error(`Enter a whole number from 0 to ${formatNumber(MAX_STOCK)}.`);
+      toast.error(t("inventory.wholeNumber", { max: formatNumber(MAX_STOCK) }));
       return;
     }
-    save({ stock: number }, number === 0 ? `${view.title} is now out of stock` : `Stock set to ${formatNumber(number)}`);
+    save({ stock: number }, number === 0 ? t("inventory.nowOut", { name: view.title }) : t("inventory.stockSet", { count: formatNumber(number) }));
   }
 
   function toggleTracking() {
     if (tracked) {
-      save({ track_inventory: false }, "Stock no longer tracked: the product stays for sale without a limit");
+      save({ track_inventory: false }, t("inventory.trackingOff"));
     } else {
       save({ track_inventory: true }, toNumber(product.stock) > 0
-        ? "Stock tracking on: orders now reduce the stock"
-        : "Stock tracking on: it shows as sold out until you add stock");
+        ? t("inventory.trackingOn")
+        : t("inventory.trackingOnEmpty"));
     }
   }
 
@@ -138,15 +139,15 @@ function InventoryRow({ product, categoryLabel, from, onSaved }) {
             </Link>
             <p className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-slate-400">
               <span>#{product.id}</span>
-              {product.sku && <span>SKU {product.sku}</span>}
-              {product.is_active === false && <span className="font-semibold text-slate-500">Hidden</span>}
+              {product.sku && <span dir="ltr">{t("productPage.sku")} {product.sku}</span>}
+              {product.is_active === false && <span className="font-semibold text-slate-500">{t("status.visibility.hidden")}</span>}
             </p>
           </div>
         </div>
       </td>
       <td className="px-4 py-3 text-slate-600">{categoryLabel || <span className="text-slate-400">—</span>}</td>
       <td className="px-4 py-3"><StatusBadge kind="stock" status={state} /></td>
-      <td className="px-4 py-3 text-right tabular-nums text-slate-700">{formatNumber(toNumber(product.sold_count))}</td>
+      <td className="px-4 py-3 text-end tabular-nums text-slate-700">{formatNumber(toNumber(product.sold_count))}</td>
       <td className="px-4 py-3">
         <label className={`inline-flex items-center gap-2 ${saving ? "opacity-60" : "cursor-pointer"}`}>
           <span className="relative inline-flex shrink-0">
@@ -159,11 +160,11 @@ function InventoryRow({ product, categoryLabel, from, onSaved }) {
               className="peer sr-only"
             />
             <span className="h-6 w-11 rounded-full bg-slate-200 transition-colors peer-checked:bg-primary-500 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500" />
-            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
+            <span className="absolute start-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5 rtl:peer-checked:-translate-x-5" />
           </span>
           <span className="text-xs font-semibold text-slate-600">
-            {tracked ? "Tracked" : "Off"}
-            <span className="sr-only"> stock tracking for {view.title}</span>
+            {tracked ? t("inventory.tracked") : t("status.coupon.inactive")}
+            <span className="sr-only"> {t("inventory.trackingFor", { name: view.title })}</span>
           </span>
         </label>
       </td>
@@ -172,7 +173,7 @@ function InventoryRow({ product, categoryLabel, from, onSaved }) {
           className="flex items-center justify-end gap-2"
           onSubmit={(e) => { e.preventDefault(); saveStock(); }}
         >
-          <label htmlFor={inputId} className="sr-only">Units in stock for {view.title}</label>
+          <label htmlFor={inputId} className="sr-only">{t("inventory.unitsFor", { name: view.title })}</label>
           <input
             id={inputId}
             type="number"
@@ -186,14 +187,14 @@ function InventoryRow({ product, categoryLabel, from, onSaved }) {
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Escape") setValue(current); }}
             aria-invalid={tracked && dirty && !valid ? true : undefined}
-            className={`input h-9 w-24 px-3 py-1.5 text-right tabular-nums disabled:bg-slate-50 ${tracked && dirty && !valid ? "border-rose-400" : ""}`}
+            className={`input h-9 w-24 px-3 py-1.5 text-end tabular-nums disabled:bg-slate-50 ${tracked && dirty && !valid ? "border-rose-400" : ""}`}
           />
           <button
             type="submit"
             disabled={!tracked || !dirty || saving}
             className={`btn-primary btn-sm w-16 justify-center ${tracked && dirty ? "" : "invisible"}`}
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Save"}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : t("common.save")}
           </button>
         </form>
       </td>
@@ -203,6 +204,7 @@ function InventoryRow({ product, categoryLabel, from, onSaved }) {
 
 export default function AdminInventoryPage() {
   const location = useLocation();
+  const { t, lang } = useLanguage("admin");
   const { get, update } = useUrlParams({ page: "1", sort: "id-desc" });
   const page = Math.max(1, parseInt(get("page"), 10) || 1);
   const filters = { search: get("search"), category: get("category"), stock: get("stock"), sort: get("sort") };
@@ -214,12 +216,12 @@ export default function AdminInventoryPage() {
   const categories = useApi("/api/admin/categories");
 
   const products = Array.isArray(list.data) ? list.data : [];
-  const catOptions = useMemo(() => categoryOptions(categories.data), [categories.data]);
+  const catOptions = useMemo(() => categoryOptions(categories.data), [categories.data, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const catLabel = useMemo(() => {
     const map = new Map();
     (categories.data || []).forEach((c) => map.set(c.slug, getCategoryLabel(c)));
     return map;
-  }, [categories.data]);
+  }, [categories.data, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const filtered = Object.entries(filters).some(([key, value]) => value && key !== "sort");
   const setFilter = (key) => (value) => update({ [key]: value, page: null });
 
@@ -231,20 +233,20 @@ export default function AdminInventoryPage() {
   return (
     <div>
       <PageHeader
-        title="Inventory"
+        title={t("layout.nav.inventory")}
         description={summary.data
-          ? `${formatNumber(summary.data.tracked)} tracked · ${formatNumber(summary.data.untracked)} not tracked · ${formatNumber(summary.data.unitsSold)} units sold in total`
-          : "Stock levels, tracking and units sold"}
+          ? t("inventory.summary", { tracked: formatNumber(summary.data.tracked), untracked: formatNumber(summary.data.untracked), sold: formatNumber(summary.data.unitsSold) })
+          : t("inventory.intro")}
       />
 
       <SummaryTiles summary={summary} active={filters.stock} onPick={setFilter("stock")} />
 
       <Toolbar>
-        <SearchBox value={filters.search} onSearch={setFilter("search")} placeholder="Name, brand, SKU or ID" label="Search products" />
-        <FilterSelect label="Stock" value={filters.stock} onChange={setFilter("stock")} options={STOCK_OPTIONS} />
-        <FilterSelect label="Category" value={filters.category} onChange={setFilter("category")}
-          options={[{ value: "none", label: "No category" }, ...catOptions]} />
-        <FilterSelect label="Sort" value={filters.sort} onChange={(v) => update({ sort: v, page: null })} options={SORT_OPTIONS} allLabel={null} />
+        <SearchBox value={filters.search} onSearch={setFilter("search")} placeholder={t("products.searchPlaceholder")} label={t("products.search")} />
+        <FilterSelect label={t("products.stock")} value={filters.stock} onChange={setFilter("stock")} options={stockOptions()} />
+        <FilterSelect label={t("productPage.category")} value={filters.category} onChange={setFilter("category")}
+          options={[{ value: "none", label: t("productForm.noCategory") }, ...catOptions]} />
+        <FilterSelect label={t("products.sort")} value={filters.sort} onChange={(v) => update({ sort: v, page: null })} options={sortOptions()} allLabel={null} />
       </Toolbar>
 
       <Panel>
@@ -255,23 +257,23 @@ export default function AdminInventoryPage() {
         ) : products.length === 0 ? (
           <EmptyState
             icon={Boxes}
-            title={filtered ? "No products match these filters" : "No products yet"}
-            message={filters.stock === "out" ? "Nothing is sold out right now." : filtered ? "Try another search or clear a filter." : "Products you add show up here with their stock."}
-            action={filtered ? <Link to="/admin/inventory" className="btn-outline btn-sm">Clear filters</Link> : null}
+            title={filtered ? t("products.noMatch") : t("products.none")}
+            message={filters.stock === "out" ? t("inventory.nothingOut") : filtered ? t("ui.tryAnother") : t("inventory.noneText")}
+            action={filtered ? <Link to="/admin/inventory" className="btn-outline btn-sm">{t("ui.clearFilters")}</Link> : null}
           />
         ) : (
           <>
             <div className={`relative overflow-x-auto transition-opacity ${list.loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[860px] text-sm">
-                <caption className="sr-only">Stock per product</caption>
-                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                <caption className="sr-only">{t("inventory.caption")}</caption>
+                <thead className="bg-slate-50 text-start text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th scope="col" className="min-w-64 px-4 py-3 font-bold">Product</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Category</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Status</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Sold</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Tracking</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">In stock</th>
+                    <th scope="col" className="min-w-64 px-4 py-3 font-bold">{t("orderDetail.product")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("productPage.category")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("ui.status")}</th>
+                    <th scope="col" className="px-4 py-3 text-end font-bold">{t("inventory.sold")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("inventory.tracking")}</th>
+                    <th scope="col" className="px-4 py-3 text-end font-bold">{t("status.stock.in")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -294,8 +296,7 @@ export default function AdminInventoryPage() {
 
       <p className="mt-4 flex items-start gap-2 text-xs text-slate-500">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        Tracked products can't be ordered beyond their stock, and every order reduces it (cancelling gives it back).
-        Products that aren't tracked stay for sale without a limit.
+        {t("inventory.footnote")}
       </p>
     </div>
   );

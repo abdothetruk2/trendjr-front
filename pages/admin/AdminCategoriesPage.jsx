@@ -15,6 +15,8 @@ import {
 import { getCategoryLabel, getImageUrl, getText, isExternalUrl } from "../../src/utils/product";
 import { categoryTree } from "../../src/utils/categories";
 import { formatNumber } from "../../src/utils/format";
+import TranslationEditor, { LANGS, toLocalized, missingTranslations, TranslationStatus } from "../../src/components/admin/TranslationEditor";
+import useLanguage from "../../src/i18n/useLanguage";
 
 const PAGE_SIZE = 15;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -26,6 +28,7 @@ const slugify = (text) => String(text || "")
 export default function AdminCategoriesPage() {
   const toast = useToast();
   const confirm = useConfirm();
+  const { t, lang } = useLanguage("admin");
   const { get, update } = useUrlParams({ page: "1" });
   const { data, loading, error, retry } = useApi("/api/admin/categories");
   const [editing, setEditing] = useState(null); // null | {} (new) | category
@@ -54,7 +57,7 @@ export default function AdminCategoriesPage() {
       }
       return true;
     });
-  }, [categories, byId, level, status, search]);
+  }, [categories, byId, level, status, search, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -66,7 +69,7 @@ export default function AdminCategoriesPage() {
     setBusy(category._id);
     try {
       await api.patch(`/api/categories/${category._id}`, { isActive: !category.isActive });
-      toast.success(category.isActive ? "Category hidden from the store" : "Category is visible in the store");
+      toast.success(category.isActive ? t("categories.hidden") : t("categories.shown"));
       retry();
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -77,21 +80,21 @@ export default function AdminCategoriesPage() {
 
   async function remove(category) {
     const ok = await confirm({
-      title: "Delete this category?",
+      title: t("categories.deleteTitle"),
       message: (
         <>
-          <strong className="text-secondary">{getCategoryLabel(category)}</strong> will be deleted.
-          {category.productCount > 0 && <> It still has {category.productCount} product{category.productCount === 1 ? "" : "s"}, so the store will refuse until they are moved.</>}
+          {t("categories.deleteText", { name: getCategoryLabel(category) })}
+          {category.productCount > 0 && <> {t("categories.deleteHasProducts", { count: category.productCount })}</>}
         </>
       ),
-      confirmLabel: "Delete category",
+      confirmLabel: t("categories.delete"),
       tone: "danger",
     });
     if (!ok) return;
     setBusy(category._id);
     try {
       await api.delete(`/api/categories/${category._id}`);
-      toast.success("Category deleted");
+      toast.success(t("categories.deleted"));
       retry();
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -103,17 +106,17 @@ export default function AdminCategoriesPage() {
   return (
     <div>
       <PageHeader
-        title="Categories"
-        description={data ? `${formatNumber(categories.length)} categories · ${formatNumber(categories.filter((c) => c.parent_id == null).length)} top-level` : "Organize your catalog"}
-        actions={<button type="button" onClick={() => setEditing({})} className="btn-primary"><Plus className="h-4 w-4" aria-hidden="true" /> Add category</button>}
+        title={t("layout.nav.categories")}
+        description={data ? t("categories.summary", { count: categories.length, formatted: formatNumber(categories.length), top: formatNumber(categories.filter((c) => c.parent_id == null).length) }) : t("categories.intro")}
+        actions={<button type="button" onClick={() => setEditing({})} className="btn-primary"><Plus className="h-4 w-4" aria-hidden="true" /> {t("categories.add")}</button>}
       />
 
       <Toolbar>
-        <SearchBox value={get("search")} onSearch={setFilter("search")} placeholder="Name or slug" label="Search categories" />
-        <FilterSelect label="Level" value={level} onChange={setFilter("level")}
-          options={[{ value: "top", label: "Top-level" }, { value: "sub", label: "Sub-categories" }]} />
-        <FilterSelect label="Status" value={status} onChange={setFilter("status")}
-          options={[{ value: "active", label: "Visible" }, { value: "hidden", label: "Hidden" }]} />
+        <SearchBox value={get("search")} onSearch={setFilter("search")} placeholder={t("categories.searchPlaceholder")} label={t("categories.search")} />
+        <FilterSelect label={t("categories.level")} value={level} onChange={setFilter("level")}
+          options={[{ value: "top", label: t("categories.topLevel") }, { value: "sub", label: t("categories.subCategories") }]} />
+        <FilterSelect label={t("ui.status")} value={status} onChange={setFilter("status")}
+          options={[{ value: "active", label: t("status.visibility.active") }, { value: "hidden", label: t("status.visibility.hidden") }]} />
       </Toolbar>
 
       <Panel>
@@ -124,23 +127,24 @@ export default function AdminCategoriesPage() {
         ) : rows.length === 0 ? (
           <EmptyState
             icon={FolderTree}
-            title={filtered ? "No categories match" : "No categories yet"}
-            message={filtered ? "Try another search or clear a filter." : "Create your first category to group products."}
-            action={filtered && <Link to="/admin/categories" className="btn-outline btn-sm">Clear filters</Link>}
+            title={filtered ? t("categories.noMatch") : t("categories.none")}
+            message={filtered ? t("ui.tryAnother") : t("categories.noneText")}
+            action={filtered && <Link to="/admin/categories" className="btn-outline btn-sm">{t("ui.clearFilters")}</Link>}
           />
         ) : (
           <>
             <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[720px] text-sm">
-                <caption className="sr-only">Categories</caption>
-                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                <caption className="sr-only">{t("layout.nav.categories")}</caption>
+                <thead className="bg-slate-50 text-start text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th scope="col" className="px-4 py-3 font-bold">Category</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Slug</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Products</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Order</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Status</th>
-                    <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("productPage.category")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("categories.translations")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("categories.slug")}</th>
+                    <th scope="col" className="px-4 py-3 text-end font-bold">{t("layout.nav.products")}</th>
+                    <th scope="col" className="px-4 py-3 text-end font-bold">{t("categories.order")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("ui.status")}</th>
+                    <th scope="col" className="px-4 py-3"><span className="sr-only">{t("ui.actions")}</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -149,7 +153,7 @@ export default function AdminCategoriesPage() {
                     return (
                       <tr key={category._id} className="hover:bg-slate-50/60">
                         <td className="px-4 py-3">
-                          <div className={`flex items-center gap-3 ${parent && !filtered ? "pl-6" : ""}`}>
+                          <div className={`flex items-center gap-3 ${parent && !filtered ? "ps-6" : ""}`}>
                             {parent && !filtered && <CornerDownRight className="h-4 w-4 shrink-0 text-slate-300" aria-hidden="true" />}
                             <ProductImage
                               src={getImageUrl(category.image)}
@@ -159,29 +163,30 @@ export default function AdminCategoriesPage() {
                             />
                             <div className="min-w-0">
                               <p className="truncate font-bold text-secondary">{getCategoryLabel(category)}</p>
-                              {parent && <p className="truncate text-xs text-slate-400">in {getCategoryLabel(parent)}</p>}
+                              {parent && <p className="truncate text-xs text-slate-400">{t("categories.inParent", { name: getCategoryLabel(parent) })}</p>}
                             </div>
                           </div>
                         </td>
+                        <td className="px-4 py-3"><TranslationStatus value={category.name} /></td>
                         <td className="px-4 py-3 font-mono text-xs text-slate-500">{category.slug}</td>
-                        <td className="px-4 py-3 text-right tabular-nums">
+                        <td className="px-4 py-3 text-end tabular-nums">
                           {category.productCount > 0 ? (
                             <Link to={`/admin/products?category=${encodeURIComponent(category.slug)}`} className="font-bold text-primary-600 hover:underline">
                               {formatNumber(category.productCount)}
                             </Link>
                           ) : <span className="text-slate-400">0</span>}
                         </td>
-                        <td className="px-4 py-3 text-right tabular-nums text-slate-500">{category.sort_order ?? 0}</td>
+                        <td className="px-4 py-3 text-end tabular-nums text-slate-500">{category.sort_order ?? 0}</td>
                         <td className="px-4 py-3"><StatusBadge kind="visibility" status={category.isActive ? "active" : "hidden"} /></td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
                             <button type="button" onClick={() => toggleVisibility(category)} disabled={busy === category._id} className="btn-outline btn-sm px-3">
-                              {category.isActive ? "Hide" : "Show"}
+                              {category.isActive ? t("ui.hide") : t("ui.show")}
                             </button>
-                            <button type="button" onClick={() => setEditing(category)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-primary-50 hover:text-primary-600" aria-label={`Edit ${getCategoryLabel(category)}`} title="Edit">
+                            <button type="button" onClick={() => setEditing(category)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-primary-50 hover:text-primary-600" aria-label={t("ui.editNamed", { name: getCategoryLabel(category) })} title={t("ui.edit")}>
                               <Pencil className="h-4 w-4" aria-hidden="true" />
                             </button>
-                            <button type="button" onClick={() => remove(category)} disabled={busy === category._id} className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40" aria-label={`Delete ${getCategoryLabel(category)}`} title="Delete">
+                            <button type="button" onClick={() => remove(category)} disabled={busy === category._id} className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40" aria-label={t("ui.deleteNamed", { name: getCategoryLabel(category) })} title={t("ui.delete")}>
                               <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </button>
                           </div>
@@ -208,10 +213,11 @@ export default function AdminCategoriesPage() {
 }
 
 function CategoryFormModal({ category, categories, onClose, onSaved }) {
+  const { t } = useLanguage("admin");
   const open = category !== null;
   const isEdit = Boolean(category?._id);
   return (
-    <Modal open={open} onClose={onClose} title={isEdit ? "Edit category" : "Add category"} size="lg">
+    <Modal open={open} onClose={onClose} title={isEdit ? t("categories.edit") : t("categories.add")} size="lg">
       {open && <CategoryForm key={category?._id || "new"} category={category} categories={categories} isEdit={isEdit} onClose={onClose} onSaved={onSaved} />}
     </Modal>
   );
@@ -219,17 +225,19 @@ function CategoryFormModal({ category, categories, onClose, onSaved }) {
 
 function CategoryForm({ category, categories, isEdit, onClose, onSaved }) {
   const toast = useToast();
+  const confirm = useConfirm();
+  const { t } = useLanguage("admin");
+  const [aiDrafts, setAiDrafts] = useState(() => new Set());
   const hasChildren = isEdit && categories.some((c) => c.parent_id != null && c.parent_id === category.id);
   const parents = categories.filter((c) => c.parent_id == null && c._id !== category?._id);
 
   const [form, setForm] = useState(() => ({
-    nameEn: getText(category?.name, "en") || "",
-    nameDe: typeof category?.name === "object" ? category.name?.de || "" : "",
-    nameAr: typeof category?.name === "object" ? category.name?.ar || "" : "",
+    name: toLocalized(category?.name),
+    subtitle: toLocalized(category?.subtitle),
+    description: toLocalized(category?.description),
     slug: category?.slug || "",
     parent_id: category?.parent_id != null ? String(category.parent_id) : "",
     sort_order: String(category?.sort_order ?? 0),
-    description: typeof category?.description === "string" ? category.description : "",
     image: category?.image || "",
     isActive: category?.isActive !== false,
   }));
@@ -237,22 +245,47 @@ function CategoryForm({ category, categories, isEdit, onClose, onSaved }) {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const set = (key) => (value) => setForm((f) => ({ ...f, [key]: value }));
+  const textFields = [
+    { key: "name", label: t("categories.name"), required: true, maxLength: 100 },
+    { key: "subtitle", label: t("categories.subtitle"), maxLength: 200, hint: t("categories.subtitleHint") },
+    { key: "description", label: t("productForm.description"), multiline: true, maxLength: 1000, hint: t("categories.descriptionHint") },
+  ];
+  const changeText = (key, language, value) => setForm((f) => {
+    const next = { ...f, [key]: { ...f[key], [language]: value } };
+    if (key === "name" && language === "en" && !slugTouched) next.slug = slugify(value);
+    return next;
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();
     const found = {};
-    if (!form.nameEn.trim()) found.nameEn = "Enter a name.";
-    if (!form.slug || !SLUG_PATTERN.test(form.slug)) found.slug = "Use lowercase letters, numbers and single hyphens.";
-    if (!Number.isInteger(Number(form.sort_order))) found.sort_order = "Enter a whole number.";
+    if (!form.name.en.trim()) found.name = t("categories.nameRequired");
+    if (!form.slug || !SLUG_PATTERN.test(form.slug)) found.slug = t("productForm.errors.slug");
+    if (!Number.isInteger(Number(form.sort_order))) found.sort_order = t("categories.wholeNumber");
     setErrors(found);
     if (Object.keys(found).length) return;
+    if (aiDrafts.size > 0 && !(await confirm({
+      title: t("productForm.unreviewedTitle"),
+      message: t("productForm.unreviewedText", { count: aiDrafts.size }),
+      confirmLabel: t("productForm.publishAnyway"),
+      cancelLabel: t("productForm.reviewFirst"),
+    }))) return;
+    const missing = LANGS.filter((l) => l !== "en").filter((l) => missingTranslations(textFields.slice(0, 1), form, l).length > 0);
+    if (missing.length && !(await confirm({
+      title: t("productForm.missingTitle"),
+      message: t("productForm.missingText", { languages: missing.map((l) => l.toUpperCase()).join(", ") }),
+      confirmLabel: t("productForm.saveAnyway"),
+      cancelLabel: t("productForm.addTranslations"),
+    }))) return;
 
+    const clean = (key) => Object.fromEntries(LANGS.map((l) => [l, form[key][l].trim()]));
     const payload = {
-      name: { en: form.nameEn.trim(), de: form.nameDe.trim(), ar: form.nameAr.trim() },
+      name: clean("name"),
+      subtitle: clean("subtitle"),
+      description: clean("description"),
       slug: form.slug,
       parent_id: form.parent_id === "" ? null : Number(form.parent_id),
       sort_order: Number(form.sort_order),
-      description: form.description.trim(),
       image: form.image.trim(),
       isActive: form.isActive,
     };
@@ -261,7 +294,7 @@ function CategoryForm({ category, categories, isEdit, onClose, onSaved }) {
     try {
       if (isEdit) await api.patch(`/api/categories/${category._id}`, payload);
       else await api.post("/api/categories", payload);
-      onSaved(isEdit ? "Category saved" : "Category created");
+      onSaved(isEdit ? t("categories.saved") : t("categories.created"));
     } catch (err) {
       toast.error(getErrorMessage(err));
       setSaving(false);
@@ -270,50 +303,30 @@ function CategoryForm({ category, categories, isEdit, onClose, onSaved }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <TranslationEditor fields={textFields} values={form} onChange={changeText} drafts={aiDrafts} onDrafts={setAiDrafts} errors={{ name: errors.name }} />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Name" required error={errors.nameEn}>
-          <input
-            value={form.nameEn}
-            onChange={(e) => {
-              const value = e.target.value;
-              setForm((f) => ({ ...f, nameEn: value, slug: slugTouched ? f.slug : slugify(value) }));
-            }}
-            className="input"
-            maxLength={100}
-            data-autofocus
-          />
+        <Field label={t("categories.slug")} required error={errors.slug} hint={isEdit ? t("categories.slugHintEdit") : t("categories.slugHintNew")}>
+          <input value={form.slug} onChange={(e) => { setSlugTouched(true); set("slug")(e.target.value.toLowerCase()); }} className="input font-mono text-xs" maxLength={120} dir="ltr" />
         </Field>
-        <Field label="Slug" required error={errors.slug} hint={isEdit ? "Products in this category follow the new slug." : "Used in the category's web address."}>
-          <input value={form.slug} onChange={(e) => { setSlugTouched(true); set("slug")(e.target.value.toLowerCase()); }} className="input font-mono text-xs" maxLength={120} />
-        </Field>
-        <Field label="Name (German)">
-          <input value={form.nameDe} onChange={(e) => set("nameDe")(e.target.value)} className="input" lang="de" maxLength={100} />
-        </Field>
-        <Field label="Name (Arabic)">
-          <input value={form.nameAr} onChange={(e) => set("nameAr")(e.target.value)} className="input" lang="ar" dir="rtl" maxLength={100} />
-        </Field>
-        <Field label="Parent category" hint={hasChildren ? "This category has sub-categories, so it stays top-level." : "Leave empty for a top-level category."}>
+        <Field label={t("categories.parent")} hint={hasChildren ? t("categories.parentHintChildren") : t("categories.parentHint")}>
           <select value={form.parent_id} onChange={(e) => set("parent_id")(e.target.value)} className="input" disabled={hasChildren}>
-            <option value="">None (top-level)</option>
+            <option value="">{t("categories.noParent")}</option>
             {parents.map((p) => <option key={p._id} value={p.id}>{getCategoryLabel(p)}</option>)}
           </select>
         </Field>
-        <Field label="Display order" hint="Lower numbers come first." error={errors.sort_order}>
+        <Field label={t("categories.displayOrder")} hint={t("categories.displayOrderHint")} error={errors.sort_order}>
           <input type="number" step="1" value={form.sort_order} onChange={(e) => set("sort_order")(e.target.value)} className="input" />
         </Field>
       </div>
-      <Field label="Description">
-        <textarea value={form.description} onChange={(e) => set("description")(e.target.value)} className="input min-h-20" maxLength={1000} />
-      </Field>
-      <ImageField value={form.image} onChange={set("image")} label="Image (optional)" />
+      <ImageField value={form.image} onChange={set("image")} label={t("categories.image")} />
       <div className="rounded-2xl border border-slate-200 p-4">
-        <Toggle checked={form.isActive} onChange={set("isActive")} label="Visible in the store" description="Hidden categories don't appear in the menus or filters." />
+        <Toggle checked={form.isActive} onChange={set("isActive")} label={t("productForm.visible")} description={t("categories.visibleText")} />
       </div>
       <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
-        <button type="button" onClick={onClose} className="btn-outline" disabled={saving}>Cancel</button>
+        <button type="button" onClick={onClose} className="btn-outline" disabled={saving}>{t("common.cancel")}</button>
         <button type="submit" className="btn-primary" disabled={saving}>
           {saving && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-          {isEdit ? "Save category" : "Create category"}
+          {isEdit ? t("categories.save") : t("categories.create")}
         </button>
       </div>
     </form>

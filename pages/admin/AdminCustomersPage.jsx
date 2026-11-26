@@ -13,15 +13,18 @@ import {
 } from "../../src/components/admin/AdminUI";
 import { formatPrice } from "../../src/utils/product";
 import { formatDate, formatDateTime, formatNumber } from "../../src/utils/format";
+import useLanguage from "../../src/i18n/useLanguage";
+import i18n from "../../src/i18n";
 
 const PAGE_SIZE = 20;
-const displayName = (c) => c.username || c.email || "Unnamed account";
+const displayName = (c) => c.username || c.email || i18n.t("customers.unnamed", { ns: "admin" });
 
 export default function AdminCustomersPage() {
   const { user } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
   const { get, update } = useUrlParams({ page: "1", sort: "newest" });
+  const { t } = useLanguage("admin");
   const [viewing, setViewing] = useState(null);
   const [busy, setBusy] = useState(null);
 
@@ -51,26 +54,26 @@ export default function AdminCustomersPage() {
   }
 
   const toggleBlock = (c) => change(c, { isBlocked: !c.isBlocked }, c.isBlocked
-    ? { title: "Unblock this account?", message: <><strong className="text-secondary">{displayName(c)}</strong> will be able to sign in and order again.</>, confirmLabel: "Unblock", done: "Account unblocked" }
-    : { title: "Block this account?", message: <><strong className="text-secondary">{displayName(c)}</strong> will be signed out everywhere and can't sign in or order until unblocked. Their orders stay as they are.</>, confirmLabel: "Block account", tone: "danger", done: "Account blocked" });
+    ? { title: t("customers.unblockTitle"), message: t("customers.unblockText", { name: displayName(c) }), confirmLabel: t("customers.unblock"), done: t("customers.unblocked") }
+    : { title: t("customers.blockTitle"), message: t("customers.blockText", { name: displayName(c) }), confirmLabel: t("customers.blockAccount"), tone: "danger", done: t("customers.blocked") });
 
   const toggleAdmin = (c) => change(c, { role: c.role === "admin" ? "user" : "admin" }, c.role === "admin"
-    ? { title: "Remove admin access?", message: <><strong className="text-secondary">{displayName(c)}</strong> will no longer be able to open this dashboard.</>, confirmLabel: "Remove access", tone: "danger", done: "Admin access removed" }
-    : { title: "Make this customer an admin?", message: <><strong className="text-secondary">{displayName(c)}</strong> will get full access to this dashboard: products, orders, customers and coupons.</>, confirmLabel: "Make admin", done: "Admin access granted" });
+    ? { title: t("customers.removeAdminTitle"), message: t("customers.removeAdminText", { name: displayName(c) }), confirmLabel: t("customers.removeAccess"), tone: "danger", done: t("customers.adminRemoved") }
+    : { title: t("customers.makeAdminTitle"), message: t("customers.makeAdminText", { name: displayName(c) }), confirmLabel: t("customers.makeAdmin"), done: t("customers.adminGranted") });
 
   return (
     <div>
       <PageHeader
-        title="Customers"
-        description={total != null ? `${formatNumber(total)} account${total === 1 ? "" : "s"}${filtered ? " match your filters" : ""}` : "Everyone with an account"}
+        title={t("layout.nav.customers")}
+        description={total != null ? t(filtered ? "customers.countFiltered" : "customers.count", { count: total, formatted: formatNumber(total) }) : t("customers.intro")}
       />
 
       <Toolbar>
-        <SearchBox value={filters.search} onSearch={setFilter("search")} placeholder="Username, email or phone" label="Search customers" />
-        <FilterSelect label="Role" value={filters.role} onChange={setFilter("role")} options={[{ value: "user", label: "Customers" }, { value: "admin", label: "Admins" }]} />
-        <FilterSelect label="Status" value={filters.status} onChange={setFilter("status")} options={[{ value: "active", label: "Active" }, { value: "blocked", label: "Blocked" }]} />
-        <FilterSelect label="Sort" value={filters.sort} onChange={(v) => update({ sort: v, page: null })} allLabel={null}
-          options={[{ value: "newest", label: "Newest first" }, { value: "oldest", label: "Oldest first" }, { value: "name-asc", label: "Username A–Z" }]} />
+        <SearchBox value={filters.search} onSearch={setFilter("search")} placeholder={t("customers.searchPlaceholder")} label={t("customers.search")} />
+        <FilterSelect label={t("settings.role")} value={filters.role} onChange={setFilter("role")} options={[{ value: "user", label: t("layout.nav.customers") }, { value: "admin", label: t("customers.admins") }]} />
+        <FilterSelect label={t("ui.status")} value={filters.status} onChange={setFilter("status")} options={[{ value: "active", label: t("status.customer.active") }, { value: "blocked", label: t("status.customer.blocked") }]} />
+        <FilterSelect label={t("products.sort")} value={filters.sort} onChange={(v) => update({ sort: v, page: null })} allLabel={null}
+          options={[{ value: "newest", label: t("products.sorts.id-desc") }, { value: "oldest", label: t("products.sorts.id-asc") }, { value: "name-asc", label: t("customers.usernameAz") }]} />
       </Toolbar>
 
       <Panel>
@@ -81,24 +84,24 @@ export default function AdminCustomersPage() {
         ) : customers.length === 0 ? (
           <EmptyState
             icon={Users}
-            title={filtered ? "No customers match" : "No customers yet"}
-            message={filtered ? "Try another search or clear a filter." : "Accounts appear here when people register."}
-            action={filtered && <Link to="/admin/customers" className="btn-outline btn-sm">Clear filters</Link>}
+            title={filtered ? t("customers.noMatch") : t("customers.none")}
+            message={filtered ? t("ui.tryAnother") : t("customers.noneText")}
+            action={filtered && <Link to="/admin/customers" className="btn-outline btn-sm">{t("ui.clearFilters")}</Link>}
           />
         ) : (
           <>
             <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[880px] text-sm">
-                <caption className="sr-only">Customers</caption>
-                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                <caption className="sr-only">{t("layout.nav.customers")}</caption>
+                <thead className="bg-slate-50 text-start text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th scope="col" className="px-4 py-3 font-bold">Customer</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Role</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Status</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Orders</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Spent</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Joined</th>
-                    <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("adminOrders.customer")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("settings.role")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("ui.status")}</th>
+                    <th scope="col" className="px-4 py-3 text-end font-bold">{t("chart.orders")}</th>
+                    <th scope="col" className="px-4 py-3 text-end font-bold">{t("customers.spent")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("customers.joined")}</th>
+                    <th scope="col" className="px-4 py-3"><span className="sr-only">{t("ui.actions")}</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -113,8 +116,8 @@ export default function AdminCustomersPage() {
                             </span>
                             <div className="min-w-0">
                               <p className="truncate font-bold text-secondary">
-                                {c.username || <span className="italic text-slate-400">No username</span>}
-                                {self && <span className="ml-2 rounded-md bg-primary-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-700">You</span>}
+                                {c.username || <span className="italic text-slate-400">{t("customers.noUsername")}</span>}
+                                {self && <span className="ms-2 rounded-md bg-primary-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-700">{t("customers.you")}</span>}
                               </p>
                               <p className="truncate text-xs text-slate-400">{c.email}{c.phone ? ` · ${c.phone}` : ""}</p>
                             </div>
@@ -122,12 +125,12 @@ export default function AdminCustomersPage() {
                         </td>
                         <td className="px-4 py-3"><StatusBadge kind="role" status={c.role} /></td>
                         <td className="px-4 py-3"><StatusBadge kind="customer" status={c.isBlocked ? "blocked" : "active"} /></td>
-                        <td className="px-4 py-3 text-right tabular-nums text-slate-700">{formatNumber(c.ordersCount)}</td>
-                        <td className="px-4 py-3 text-right font-bold tabular-nums text-secondary">{formatPrice(c.totalSpent)}</td>
+                        <td className="px-4 py-3 text-end tabular-nums text-slate-700">{formatNumber(c.ordersCount)}</td>
+                        <td className="px-4 py-3 text-end font-bold tabular-nums text-secondary">{formatPrice(c.totalSpent)}</td>
                         <td className="px-4 py-3 text-slate-500">{formatDate(c.createdAt)}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
-                            <button type="button" onClick={() => setViewing(c)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800" aria-label={`View ${displayName(c)}`} title="View">
+                            <button type="button" onClick={() => setViewing(c)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800" aria-label={t("customers.viewNamed", { name: displayName(c) })} title={t("adminOrders.view")}>
                               <Eye className="h-4 w-4" aria-hidden="true" />
                             </button>
                             <button
@@ -135,8 +138,8 @@ export default function AdminCustomersPage() {
                               onClick={() => toggleAdmin(c)}
                               disabled={self || busy === c._id}
                               className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-primary-50 hover:text-primary-600 disabled:pointer-events-none disabled:opacity-30"
-                              aria-label={c.role === "admin" ? `Remove admin access from ${displayName(c)}` : `Make ${displayName(c)} an admin`}
-                              title={self ? "You can't change your own role" : c.role === "admin" ? "Remove admin access" : "Make admin"}
+                              aria-label={c.role === "admin" ? t("customers.removeAdminNamed", { name: displayName(c) }) : t("customers.makeAdminNamed", { name: displayName(c) })}
+                              title={self ? t("customers.ownRole") : c.role === "admin" ? t("customers.removeAdminTitleShort") : t("customers.makeAdmin")}
                             >
                               {c.role === "admin" ? <ShieldOff className="h-4 w-4" aria-hidden="true" /> : <ShieldCheck className="h-4 w-4" aria-hidden="true" />}
                             </button>
@@ -147,12 +150,12 @@ export default function AdminCustomersPage() {
                               className={`btn-sm inline-flex items-center gap-1.5 rounded-xl px-3 font-bold transition-colors disabled:pointer-events-none disabled:opacity-30 ${
                                 c.isBlocked ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-rose-50 text-rose-700 hover:bg-rose-100"
                               }`}
-                              title={self ? "You can't block your own account" : undefined}
+                              title={self ? t("customers.ownBlock") : undefined}
                             >
                               {busy === c._id
                                 ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
                                 : c.isBlocked ? <CircleCheck className="h-3.5 w-3.5" aria-hidden="true" /> : <Ban className="h-3.5 w-3.5" aria-hidden="true" />}
-                              {c.isBlocked ? "Unblock" : "Block"}
+                              {c.isBlocked ? t("customers.unblock") : t("customers.block")}
                             </button>
                           </div>
                         </td>
@@ -181,6 +184,7 @@ const SUB_PAGE_SIZE = 10;
 // People who signed up with the footer newsletter form (they may not have an account)
 function SubscribersPanel() {
   const toast = useToast();
+  const { t } = useLanguage("admin");
   const confirm = useConfirm();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -194,16 +198,16 @@ function SubscribersPanel() {
 
   async function remove(sub) {
     const ok = await confirm({
-      title: "Remove this subscriber?",
-      message: <><strong className="text-secondary">{sub.email}</strong> will be taken off the newsletter list.</>,
-      confirmLabel: "Remove",
+      title: t("subscribers.removeTitle"),
+      message: t("subscribers.removeText", { email: sub.email }),
+      confirmLabel: t("cartPage.remove"),
       tone: "danger",
     });
     if (!ok) return;
     setBusy(sub._id);
     try {
       await api.delete(`/api/admin/subscribers/${sub._id}`);
-      toast.success("Subscriber removed");
+      toast.success(t("subscribers.removed"));
       if (subscribers.length === 1 && page > 1) setPage(page - 1);
       else retry();
     } catch (err) {
@@ -224,9 +228,9 @@ function SubscribersPanel() {
         if (res.data.length < 200) break;
       }
       await navigator.clipboard.writeText(emails.join(", "));
-      toast.success(`${formatNumber(emails.length)} email${emails.length === 1 ? "" : "s"} copied`);
+      toast.success(t("subscribers.copied", { count: emails.length, formatted: formatNumber(emails.length) }));
     } catch (err) {
-      toast.error(err?.name === "NotAllowedError" ? "Your browser blocked copying. Try again." : getErrorMessage(err));
+      toast.error(err?.name === "NotAllowedError" ? t("subscribers.copyBlocked") : getErrorMessage(err));
     } finally {
       setCopying(false);
     }
@@ -235,14 +239,14 @@ function SubscribersPanel() {
   return (
     <Panel
       className="mt-6"
-      title="Newsletter subscribers"
-      description={total != null ? `${formatNumber(total)} email${total === 1 ? "" : "s"} from the sign-up form in the footer` : "Emails from the sign-up form in the footer"}
+      title={t("subscribers.title")}
+      description={total != null ? t("subscribers.count", { count: total, formatted: formatNumber(total) }) : t("subscribers.intro")}
       actions={(
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-          <SearchBox value={search} onSearch={(v) => { setSearch(v); setPage(1); }} placeholder="Search emails" label="Search subscribers" />
+          <SearchBox value={search} onSearch={(v) => { setSearch(v); setPage(1); }} placeholder={t("subscribers.searchPlaceholder")} label={t("subscribers.search")} />
           <button type="button" onClick={copyAll} disabled={copying || !total} className="btn-outline btn-sm">
             {copying ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
-            Copy all emails
+            {t("subscribers.copyAll")}
           </button>
         </div>
       )}
@@ -254,8 +258,8 @@ function SubscribersPanel() {
       ) : subscribers.length === 0 ? (
         <EmptyState
           icon={Mail}
-          title={search ? "No subscriber matches" : "No subscribers yet"}
-          message={search ? "Try another search." : "People who sign up in the footer will appear here."}
+          title={search ? t("subscribers.noMatch") : t("subscribers.none")}
+          message={search ? t("subscribers.tryAnother") : t("subscribers.noneText")}
         />
       ) : (
         <>
@@ -267,15 +271,15 @@ function SubscribersPanel() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <a href={`mailto:${sub.email}`} className="block truncate text-sm font-bold text-secondary hover:text-primary-600">{sub.email}</a>
-                  <span className="block text-xs text-slate-500">Signed up {formatDate(sub.createdAt)}</span>
+                  <span className="block text-xs text-slate-500">{t("subscribers.signedUp", { date: formatDate(sub.createdAt) })}</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => remove(sub)}
                   disabled={busy === sub._id}
                   className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"
-                  aria-label={`Remove ${sub.email}`}
-                  title="Remove"
+                  aria-label={t("cartPage.removeNamed", { name: sub.email })}
+                  title={t("cartPage.remove")}
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -291,9 +295,10 @@ function SubscribersPanel() {
 
 function CustomerDetail({ id }) {
   const { data, loading, error, retry } = useApi(`/api/admin/customers/${id}`);
+  const { t } = useLanguage("admin");
 
   if (loading && !data) {
-    return <div className="grid h-40 place-items-center" role="status"><Loader2 className="h-6 w-6 animate-spin text-primary-500" aria-hidden="true" /><span className="sr-only">Loading…</span></div>;
+    return <div className="grid h-40 place-items-center" role="status"><Loader2 className="h-6 w-6 animate-spin text-primary-500" aria-hidden="true" /><span className="sr-only">{t("common.loading")}</span></div>;
   }
   if (error) return <ErrorState message={error} onRetry={retry} />;
 
@@ -305,10 +310,10 @@ function CustomerDetail({ id }) {
       </div>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          ["Orders", formatNumber(data.ordersCount)],
-          ["Total spent", formatPrice(data.totalSpent)],
-          ["Last order", data.lastOrderAt ? formatDate(data.lastOrderAt) : "—"],
-          ["Joined", formatDate(data.createdAt)],
+          [t("chart.orders"), formatNumber(data.ordersCount)],
+          [t("customers.totalSpent"), formatPrice(data.totalSpent)],
+          [t("customers.lastOrder"), data.lastOrderAt ? formatDate(data.lastOrderAt) : "—"],
+          [t("customers.joined"), formatDate(data.createdAt)],
         ].map(([label, value]) => (
           <div key={label} className="rounded-2xl bg-slate-50 p-3">
             <dt className="text-[11px] font-semibold text-slate-400">{label}</dt>
@@ -317,12 +322,12 @@ function CustomerDetail({ id }) {
         ))}
       </dl>
       <div className="text-sm">
-        <p className="text-xs font-bold text-slate-500">Phone</p>
-        <p className="text-slate-700">{data.phone || "—"}</p>
+        <p className="text-xs font-bold text-slate-500">{t("account.phone")}</p>
+        <p className="text-slate-700" dir="ltr">{data.phone || "—"}</p>
       </div>
       {data.addresses?.length > 0 && (
         <div>
-          <p className="mb-1.5 text-xs font-bold text-slate-500">Saved addresses</p>
+          <p className="mb-1.5 text-xs font-bold text-slate-500">{t("customers.savedAddresses")}</p>
           <ul className="space-y-1.5">
             {data.addresses.map((a, i) => (
               <li key={a._id || i} className="flex items-start gap-2 text-sm text-slate-700">
@@ -334,7 +339,7 @@ function CustomerDetail({ id }) {
         </div>
       )}
       <div>
-        <p className="mb-2 text-xs font-bold text-slate-500">Recent orders</p>
+        <p className="mb-2 text-xs font-bold text-slate-500">{t("dashboard.recentOrders")}</p>
         {data.recentOrders?.length ? (
           <ul className="divide-y divide-slate-100 rounded-2xl border border-slate-200">
             {data.recentOrders.map((o) => (
@@ -342,16 +347,16 @@ function CustomerDetail({ id }) {
                 <Link to={`/admin/orders?search=${encodeURIComponent(o.orderNumber)}`} className="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-slate-50">
                   <span className="min-w-0 flex-1">
                     <span className="block font-mono text-sm font-bold text-secondary">{o.orderNumber}</span>
-                    <span className="block text-xs text-slate-400">{formatDateTime(o.createdAt)} · {o.itemsCount} item{o.itemsCount === 1 ? "" : "s"}</span>
+                    <span className="block text-xs text-slate-400">{formatDateTime(o.createdAt)} · {t("orders.items", { count: o.itemsCount })}</span>
                   </span>
                   <StatusBadge kind="order" status={o.status} />
-                  <span className="w-20 text-right text-sm font-extrabold tabular-nums text-secondary">{formatPrice(o.totalPrice)}</span>
+                  <span className="w-20 text-end text-sm font-extrabold tabular-nums text-secondary">{formatPrice(o.totalPrice)}</span>
                 </Link>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">No orders yet.</p>
+          <p className="rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">{t("orders.none")}</p>
         )}
       </div>
     </div>

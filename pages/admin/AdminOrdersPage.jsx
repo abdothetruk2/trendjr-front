@@ -12,16 +12,20 @@ import {
   PageHeader, Panel, Toolbar, SearchBox, FilterSelect, StatusBadge, EmptyState, ErrorState, TableSkeleton, ListFooter,
   ORDER_STATUS_OPTIONS, PAYMENT_STATUS_OPTIONS,
 } from "../../src/components/admin/AdminUI";
-import { formatPrice, getImageUrl, getText, isExternalUrl } from "../../src/utils/product";
+import { formatPrice, getImageUrl, getText, isExternalUrl, orderMoney } from "../../src/utils/product";
 import { formatDateTime, formatNumber, fromDateInput } from "../../src/utils/format";
+import useLanguage from "../../src/i18n/useLanguage";
+import { statusLabel } from "../../src/components/StatusBadge";
+import i18n from "../../src/i18n";
 
 const PAGE_SIZE = 20;
 
 const itemsCount = (order) => (order.items || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
-const customerName = (order) => order.user?.username || order.user?.email || order.shippingAddress?.fullName || "Deleted customer";
+const customerName = (order) => order.user?.username || order.user?.email || order.shippingAddress?.fullName || i18n.t("dashboard.deletedCustomer", { ns: "admin" });
 
 export default function AdminOrdersPage() {
   const { get, update } = useUrlParams({ page: "1" });
+  const { t } = useLanguage("admin");
   const [selected, setSelected] = useState(null);
 
   const page = Math.max(1, parseInt(get("page"), 10) || 1);
@@ -42,21 +46,21 @@ export default function AdminOrdersPage() {
   return (
     <div>
       <PageHeader
-        title="Orders"
-        description={total != null ? `${formatNumber(total)} order${total === 1 ? "" : "s"}${filtered ? " match your filters" : ""}` : "Every order placed in the store"}
+        title={t("layout.nav.orders")}
+        description={total != null ? t(filtered ? "adminOrders.countFiltered" : "chart.ordersCount", { count: total, formatted: formatNumber(total) }) : t("adminOrders.intro")}
       />
 
       <Toolbar>
-        <SearchBox value={filters.search} onSearch={setFilter("search")} placeholder="Order no., customer, name or phone" label="Search orders" />
-        <FilterSelect label="Status" value={filters.status} onChange={setFilter("status")} options={ORDER_STATUS_OPTIONS} />
-        <FilterSelect label="Payment" value={filters.paymentStatus} onChange={setFilter("payment")} options={PAYMENT_STATUS_OPTIONS} />
-        <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white pl-3 text-xs font-semibold text-slate-500 focus-within:border-primary-500">
-          From
-          <input type="date" value={filters.from} max={filters.to || undefined} onChange={(e) => setFilter("from")(e.target.value)} className="rounded-r-xl bg-transparent py-2 pr-2 text-sm font-bold text-slate-800 outline-none" />
+        <SearchBox value={filters.search} onSearch={setFilter("search")} placeholder={t("adminOrders.searchPlaceholder")} label={t("adminOrders.search")} />
+        <FilterSelect label={t("ui.status")} value={filters.status} onChange={setFilter("status")} options={ORDER_STATUS_OPTIONS} />
+        <FilterSelect label={t("orderDetail.payment")} value={filters.paymentStatus} onChange={setFilter("payment")} options={PAYMENT_STATUS_OPTIONS} />
+        <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white ps-3 text-xs font-semibold text-slate-500 focus-within:border-primary-500">
+          {t("adminOrders.from")}
+          <input type="date" value={filters.from} max={filters.to || undefined} onChange={(e) => setFilter("from")(e.target.value)} className="rounded-e-xl bg-transparent py-2 pe-2 text-sm font-bold text-slate-800 outline-none" />
         </label>
-        <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white pl-3 text-xs font-semibold text-slate-500 focus-within:border-primary-500">
-          To
-          <input type="date" value={filters.to} min={filters.from || undefined} onChange={(e) => setFilter("to")(e.target.value)} className="rounded-r-xl bg-transparent py-2 pr-2 text-sm font-bold text-slate-800 outline-none" />
+        <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white ps-3 text-xs font-semibold text-slate-500 focus-within:border-primary-500">
+          {t("adminOrders.to")}
+          <input type="date" value={filters.to} min={filters.from || undefined} onChange={(e) => setFilter("to")(e.target.value)} className="rounded-e-xl bg-transparent py-2 pe-2 text-sm font-bold text-slate-800 outline-none" />
         </label>
       </Toolbar>
 
@@ -68,23 +72,23 @@ export default function AdminOrdersPage() {
         ) : orders.length === 0 ? (
           <EmptyState
             icon={ReceiptText}
-            title={filtered ? "No orders match these filters" : "No orders yet"}
-            message={filtered ? "Try another search, status or date range." : "Orders placed by customers will appear here."}
-            action={filtered && <Link to="/admin/orders" className="btn-outline btn-sm">Clear filters</Link>}
+            title={filtered ? t("adminOrders.noMatch") : t("orders.none")}
+            message={filtered ? t("adminOrders.noMatchText") : t("adminOrders.noneText")}
+            action={filtered && <Link to="/admin/orders" className="btn-outline btn-sm">{t("ui.clearFilters")}</Link>}
           />
         ) : (
           <>
             <div className={`relative overflow-x-auto transition-opacity ${loading ? "opacity-60" : ""}`}>
               <table className="w-full min-w-[820px] text-sm">
-                <caption className="sr-only">Orders</caption>
-                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                <caption className="sr-only">{t("layout.nav.orders")}</caption>
+                <thead className="bg-slate-50 text-start text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th scope="col" className="px-4 py-3 font-bold">Order</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Customer</th>
-                    <th scope="col" className="px-4 py-3 text-right font-bold">Total</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Payment</th>
-                    <th scope="col" className="px-4 py-3 font-bold">Status</th>
-                    <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("orders.order")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("adminOrders.customer")}</th>
+                    <th scope="col" className="px-4 py-3 text-end font-bold">{t("productPage.total")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("orderDetail.payment")}</th>
+                    <th scope="col" className="px-4 py-3 font-bold">{t("ui.status")}</th>
+                    <th scope="col" className="px-4 py-3"><span className="sr-only">{t("ui.actions")}</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -92,23 +96,26 @@ export default function AdminOrdersPage() {
                     <tr key={order._id} className="hover:bg-slate-50/60">
                       <td className="px-4 py-3">
                         <p className="font-mono text-sm font-bold text-secondary">{order.orderNumber}</p>
-                        <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)} · {itemsCount(order)} item{itemsCount(order) === 1 ? "" : "s"}</p>
+                        <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)} · {t("orders.items", { count: itemsCount(order) })}</p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-semibold text-slate-800">{customerName(order)}</p>
                         {order.user?.email && <p className="text-xs text-slate-400">{order.user.email}</p>}
                       </td>
-                      <td className="px-4 py-3 text-right font-extrabold tabular-nums text-secondary">{formatPrice(order.totalPrice)}</td>
+                      <td className="px-4 py-3 text-end font-extrabold tabular-nums text-secondary">
+                        {formatPrice(order.totalPrice)}
+                        {orderMoney(order).converted && <span className="block text-xs font-semibold text-slate-400">{orderMoney(order).total()}</span>}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col items-start gap-1">
                           <StatusBadge kind="payment" status={order.paymentStatus} />
-                          <span className="text-xs capitalize text-slate-400">{order.paymentMethod === "card" ? "Card" : "Cash on delivery"}</span>
+                          <span className="text-xs text-slate-400">{order.paymentMethod === "card" ? t("orderDetail.card") : t("footer.cod")}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3"><StatusBadge kind="order" status={order.status} /></td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-end">
                         <button type="button" onClick={() => setSelected(order)} className="btn-outline btn-sm">
-                          <Eye className="h-4 w-4" aria-hidden="true" /> View
+                          <Eye className="h-4 w-4" aria-hidden="true" /> {t("adminOrders.view")}
                         </button>
                       </td>
                     </tr>
@@ -124,8 +131,8 @@ export default function AdminOrdersPage() {
       <Modal
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
-        title={selected ? `Order ${selected.orderNumber}` : ""}
-        description={selected ? `Placed ${formatDateTime(selected.createdAt)}` : ""}
+        title={selected ? t("orderDetail.metaTitle", { number: selected.orderNumber }) : ""}
+        description={selected ? t("orderDetail.placedAt", { date: formatDateTime(selected.createdAt) }) : ""}
         size="lg"
       >
         {selected && (
@@ -141,6 +148,7 @@ export default function AdminOrdersPage() {
 
 function OrderDetail({ order, onChanged }) {
   const toast = useToast();
+  const { t } = useLanguage("admin");
   const confirm = useConfirm();
   const [status, setStatus] = useState(order.status);
   const [paymentStatus, setPaymentStatus] = useState(order.paymentStatus);
@@ -149,16 +157,16 @@ function OrderDetail({ order, onChanged }) {
   async function saveStatus() {
     if (status === order.status) return;
     if (status === "cancelled" && !(await confirm({
-      title: "Cancel this order?",
-      message: "The customer's order will be marked as cancelled and no longer counts toward revenue.",
-      confirmLabel: "Cancel order",
-      cancelLabel: "Keep order",
+      title: t("orderDetail.cancelTitle"),
+      message: t("adminOrders.cancelText"),
+      confirmLabel: t("orderDetail.cancel"),
+      cancelLabel: t("orderDetail.keep"),
       tone: "danger",
     }))) return;
     setSaving("status");
     try {
       const res = await api.patch(`/api/orders/${order._id}/status`, { status });
-      toast.success(`Order marked as ${status}`);
+      toast.success(t("adminOrders.markedAs", { status: statusLabel("order", status) }));
       onChanged(res.data);
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -173,7 +181,7 @@ function OrderDetail({ order, onChanged }) {
     setSaving("payment");
     try {
       const res = await api.patch(`/api/orders/${order._id}/payment`, { paymentStatus });
-      toast.success("Payment status updated");
+      toast.success(t("adminOrders.paymentUpdated"));
       onChanged(res.data);
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -192,7 +200,7 @@ function OrderDetail({ order, onChanged }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 p-4">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <label htmlFor="order-status" className="text-xs font-bold text-slate-600">Order status</label>
+            <label htmlFor="order-status" className="text-xs font-bold text-slate-600">{t("adminOrders.orderStatus")}</label>
             <StatusBadge kind="order" status={order.status} />
           </div>
           <div className="flex gap-2">
@@ -200,13 +208,13 @@ function OrderDetail({ order, onChanged }) {
               {ORDER_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <button type="button" onClick={saveStatus} disabled={status === order.status || saving !== ""} className="btn-primary btn-sm shrink-0">
-              {saving === "status" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Update"}
+              {saving === "status" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : t("adminOrders.update")}
             </button>
           </div>
         </div>
         <div className="rounded-2xl border border-slate-200 p-4">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <label htmlFor="payment-status" className="text-xs font-bold text-slate-600">Payment ({order.paymentMethod === "card" ? "card" : "cash on delivery"})</label>
+            <label htmlFor="payment-status" className="text-xs font-bold text-slate-600">{t("orderDetail.payment")} ({order.paymentMethod === "card" ? t("orderDetail.card") : t("footer.cod")})</label>
             <StatusBadge kind="payment" status={order.paymentStatus} />
           </div>
           <div className="flex gap-2">
@@ -214,7 +222,7 @@ function OrderDetail({ order, onChanged }) {
               {PAYMENT_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <button type="button" onClick={savePayment} disabled={paymentStatus === order.paymentStatus || saving !== ""} className="btn-primary btn-sm shrink-0">
-              {saving === "payment" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Update"}
+              {saving === "payment" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : t("adminOrders.update")}
             </button>
           </div>
         </div>
@@ -222,53 +230,59 @@ function OrderDetail({ order, onChanged }) {
 
       {/* Items */}
       <div>
-        <h3 className="mb-2 text-sm font-extrabold text-secondary">Items</h3>
+        <h3 className="mb-2 text-sm font-extrabold text-secondary">{t("orderDetail.items")}</h3>
         <ul className="divide-y divide-slate-100 rounded-2xl border border-slate-200">
           {(order.items || []).map((item, index) => (
             <li key={`${item.product}-${index}`} className="flex items-center gap-3 p-3">
               <ProductImage src={getImageUrl(item.image)} fallbackSrc={isExternalUrl(item.image) ? item.image : ""} alt="" className="h-12 w-12 shrink-0 rounded-xl" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-secondary">{getText(item.name) || "Unnamed product"}</p>
-                <p className="text-xs text-slate-400">{item.quantity} × {formatPrice(item.price)}{item.sku ? ` · SKU ${item.sku}` : ""}</p>
+                <p className="truncate text-sm font-bold text-secondary">{getText(item.name) || t("product.unnamed")}</p>
+                <p className="text-xs text-slate-400">{item.quantity} × {formatPrice(item.price)}{item.sku ? ` · ${t("productPage.sku")} ${item.sku}` : ""}</p>
               </div>
               <p className="text-sm font-extrabold tabular-nums text-secondary">{formatPrice(item.subtotal)}</p>
             </li>
           ))}
         </ul>
-        <dl className="ml-auto mt-3 max-w-xs space-y-1.5 text-sm">
-          <div className="flex justify-between text-slate-500"><dt>Subtotal</dt><dd className="tabular-nums">{formatPrice(order.subtotal)}</dd></div>
-          <div className="flex justify-between text-slate-500"><dt>Shipping</dt><dd className="tabular-nums">{order.shippingFee ? formatPrice(order.shippingFee) : "Free"}</dd></div>
+        <dl className="ms-auto mt-3 max-w-xs space-y-1.5 text-sm">
+          <div className="flex justify-between text-slate-500"><dt>{t("checkout.subtotal")}</dt><dd className="tabular-nums">{formatPrice(order.subtotal)}</dd></div>
+          <div className="flex justify-between text-slate-500"><dt>{t("cartPage.shipping")}</dt><dd className="tabular-nums">{order.shippingFee ? formatPrice(order.shippingFee) : t("cartPage.free")}</dd></div>
           {order.discount > 0 && (
             <div className="flex justify-between text-emerald-600">
-              <dt className="inline-flex items-center gap-1"><TicketPercent className="h-3.5 w-3.5" aria-hidden="true" /> Discount{order.coupon?.code ? ` (${order.coupon.code})` : ""}</dt>
-              <dd className="tabular-nums">−{formatPrice(order.discount)}</dd>
+              <dt className="inline-flex items-center gap-1"><TicketPercent className="h-3.5 w-3.5" aria-hidden="true" /> {t("checkout.discount")}{order.coupon?.code ? ` (${order.coupon.code})` : ""}</dt>
+              <dd className="tabular-nums"><bdi dir="ltr">−{formatPrice(order.discount)}</bdi></dd>
             </div>
           )}
-          <div className="flex justify-between border-t border-slate-100 pt-1.5 font-extrabold text-secondary"><dt>Total</dt><dd className="tabular-nums">{formatPrice(order.totalPrice)}</dd></div>
+          <div className="flex justify-between border-t border-slate-100 pt-1.5 font-extrabold text-secondary"><dt>{t("productPage.total")}</dt><dd className="tabular-nums">{formatPrice(order.totalPrice)}</dd></div>
+          {orderMoney(order).converted && (
+            <div className="flex justify-between text-xs text-slate-500">
+              <dt>{t("adminOrders.customerCurrency", { code: order.currency.code })}</dt>
+              <dd className="tabular-nums">{orderMoney(order).total()}</dd>
+            </div>
+          )}
         </dl>
       </div>
 
       {/* Customer & delivery */}
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl bg-slate-50 p-4 text-sm">
-          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-bold text-slate-500"><UserRound className="h-3.5 w-3.5" aria-hidden="true" /> Customer</p>
+          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-bold text-slate-500"><UserRound className="h-3.5 w-3.5" aria-hidden="true" /> {t("adminOrders.customer")}</p>
           <p className="font-bold text-secondary">{order.user?.username || "—"}</p>
-          <p className="text-slate-500">{order.user?.email || "Account deleted"}</p>
+          <p className="text-slate-500">{order.user?.email || t("adminOrders.accountDeleted")}</p>
         </div>
         <div className="rounded-2xl bg-slate-50 p-4 text-sm">
-          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-bold text-slate-500"><MapPin className="h-3.5 w-3.5" aria-hidden="true" /> Delivery address</p>
-          {addressLines.length ? addressLines.map((line) => <p key={line} className="text-slate-700">{line}</p>) : <p className="text-slate-400">No address given</p>}
+          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-bold text-slate-500"><MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {t("account.address")}</p>
+          {addressLines.length ? addressLines.map((line) => <p key={line} className="text-slate-700">{line}</p>) : <p className="text-slate-400">{t("adminOrders.noAddress")}</p>}
         </div>
       </div>
 
       {order.notes && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <p className="mb-1 inline-flex items-center gap-1.5 text-xs font-bold"><StickyNote className="h-3.5 w-3.5" aria-hidden="true" /> Customer note</p>
+          <p className="mb-1 inline-flex items-center gap-1.5 text-xs font-bold"><StickyNote className="h-3.5 w-3.5" aria-hidden="true" /> {t("adminOrders.customerNote")}</p>
           <p className="whitespace-pre-line">{order.notes}</p>
         </div>
       )}
 
-      {order.cancelledAt && <p className="text-xs text-slate-400">Cancelled {formatDateTime(order.cancelledAt)}</p>}
+      {order.cancelledAt && <p className="text-xs text-slate-400">{t("adminOrders.cancelledAt", { date: formatDateTime(order.cancelledAt) })}</p>}
     </div>
   );
 }

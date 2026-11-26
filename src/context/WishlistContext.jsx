@@ -23,7 +23,8 @@ function snapshot(product) {
         : product.image?.url ?? product.images?.[0] ?? '';
     return {
         id: view.id,
-        name: view.title,
+        // every language of the name (shown in the visitor's language)
+        name: product.name && typeof product.name === 'object' ? product.name : view.title,
         brand: view.brand,
         image: rawImage,
         price: view.price,

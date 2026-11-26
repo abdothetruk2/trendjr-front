@@ -2,22 +2,26 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import ProductGrid from "../src/components/ProductGrid";
+import useLanguage from "../src/i18n/useLanguage";
+import { usePageMeta } from "../src/i18n/seo";
 
 // /search?q=... — results come from GET /api/products?search=
 export default function SearchPage() {
   const [params] = useSearchParams();
   const q = (params.get("q") || "").trim();
+  const { t } = useLanguage();
+  usePageMeta({ title: q ? t("search.metaTitle", { q }) : t("search.title") });
 
   return (
     <main className="min-h-screen bg-surface py-8">
       <div className="container-page">
         <div className="mb-6">
-          <p className="eyebrow">Find your next favorite</p>
-          <h1 className="mt-2 text-3xl font-black text-secondary">Search results</h1>
+          <p className="eyebrow">{t("search.eyebrow")}</p>
+          <h1 className="mt-2 text-3xl font-black text-secondary">{t("search.title")}</h1>
         </div>
         <SearchForm key={q} initial={q} />
         <p className="mb-2 text-sm text-slate-500">
-          {q ? <>Results for <strong className="text-secondary">“{q}”</strong></> : "Type what you are looking for above."}
+          {q ? <>{t("search.resultsFor")} <strong className="text-secondary">“<bdi>{q}</bdi>”</strong></> : t("search.hint")}
         </p>
       </div>
       {q && <ProductGrid id="search-results" search={q} />}
@@ -27,6 +31,7 @@ export default function SearchPage() {
 
 function SearchForm({ initial }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [term, setTerm] = useState(initial);
 
   function handleSubmit(e) {
@@ -44,11 +49,11 @@ function SearchForm({ initial }) {
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           className="w-full bg-transparent py-3 text-sm outline-none"
-          placeholder="Search products..."
-          aria-label="Search term"
+          placeholder={t("search.placeholder")}
+          aria-label={t("search.term")}
         />
       </div>
-      <button type="submit" className="btn-primary">Search</button>
+      <button type="submit" className="btn-primary">{t("search.button")}</button>
     </form>
   );
 }

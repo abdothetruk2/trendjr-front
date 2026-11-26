@@ -1,0 +1,797 @@
+{
+ "nav": {
+  "home": "Startseite",
+  "shop": "Shop",
+  "offers": "Angebote",
+  "about": "Über uns",
+  "contact": "Kontakt",
+  "faq": "FAQ",
+  "categories": "Kategorien",
+  "cart": "Warenkorb",
+  "saved": "Gemerkt",
+  "account": "Konto",
+  "wishlist": "Wunschliste",
+  "myAccount": "Mein Konto",
+  "myOrders": "Meine Bestellungen",
+  "signIn": "Anmelden",
+  "signOut": "Abmelden",
+  "register": "Registrieren",
+  "adminDashboard": "Admin-Dashboard",
+  "mobileNav": "Mobil"
+ },
+ "header": {
+  "openMenu": "Menü öffnen",
+  "homeLink": "Trend Jr Startseite",
+  "tagline": "Direkt-Marktplatz",
+  "searchPlaceholder": "Gadgets, Beauty, Schmuck, Angebote suchen...",
+  "searchLabel": "Produkte suchen",
+  "go": "Los",
+  "hello": "Hallo",
+  "helloName": "Hallo, {{name}}",
+  "there": "zusammen",
+  "signInRegister": "Anmelden / Registrieren",
+  "wishlistCount_one": "Wunschliste, {{count}} gemerkt",
+  "wishlistCount_other": "Wunschliste, {{count}} gemerkt",
+  "cartCount_one": "Warenkorb, {{count}} Artikel",
+  "cartCount_other": "Warenkorb, {{count}} Artikel",
+  "cartEmpty": "Warenkorb (leer)",
+  "empty": "Leer",
+  "mainNav": "Hauptmenü"
+ },
+ "language": {
+  "label": "Sprache",
+  "change": "Sprache: {{language}}. Sprache ändern"
+ },
+ "promo": {
+  "copyCode": "Gutscheincode {{code}} kopieren",
+  "copied": "Kopiert!",
+  "coupon": "Gutschein",
+  "code": "Code: {{code}}",
+  "freeShipping": "Kostenloser Versand",
+  "onAllOrders": "auf alle Bestellungen ›",
+  "buyerProtected": "Käuferschutz",
+  "cashOnDelivery": "Zahlung bei Lieferung",
+  "help": "Hilfe",
+  "trackOrder": "Bestellung verfolgen",
+  "helpCenter": "Hilfecenter",
+  "sell": "Auf Trend Jr verkaufen"
+ },
+ "footer": {
+  "allProducts": "Alle Produkte",
+  "offersDeals": "Angebote & Deals",
+  "newArrivals": "Neuheiten",
+  "bestSelling": "Bestseller",
+  "topRated": "Top bewertet",
+  "trackOrder": "Bestellung verfolgen",
+  "shippingInfo": "Versand & Lieferung",
+  "paymentProtection": "Zahlung & Käuferschutz",
+  "helpReturns": "Hilfe & Rücksendungen",
+  "newsletterDone": "Danke! Du bist jetzt auf der Liste.",
+  "newsletterLabel": "Wöchentliche Neuheiten & exklusive Codes erhalten",
+  "join": "Anmelden",
+  "aboutUs": "Über Trend Jr",
+  "contactUs": "Kontakt",
+  "createAccount": "Konto erstellen",
+  "about": "Trend Jr bietet dir angesagte Gadgets, Beauty-Tools, Schmuck, Accessoires und Wohn-Essentials zu klaren Preisen – mit kostenlosem Versand und Zahlung bei Lieferung.",
+  "shop": "Shop",
+  "customerCare": "Kundenservice",
+  "companyAccount": "Unternehmen & Konto",
+  "copyright": "© {{year}} Trend Jr Commerce. Alle Rechte vorbehalten.",
+  "paymentDelivery": "Zahlung und Lieferung",
+  "cod": "Zahlung bei Lieferung",
+  "freeShipping": "Kostenloser Versand"
+ },
+ "menu": {
+  "shopAll": "Alle Produkte",
+  "offers": "Angebote & Deals",
+  "helpFaq": "Hilfe & FAQ",
+  "title": "Menü",
+  "close": "Menü schließen",
+  "welcome": "Willkommen bei Trend Jr",
+  "welcomeText": "Melde dich an, um deine Bestellungen zu verfolgen und Favoriten zu speichern.",
+  "browse": "Entdecken",
+  "yourAccount": "Dein Konto"
+ },
+ "categories": {
+  "loading": "Kategorien werden geladen",
+  "loadError": "Kategorien konnten nicht geladen werden – erneut versuchen",
+  "hideSub": "Unterkategorien von {{name}} ausblenden",
+  "showSub": "Unterkategorien von {{name}} anzeigen",
+  "all": "Alle",
+  "scrollBack": "Vorherige Kategorien anzeigen",
+  "scrollMore": "Weitere Kategorien anzeigen",
+  "filter": "Produkte nach Kategorie filtern",
+  "categoryLabel": "Kategorie:",
+  "allProducts": "Alle Produkte",
+  "close": "Kategorien schließen",
+  "productCategories": "Produktkategorien"
+ },
+ "common": {
+  "sending": "Wird gesendet",
+  "loading": "Wird geladen…",
+  "retry": "Erneut versuchen",
+  "close": "Schließen",
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "back": "Zurück",
+  "dismiss": "Benachrichtigung schließen"
+ },
+ "validation": {
+  "email": "Bitte gib eine gültige E-Mail-Adresse ein."
+ },
+ "errors": {
+  "timeout": "Der Server hat zu lange gebraucht, um zu antworten.",
+  "offline": "Der Server ist nicht erreichbar. Bitte prüfe deine Verbindung und versuche es erneut.",
+  "requestFailed": "Anfrage fehlgeschlagen ({{status}})."
+ },
+ "product": {
+  "unnamed": "Unbenanntes Produkt",
+  "soldOut": "Ausverkauft",
+  "flash": "Blitz",
+  "new": "NEU",
+  "removeFromWishlistNamed": "{{name}} von der Wunschliste entfernen",
+  "saveToWishlistNamed": "{{name}} auf die Wunschliste setzen",
+  "removeFromWishlist": "Von der Wunschliste entfernen",
+  "saveToWishlist": "Auf die Wunschliste",
+  "quickViewNamed": "Schnellansicht: {{name}}",
+  "quickView": "Schnellansicht",
+  "rated": "Bewertet mit",
+  "reviewsCount_one": "{{formatted}} Bewertung",
+  "reviewsCount_other": "{{formatted}} Bewertungen",
+  "soldCount_one": "{{formatted}} verkauft",
+  "soldCount_other": "{{formatted}} verkauft",
+  "was": "Vorher",
+  "save": "Spare {{amount}}",
+  "onlyLeft_one": "Nur noch {{count}} verfügbar",
+  "onlyLeft_other": "Nur noch {{count}} verfügbar",
+  "soldOutNamed": "{{name}} ist ausverkauft",
+  "addToCartNamed": "{{name}} in den Warenkorb legen",
+  "added": "Hinzugefügt",
+  "addToCart": "In den Warenkorb",
+  "noImageLabel": "Bild nicht verfügbar",
+  "noImage": "Kein Bild",
+  "outOf5": "von 5",
+  "noReviews": "Noch keine Bewertungen",
+  "youSave": "Du sparst {{amount}}",
+  "outOfStock": "Nicht auf Lager",
+  "onlyLeftInStock_one": "Nur noch {{count}} auf Lager",
+  "onlyLeftInStock_other": "Nur noch {{count}} auf Lager",
+  "inStock": "Auf Lager",
+  "quantity": "Menge",
+  "decrease": "Menge verringern",
+  "increase": "Menge erhöhen",
+  "addToCartPrice": "In den Warenkorb · {{price}}",
+  "viewDetails": "Alle Details ansehen"
+ },
+ "seo": {
+  "defaultTitle": "Trend Jr | Online direkt einkaufen: Technik, Mode & Wohnen",
+  "defaultDescription": "Angesagte Gadgets, Beauty-Tools, Schmuck, Accessoires und Wohn-Essentials bei Trend Jr. Klare Preise, kostenloser Versand und Zahlung bei Lieferung."
+ },
+ "hero": {
+  "srTitle": "Trend Jr: die neuesten Trendprodukte an einem Ort",
+  "badge": "Die neuesten Trendprodukte",
+  "subtitle": "Alles Neue und Besondere an einem Ort",
+  "shopNow": "Jetzt shoppen",
+  "browseOffers": "Angebote ansehen",
+  "address": "Unsere Adresse",
+  "features": {
+   "inspected": {
+    "title": "Geprüfte Produkte",
+    "subtitle": "vor dem Versand"
+   },
+   "shipping": {
+    "title": "Zuverlässiger Versand",
+    "subtitle": ""
+   },
+   "latest": {
+    "title": "Die neuesten",
+    "subtitle": "Produkte weltweit"
+   },
+   "easy": {
+    "title": "Einfach einkaufen",
+    "subtitle": "und sicher"
+   }
+  }
+ },
+ "trust": {
+  "eyebrow": "Warum Trend Jr?",
+  "title": "Von der Fabrik bis zu deiner Tür – volle Transparenz",
+  "text": "Weltweite Lieferung in durchschnittlich 7–21 Tagen mit Sendungsverfolgung von Anfang bis Ende.",
+  "delivery": {
+   "title": "Kostenlose Lieferung weltweit",
+   "text": "Jede Bestellung wird kostenlos versendet – ohne Mindestbestellwert und mit Live-Sendungsverfolgung."
+  },
+  "qc": {
+   "title": "Qualitätskontrolle vor dem Versand",
+   "text": "Die Artikel stammen direkt aus geprüften Werkstätten und werden vor dem Verlassen des Lagers kontrolliert."
+  },
+  "protection": {
+   "title": "100 % Käuferschutz",
+   "text": "Verschlüsselter Checkout und unkomplizierte Erstattung, wenn eine Bestellung beschädigt oder gar nicht ankommt."
+  },
+  "support": {
+   "title": "Schneller Kundenservice",
+   "text": "Echte Menschen helfen dir jederzeit bei Sendungsverfolgung, Größen oder Rücksendungen."
+  }
+ },
+ "loader": {
+  "tagline": "ENTDECKE DEINEN NÄCHSTEN TREND",
+  "loading": "WIRD GELADEN..."
+ },
+ "errorPage": {
+  "title": "Etwas ist schiefgelaufen",
+  "text": "Diese Seite konnte nicht angezeigt werden. Neu laden hilft meistens; dein Warenkorb bleibt erhalten.",
+  "reload": "Seite neu laden"
+ },
+ "grid": {
+  "tabs": {
+   "all": "Alle entdecken",
+   "popular": "Bestseller",
+   "newest": "Neuheiten",
+   "rating": "Top bewertet"
+  },
+  "sort": {
+   "featured": "Sortieren: Empfohlen",
+   "popular": "Beliebteste",
+   "newest": "Neueste zuerst",
+   "rating": "Top bewertet",
+   "priceAsc": "Preis: aufsteigend",
+   "priceDesc": "Preis: absteigend",
+   "discount": "Größter Rabatt"
+  },
+  "under": "Unter {{price}}",
+  "anyPrice": "Jeder Preis",
+  "maxPrice": "Höchstpreis",
+  "sortLabel": "Produkte sortieren",
+  "loading": "Produkte werden geladen…",
+  "showingOf": "{{from}}–{{to}} von {{total}} Artikeln",
+  "showing": "{{from}}–{{to}} Artikel",
+  "pageOf": "Seite {{page}} von {{total}}",
+  "loadError": "Die Produkte konnten nicht geladen werden.",
+  "noPage": "Seite {{page}} gibt es nicht",
+  "firstPage": "Zur ersten Seite",
+  "empty": "Keine Produkte gefunden",
+  "emptyPrice": "Nichts unter {{price}} – versuche einen höheren Preis.",
+  "emptyHint": "Versuche eine andere Kategorie oder einen anderen Suchbegriff.",
+  "clearPrice": "Preisfilter entfernen",
+  "pages": "Produktseiten",
+  "prev": "Zurück",
+  "next": "Weiter",
+  "page": "Seite {{page}}"
+ },
+ "gallery": {
+  "carousel": "Karussell",
+  "photosOf": "Fotos von {{name}}",
+  "openPhoto": "Foto {{n}} von {{count}} im Vollbild öffnen",
+  "photoAlt": "{{name}} – Foto {{n}}",
+  "prev": "Vorheriges Foto",
+  "next": "Nächstes Foto",
+  "fullScreen": "Fotos im Vollbild ansehen",
+  "showPhoto": "Foto {{n}} von {{count}} anzeigen",
+  "viewer": "{{name}} – Fotoansicht",
+  "photo": "Foto",
+  "zoomOut": "Verkleinern",
+  "zoomIn": "Vergrößern",
+  "closeViewer": "Fotoansicht schließen",
+  "keysHint": "Mit den Pfeiltasten links und rechts blättern, mit Escape schließen."
+ },
+ "status": {
+  "unknown": "Unbekannt",
+  "order": {
+   "pending": "Ausstehend",
+   "confirmed": "Bestätigt",
+   "processing": "In Bearbeitung",
+   "shipped": "Versandt",
+   "delivered": "Zugestellt",
+   "cancelled": "Storniert"
+  },
+  "payment": {
+   "pending": "Unbezahlt",
+   "paid": "Bezahlt",
+   "failed": "Fehlgeschlagen",
+   "refunded": "Erstattet"
+  },
+  "coupon": {
+   "active": "Aktiv",
+   "scheduled": "Geplant",
+   "expired": "Abgelaufen",
+   "used-up": "Aufgebraucht",
+   "inactive": "Aus"
+  },
+  "visibility": {
+   "active": "Sichtbar",
+   "hidden": "Ausgeblendet"
+  },
+  "customer": {
+   "active": "Aktiv",
+   "blocked": "Gesperrt"
+  },
+  "role": {
+   "admin": "Admin",
+   "user": "Kunde"
+  },
+  "stock": {
+   "in": "Auf Lager",
+   "low": "Geringer Bestand",
+   "out": "Nicht auf Lager",
+   "untracked": "Nicht erfasst"
+  }
+ },
+ "auth": {
+  "checkingSession": "Sitzung wird geprüft…",
+  "adminsOnly": "Nur für Admins",
+  "noAccess": "Kein Zugriff",
+  "signedInAsNoAccess": "Du bist als {{name}} angemeldet und hast keinen Zugriff auf diese Seite.",
+  "backToStore": "Zurück zum Shop",
+  "otherAccount": "Anderes Konto verwenden"
+ },
+ "deals": {
+  "flashTitle": "Blitzangebote",
+  "topTitle": "Top-Angebote",
+  "flashText": "Die Blitz-Deals von heute",
+  "topText": "Die größten Rabatte gerade jetzt",
+  "seeAll": "Alle Angebote",
+  "loadError": "Die Angebote konnten nicht geladen werden.",
+  "empty": "Gerade keine Angebote – schau bald wieder vorbei.",
+  "claimed": "{{percent}} % vergriffen",
+  "fastSelling": "Verkauft sich schnell",
+  "add": "Hinzufügen",
+  "timeLeft": "Verbleibende Zeit für die heutigen Angebote",
+  "endsIn": "Endet in"
+ },
+ "cart": {
+  "maxReached": "Du hast bereits die maximal verfügbare Menge ({{count}})",
+  "added": "In den Warenkorb gelegt",
+  "viewCart": "Zum Warenkorb"
+ },
+ "account": {
+  "emailInvalid": "Gib eine gültige E-Mail-Adresse ein.",
+  "phoneInvalid": "Gib eine gültige Telefonnummer ein.",
+  "profileUpdated": "Profil aktualisiert",
+  "profile": "Profil",
+  "profileText": "Wie der Shop dich erreichen kann.",
+  "username": "Benutzername",
+  "usernameHint": "Wird zur Anmeldung verwendet. Er kann hier nicht geändert werden.",
+  "email": "E-Mail",
+  "phone": "Telefon",
+  "optional": "Optional",
+  "saveProfile": "Profil speichern",
+  "addressSaved": "Lieferadresse gespeichert",
+  "address": "Lieferadresse",
+  "addressText": "Wird beim Checkout automatisch für dich ausgefüllt.",
+  "saveAddress": "Adresse speichern",
+  "currentRequired": "Gib dein aktuelles Passwort ein.",
+  "minChars_one": "Mindestens {{count}} Zeichen.",
+  "minChars_other": "Mindestens {{count}} Zeichen.",
+  "differentPassword": "Wähle ein Passwort, das du gerade nicht verwendest.",
+  "mismatch": "Die Passwörter stimmen nicht überein.",
+  "passwordChanged": "Passwort geändert",
+  "password": "Passwort",
+  "passwordText": "Verwende ein langes Passwort, das du nirgendwo sonst nutzt.",
+  "currentPassword": "Aktuelles Passwort",
+  "newPassword": "Neues Passwort",
+  "repeatPassword": "Neues Passwort wiederholen",
+  "changePassword": "Passwort ändern"
+ },
+ "address": {
+  "fullName": "Vollständiger Name",
+  "street": "Straße und Hausnummer",
+  "streetPlaceholder": "Straße, Gebäude, Wohnung",
+  "city": "Stadt",
+  "postalCode": "Postleitzahl",
+  "country": "Land"
+ },
+ "home": {
+  "eyebrow": "Nur für dich",
+  "title": "Produkte entdecken"
+ },
+ "shop": {
+  "title": "Alle Produkte",
+  "eyebrow": "Entdecke etwas Gutes",
+  "text": "Stöbere in unserer Auswahl an Alltagshelfern, Trendfunden und Produkten, die bleiben.",
+  "metaDescription": "Alle Produkte von Trend Jr: Gadgets, Beauty-Tools, Schmuck, Accessoires und Wohn-Essentials mit kostenlosem Versand und Zahlung bei Lieferung."
+ },
+ "categoryPage": {
+  "notFound": "Kategorie nicht gefunden",
+  "loadError": "Diese Kategorie konnte nicht geladen werden",
+  "notFoundText": "Sie wurde vielleicht entfernt oder der Link ist falsch.",
+  "browseAll": "Alle Produkte ansehen",
+  "eyebrow": "Kollektion entdecken",
+  "metaDescription": "{{name}} bei Trend Jr kaufen: klare Preise, kostenloser Versand und Zahlung bei Lieferung."
+ },
+ "search": {
+  "metaTitle": "Suche: {{q}}",
+  "title": "Suchergebnisse",
+  "eyebrow": "Finde deinen nächsten Favoriten",
+  "resultsFor": "Ergebnisse für",
+  "hint": "Gib oben ein, wonach du suchst.",
+  "placeholder": "Produkte suchen...",
+  "term": "Suchbegriff",
+  "button": "Suchen"
+ },
+ "offers": {
+  "metaTitle": "Angebote & Deals",
+  "badge": "HEISSE DEALS",
+  "title": "Angebote, für die sich das Portemonnaie lohnt.",
+  "text": "Zeitlich begrenzte Preise auf ausgewählte Lieblinge. Tolle Funde, klare Preise, kein Rätselraten.",
+  "limited": "Zeitlich begrenzte Kollektion",
+  "eyebrow": "Handverlesene Ersparnisse",
+  "best": "Die besten Angebote des Tages",
+  "special": "Sonderpreise"
+ },
+ "notFound": {
+  "eyebrow": "Fehler 404",
+  "title": "Seite nicht gefunden",
+  "text": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+  "home": "Zur Startseite",
+  "browse": "Produkte ansehen"
+ },
+ "about": {
+  "metaTitle": "Über uns",
+  "eyebrow": "Wer wir sind",
+  "title": "Einkaufen sollte einfach, inspirierend und vertrauenswürdig sein.",
+  "text": "Wir bringen nützliche Produkte und durchdachte Fundstücke an einem übersichtlichen Ort zusammen. Unser Ziel: Entdecken und Kaufen, was du brauchst, soll einfach mehr Freude machen.",
+  "explore": "Shop entdecken",
+  "values": {
+   "customer": {
+    "title": "Kunden zuerst",
+    "text": "Wir setzen auf einen klaren Einkauf, hilfreiche Informationen und Unterstützung, wenn du sie brauchst."
+   },
+   "trust": {
+    "title": "Vertrauen zählt",
+    "text": "Transparente Produktangaben und ein sicherer Checkout stehen an erster Stelle."
+   },
+   "discoveries": {
+    "title": "Gute Entdeckungen",
+    "text": "Wir möchten dir helfen, Produkte zu finden, die zu deinem Stil, deinen Bedürfnissen und deinem Budget passen."
+   }
+  },
+  "approachEyebrow": "Unser Ansatz",
+  "approachTitle": "Eine bessere Art, online einzukaufen.",
+  "approachText": "Vom Stöbern in Kategorien bis zur Sendungsverfolgung soll jedes Detail leicht verständlich sein. Wir verbessern Auswahl und Erlebnis laufend – danach, was unseren Kunden am wichtigsten ist.",
+  "customer": "Kunden",
+  "focused": "im Fokus",
+  "secure": "Sicheres",
+  "experience": "Einkaufserlebnis"
+ },
+ "faq": {
+  "eyebrow": "Hilfecenter",
+  "title": "Häufig gestellte Fragen",
+  "text": "Schnelle Antworten auf häufige Fragen zu Einkauf, Zahlung, Lieferung und Rücksendungen.",
+  "shipping": {
+   "title": "Versand & Lieferung",
+   "cost": {
+    "q": "Was kostet der Versand?",
+    "a": "Der Versand ist bei jeder Bestellung kostenlos – ohne Mindestbestellwert."
+   },
+   "time": {
+    "q": "Wie lange dauert die Lieferung?",
+    "a": "Die Lieferzeit hängt von deinem Standort und dem Produkt ab. Nach deiner Bestellung kontaktieren wir dich unter der angegebenen Telefonnummer, um die Lieferung abzustimmen."
+   },
+   "track": {
+    "q": "Kann ich meine Bestellung verfolgen?",
+    "a": "Ja. Melde dich an und öffne <orders>Meine Bestellungen</orders>, um den Status jeder Bestellung zu sehen: aufgegeben, bestätigt, in Bearbeitung, versandt und zugestellt."
+   }
+  },
+  "payments": {
+   "title": "Zahlung",
+   "methods": {
+    "q": "Welche Zahlungsarten gibt es?",
+    "a": "Du bezahlst bar, wenn deine Bestellung geliefert wird (Zahlung bei Lieferung). Kartenzahlung ist noch nicht verfügbar."
+   },
+   "coupon": {
+    "q": "Kann ich einen Gutscheincode verwenden?",
+    "a": "Ja. Gib ihn im Gutscheinfeld beim Checkout ein; der Rabatt wird geprüft und angewendet, bevor du die Bestellung aufgibst."
+   },
+   "safe": {
+    "q": "Sind meine Daten sicher?",
+    "a": "Die Seite nutzt eine verschlüsselte Verbindung, und da du bei Lieferung bezahlst, fragen wir nie nach deinen Kartendaten."
+   }
+  },
+  "returns": {
+   "title": "Rücksendungen & Erstattungen",
+   "request": {
+    "q": "Wie beantrage ich eine Rücksendung?",
+    "a": "<contact>Kontaktiere unser Support-Team</contact> mit deiner Bestellnummer und dem Grund für die Rücksendung – wir erklären dir die nächsten Schritte."
+   },
+   "refund": {
+    "q": "Wann erhalte ich meine Erstattung?",
+    "a": "Unser Support-Team bestätigt den Zeitpunkt, sobald deine Rücksendung geprüft wurde."
+   }
+  },
+  "orders": {
+   "title": "Produkte & Bestellungen",
+   "change": {
+    "q": "Kann ich eine Bestellung ändern oder stornieren?",
+    "a": "Du kannst eine Bestellung selbst unter <orders>Meine Bestellungen</orders> stornieren, solange sie ausstehend oder bestätigt ist. Für Änderungen kontaktiere so schnell wie möglich den Support: Sobald eine Bestellung vorbereitet oder versandt wird, sind Änderungen eventuell nicht mehr möglich."
+   }
+  },
+  "stillNeedHelp": "Brauchst du weitere Hilfe? <contact>Kontaktiere unser Team</contact>"
+ },
+ "contact": {
+  "title": "Kontakt",
+  "text": "Hast du eine Frage zu einem Produkt, einer Bestellung oder der Lieferung? Schreib uns und unser Team meldet sich bei dir.",
+  "nameRequired": "Bitte gib deinen Namen ein.",
+  "topicRequired": "Bitte wähle ein Thema.",
+  "messageShort": "Bitte schreib ein paar Worte mehr.",
+  "eyebrow": "Wir sind für dich da",
+  "formTitle": "Schreib uns eine Nachricht",
+  "formHint": "Mit * markierte Felder sind Pflichtfelder. Beim Senden öffnet sich deine E-Mail-App mit der fertigen Nachricht.",
+  "name": "Dein Name",
+  "email": "E-Mail-Adresse",
+  "subject": "Betreff",
+  "selectTopic": "Thema auswählen",
+  "message": "Nachricht",
+  "messagePlaceholder": "Wie können wir dir helfen? Gib deine Bestellnummer an, wenn es um eine Bestellung geht.",
+  "send": "Nachricht senden",
+  "opened": "Deine E-Mail-App sollte sich geöffnet haben. Falls nicht, schreib uns direkt an",
+  "emailUs": "Schreib uns",
+  "callUs": "Ruf uns an",
+  "hours": "Öffnungszeiten",
+  "days": "Samstag – Donnerstag",
+  "time": "10:00 – 20:00 Uhr",
+  "quickHelp": "Schnelle Hilfe nötig?",
+  "whatsapp": "Chatte mit unserem Support-Team auf WhatsApp.",
+  "chat": "Mit dem Support chatten",
+  "topics": {
+   "order": "Frage zur Bestellung",
+   "product": "Frage zum Produkt",
+   "shipping": "Versand und Lieferung",
+   "returns": "Rücksendungen und Erstattungen",
+   "selling": "Auf Trend Jr verkaufen",
+   "other": "Sonstiges"
+  }
+ },
+ "productPage": {
+  "notFound": "Produkt nicht gefunden",
+  "loadError": "Dieses Produkt konnte nicht geladen werden",
+  "brand": "Marke",
+  "category": "Kategorie",
+  "sku": "Artikelnummer",
+  "productId": "Produkt-ID",
+  "breadcrumb": "Brotkrumen-Navigation",
+  "products": "Produkte",
+  "percentOff": "{{discount}} % RABATT",
+  "addToWishlist": "Auf die Wunschliste",
+  "savedToWishlist": "Auf der Wunschliste",
+  "lowStock_one": "Nur noch {{count}} auf Lager – schnell bestellen",
+  "lowStock_other": "Nur noch {{count}} auf Lager – schnell bestellen",
+  "inStock": "Auf Lager – versandbereit",
+  "featured": "Empfohlen",
+  "flashDeal": "Blitzangebot",
+  "rewardPoints_one": "Sammle {{formatted}} Bonuspunkt mit diesem Artikel",
+  "rewardPoints_other": "Sammle {{formatted}} Bonuspunkte mit diesem Artikel",
+  "highlights": "Highlights",
+  "overview": "Überblick",
+  "seeDetails": "Alle Details ansehen",
+  "delivery": "Lieferung",
+  "freeDelivery": "Kostenlose Lieferung",
+  "estimatedArrival": "Voraussichtliche Ankunft",
+  "trackingLine": "Sendungsverfolgung vom Versand bis zu deiner Tür",
+  "qualityLine": "Vor dem Versand qualitätsgeprüft",
+  "purchaseOptions": "Kaufoptionen",
+  "soldBy": "Verkauf und Versand durch",
+  "total": "Gesamt",
+  "buyNow": "Jetzt kaufen",
+  "asDescribed": "Artikel wie beschrieben",
+  "secureCheckout": "Sicherer Checkout",
+  "refund": "Erstattung, wenn er beschädigt oder gar nicht ankommt",
+  "protection": "Käuferschutz bei jeder Bestellung",
+  "copyPrompt": "Diesen Link kopieren:",
+  "share": "Teilen",
+  "linkCopied": "Link kopiert",
+  "copyLink": "Link kopieren",
+  "linkCopiedSr": "Link in die Zwischenablage kopiert",
+  "tabs": {
+   "description": "Beschreibung",
+   "specs": "Technische Daten",
+   "shipping": "Versand & Rückgabe"
+  },
+  "information": "Produktinformationen",
+  "shippingText": "Jede Bestellung wird kostenlos versendet, ohne Mindestbestellwert. Die Lieferung dauert je nach Standort meist {{from}}–{{to}} Tage.",
+  "tracking": "Sendungsverfolgung",
+  "trackingText": "Verfolge dein Paket vom Versand bis zur Zustellung unter „Meine Bestellungen“, sobald die Sendungsverfolgung verfügbar ist.",
+  "qualityCheck": "Qualitätskontrolle",
+  "qualityText": "Die Artikel werden vor dem Versand geprüft.",
+  "refunds": "Erstattungen",
+  "refundsText": "Kommt deine Bestellung beschädigt oder gar nicht an, kontaktiere uns mit deiner Bestellnummer für eine Erstattung.",
+  "moreQuestions": "Weitere Fragen? Sieh dir die <faq>FAQ</faq> an oder <contact>kontaktiere uns</contact>.",
+  "mayLike": "Das könnte dir auch gefallen",
+  "similar": "Ähnliche Produkte",
+  "viewAll": "Alle ansehen"
+ },
+ "cartPage": {
+  "title": "Warenkorb",
+  "eyebrow": "Fast deins",
+  "countIntro_one": "{{count}} Artikel – prüfe ihn, bevor du zur Kasse gehst.",
+  "countIntro_other": "{{count}} Artikel – prüfe sie, bevor du zur Kasse gehst.",
+  "intro": "Prüfe deine Artikel, bevor du zur Kasse gehst.",
+  "empty": "Dein Warenkorb ist leer",
+  "emptyText": "Finde etwas, das dir gefällt, und lege es hier ab.",
+  "startShopping": "Jetzt einkaufen",
+  "items": "Artikel im Warenkorb",
+  "blocked_one": "Ein Artikel kann gerade nicht bestellt werden. Entferne ihn, um fortzufahren.",
+  "blocked_other": "{{count}} Artikel können gerade nicht bestellt werden. Entferne sie, um fortzufahren.",
+  "remove": "Entfernen",
+  "unavailable": "Nicht mehr verfügbar",
+  "priceUpdated": "Preis auf den heutigen Preis aktualisiert",
+  "removeNamed": "{{name}} entfernen",
+  "decreaseNamed": "Menge von {{name}} verringern",
+  "increaseNamed": "Menge von {{name}} erhöhen",
+  "continue": "Weiter einkaufen",
+  "clear": "Warenkorb leeren",
+  "summary": "Bestellübersicht",
+  "subtotalItems_one": "Zwischensumme ({{count}} Artikel)",
+  "subtotalItems_other": "Zwischensumme ({{count}} Artikel)",
+  "youSave": "Du sparst",
+  "shipping": "Versand",
+  "free": "Kostenlos",
+  "checking": "Aktuelle Preise werden geprüft…",
+  "couponHint": "Gutscheine kannst du an der Kasse einlösen.",
+  "proceed": "Zur Kasse",
+  "protection": "Käuferschutz für berechtigte Bestellungen",
+  "freeShipping": "Kostenloser Versand auf alle Bestellungen"
+ },
+ "checkout": {
+  "title": "Kasse",
+  "eyebrow": "Ein letzter Schritt",
+  "intro": "Gib deine Lieferdaten ein, um deine Bestellung abzuschließen.",
+  "errors": {
+   "fullName": "Gib den Namen der Person ein, die die Bestellung erhält.",
+   "phone": "Gib eine Telefonnummer ein, unter der der Kurier dich erreicht.",
+   "address": "Gib die Straße und Hausnummer ein.",
+   "city": "Gib die Stadt ein.",
+   "country": "Gib das Land ein."
+  },
+  "completeDetails": "Bitte vervollständige deine Lieferdaten.",
+  "reviewCart": "Bitte prüfe deinen Warenkorb vor der Bestellung.",
+  "emptyText": "Lege zuerst ein paar Produkte in den Warenkorb und komm dann zur Kasse zurück.",
+  "unavailable_one": "{{count}} Artikel ist nicht mehr verfügbar und wird nicht bestellt.",
+  "unavailable_other": "{{count}} Artikel sind nicht mehr verfügbar und werden nicht bestellt.",
+  "reviewCartLink": "Warenkorb prüfen",
+  "shippingInfo": "Lieferinformationen",
+  "shippingText": "Wohin sollen wir deine Bestellung liefern?",
+  "namePlaceholder": "Vor- und Nachname",
+  "phone": "Telefonnummer",
+  "phonePlaceholder": "Für den Kurier",
+  "emailHint": "Updates zur Bestellung gehen an die E-Mail deines Kontos.",
+  "notes": "Anmerkungen zur Bestellung (optional)",
+  "notesPlaceholder": "Hinweise zur Lieferung?",
+  "saveAddress": "Diese Adresse in meinem Konto speichern",
+  "payment": "Zahlungsart",
+  "paymentText": "Wähle, wie du bezahlen möchtest.",
+  "codText": "Bezahle, wenn deine Bestellung ankommt",
+  "card": "Kredit-/Debitkarte",
+  "comingSoon": "Demnächst verfügbar",
+  "yourOrder": "Deine Bestellung",
+  "qty": "Menge: {{count}} × {{price}}",
+  "couponApplied": "{{code}} eingelöst: du sparst {{amount}}",
+  "couponAppliedShort": "{{code}} eingelöst",
+  "removeCoupon": "Gutschein entfernen",
+  "couponCode": "Gutscheincode",
+  "enterCode": "Code eingeben",
+  "apply": "Einlösen",
+  "subtotal": "Zwischensumme",
+  "discount": "Rabatt",
+  "calculating": "Wird berechnet",
+  "attention": "Einige Artikel brauchen deine Aufmerksamkeit:",
+  "updateCart": "Warenkorb aktualisieren",
+  "placing": "Deine Bestellung wird aufgegeben…",
+  "place": "Bestellen · {{total}}",
+  "payOnArrival": "Du bezahlst bar, wenn die Bestellung ankommt",
+  "protection": "Käuferschutz gilt für berechtigte Bestellungen."
+ },
+ "login": {
+  "metaTitle": "Anmelden",
+  "sideTitle": "Schön, dich wiederzusehen.",
+  "sideText": "Melde dich an, um deine Favoriten griffbereit zu haben und deine nächste Bestellung noch einfacher zu machen.",
+  "sideFooter": "Deine Alltagsfunde an einem Ort.",
+  "eyebrow": "Willkommen zurück",
+  "title": "Bei deinem Konto anmelden",
+  "intro": "Gib unten deine Daten ein, um fortzufahren.",
+  "usernamePlaceholder": "Dein Benutzername",
+  "passwordPlaceholder": "Gib dein Passwort ein",
+  "remember": "Angemeldet bleiben",
+  "forgotHint": "Kontaktiere den Support, wir helfen dir beim Zurücksetzen",
+  "forgot": "Passwort vergessen?",
+  "signingIn": "Anmeldung läuft…",
+  "noAccount": "Noch kein Konto?",
+  "createOne": "Jetzt erstellen",
+  "terms": "Mit dem Fortfahren akzeptierst du unsere Nutzungsbedingungen und Datenschutzerklärung."
+ },
+ "register": {
+  "title": "Konto erstellen",
+  "usernameRequired": "Bitte wähle einen Benutzernamen.",
+  "passwordMin_one": "Das Passwort muss mindestens {{count}} Zeichen lang sein.",
+  "passwordMin_other": "Das Passwort muss mindestens {{count}} Zeichen lang sein.",
+  "acceptTerms": "Bitte akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung.",
+  "sideTitle": "Mach Platz für tolle Funde.",
+  "sideText": "Erstelle ein Konto, um Produkte zu speichern, deine Bestellungen zu verfolgen und entspannter einzukaufen.",
+  "sideFooter": "Der Start dauert nur einen Moment.",
+  "eyebrow": "Werde Teil der Community",
+  "intro": "Gib deine Daten ein, um loszulegen.",
+  "usernamePlaceholder": "Benutzernamen wählen",
+  "phonePlaceholder": "Deine Telefonnummer",
+  "passwordPlaceholder_one": "Mindestens {{count}} Zeichen",
+  "passwordPlaceholder_other": "Mindestens {{count}} Zeichen",
+  "confirm": "Passwort bestätigen",
+  "confirmPlaceholder": "Passwort wiederholen",
+  "agree": "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung.",
+  "creating": "Konto wird erstellt…",
+  "haveAccount": "Du hast schon ein Konto?"
+ },
+ "wishlist": {
+  "title": "Meine Wunschliste",
+  "eyebrow": "Deine gemerkten Funde",
+  "intro": "Behalte die Produkte, die du liebst, an einem Ort.",
+  "count_one": "{{count}} gemerkter Artikel",
+  "count_other": "{{count}} gemerkte Artikel",
+  "addAll": "Alle in den Warenkorb",
+  "clear": "Leeren",
+  "empty": "Deine Wunschliste ist leer",
+  "emptyText": "Tippe bei einem Produkt auf das Herz, um es hier für später zu speichern.",
+  "explore": "Produkte entdecken",
+  "priceNote": "Die Preise werden so angezeigt, wie sie beim Speichern waren; Produktseite und Kasse verwenden immer den aktuellen Preis."
+ },
+ "profile": {
+  "eyebrow": "Dein persönlicher Bereich",
+  "intro": "Verwalte dein Profil und deine Kontodaten.",
+  "personal": "Persönliche Daten",
+  "personalText": "Aktualisiere deine Kontaktdaten."
+ },
+ "orders": {
+  "eyebrow": "Deine Einkäufe",
+  "intro": "Verfolge deine Bestellungen und sieh dir frühere Einkäufe an.",
+  "filter": "Bestellungen nach Status filtern",
+  "all": "Alle Bestellungen",
+  "loadError": "Deine Bestellungen konnten nicht geladen werden.",
+  "noneStatus": "Keine Bestellungen mit diesem Status",
+  "none": "Noch keine Bestellungen",
+  "tryFilter": "Versuche einen anderen Filter.",
+  "noneText": "Wenn du bestellst, kannst du deine Bestellung hier verfolgen.",
+  "number": "Bestellnummer",
+  "order": "Bestellung",
+  "andMore_one": "und {{count}} weiterer",
+  "andMore_other": "und {{count}} weitere",
+  "placedOn": "Bestellt am {{date}}",
+  "items_one": "{{count}} Artikel",
+  "items_other": "{{count}} Artikel",
+  "viewDetails": "Details ansehen"
+ },
+ "orderDetail": {
+  "progress": "Bestellfortschritt",
+  "placed": "Aufgegeben",
+  "metaTitle": "Bestellung {{number}}",
+  "cancelTitle": "Diese Bestellung stornieren?",
+  "cancelText": "Wir werden sie nicht vorbereiten oder versenden. Wenn du es dir anders überlegst, kannst du später neu bestellen.",
+  "cancel": "Bestellung stornieren",
+  "keep": "Bestellung behalten",
+  "cancelled": "Deine Bestellung wurde storniert",
+  "loading": "Deine Bestellung wird geladen…",
+  "notFound": "Bestellung nicht gefunden",
+  "loadError": "Diese Bestellung konnte nicht geladen werden",
+  "notFoundText": "Prüfe den Link oder suche sie in deinen Bestellungen.",
+  "thanks": "Danke, deine Bestellung ist eingegangen!",
+  "thanksText": "Wir kontaktieren dich unter {{phone}}, um die Lieferung abzustimmen. Du bezahlst bar bei Lieferung.",
+  "yourPhone": "deiner Telefonnummer",
+  "placedAt": "Bestellt {{date}}",
+  "wasCancelledOn": "Diese Bestellung wurde am {{date}} storniert.",
+  "wasCancelled": "Diese Bestellung wurde storniert.",
+  "items": "Artikel",
+  "product": "Produkt",
+  "payment": "Zahlung",
+  "card": "Karte",
+  "note": "Deine Anmerkung",
+  "cancelHint": "Du kannst stornieren, bis die Bestellung vorbereitet wird."
+ },
+ "app": {
+  "loadingPage": "Seite wird geladen…",
+  "loadingDashboard": "Dashboard wird geladen…",
+  "adminNotFound": "Diesen Bereich gibt es im Dashboard nicht.",
+  "backToDashboard": "Zurück zum Dashboard"
+ },
+ "currency": {
+  "label": "Währung",
+  "change": "Währung: {{currency}}. Währung ändern"
+ }
+}

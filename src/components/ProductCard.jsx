@@ -5,6 +5,8 @@ import ProductImage from './ProductImage';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { formatPrice, getProductImages, getProductView, webpCopies } from '../utils/product';
+import useLanguage from '../i18n/useLanguage';
+import { formatNumber } from '../utils/format';
 
 // Loaded the first time someone opens a Quick View
 const QuickView = lazy(() => import('./QuickView'));
@@ -12,9 +14,11 @@ const QuickView = lazy(() => import('./QuickView'));
 // "$1,234.56" shown as "$1,234" + smaller ".56"; screen readers get the plain price
 export function PriceTag({ value, className = '' }) {
   const text = formatPrice(value);
-  const dot = text.lastIndexOf('.');
+  // the decimal separator of the visitor's language ("." or ",")
+  const sep = formatPrice(1.5).replace(/[^.,]/g, '').slice(-1) || '.';
+  const dot = text.lastIndexOf(sep);
   return (
-    <span className={`font-extrabold tracking-tight text-slate-950 ${className}`}>
+    <span className={`font-extrabold tracking-tight text-slate-950 ${className}`} dir="ltr">
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
         {dot === -1 ? text : text.slice(0, dot)}
@@ -60,13 +64,14 @@ function HoverPhoto({ photo }) {
 
 export default function ProductCard({
   product,
-  language = 'en',
+  language,
   onAddToCart,
   onToggleWishlist,
   priority = false,
 }) {
 
   const { addItem } = useCart();
+  const { t, lang } = useLanguage();
   const wishlist = useWishlist();
   const [added, setAdded] = useState(false);
   const [pop, setPop] = useState(false);
@@ -82,7 +87,7 @@ export default function ProductCard({
 
   if (!product) return null;
 
-  const view = getProductView(product, language);
+  const view = getProductView(product, language || lang);
   const { id, title, image, imageFallback, price, oldPrice, discount, rating, reviews, sold, brand, url } = view;
   const secondPhoto = getProductImages(product)[1];
   const saved = wishlist.has(id);
@@ -147,28 +152,28 @@ export default function ProductCard({
         {/* BADGES */}
 
         {(discount > 0 || product.flash_sale || product.isNew || soldOut) && (
-          <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
+          <div className="pointer-events-none absolute start-2.5 top-2.5 flex flex-col items-start gap-1.5">
 
             {soldOut && (
               <span className="inline-flex items-center gap-1 rounded-full bg-secondary/90 px-2.5 py-1 text-[11px] font-extrabold leading-none text-white shadow-sm">
-                <PackageX className="h-3 w-3" aria-hidden="true" /> Sold out
+                <PackageX className="h-3 w-3" aria-hidden="true" /> {t('product.soldOut')}
               </span>
             )}
 
             {discount > 0 && !soldOut && (
               <span className="inline-flex items-center rounded-full bg-gradient-to-r from-rose-600 to-pink-500 px-2.5 py-1 text-[11px] font-extrabold leading-none tracking-wide text-white shadow-md shadow-rose-600/25">
-                −{discount}%
+                <bdi dir="ltr">−{discount}%</bdi>
               </span>
             )}
 
             {product.flash_sale && !soldOut && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-extrabold uppercase leading-none tracking-wide text-amber-950 shadow-sm">
-                <Zap className="h-3 w-3 fill-current" aria-hidden="true" /> Flash
+                <Zap className="h-3 w-3 fill-current" aria-hidden="true" /> {t('product.flash')}
               </span>
             )}
 
             {product.isNew && (
-              <span className="badge-secondary rounded-full">NEW</span>
+              <span className="badge-secondary rounded-full">{t('product.new')}</span>
             )}
 
           </div>
@@ -176,13 +181,13 @@ export default function ProductCard({
 
         {/* WISHLIST + QUICK VIEW */}
 
-        <div className="absolute right-2.5 top-2.5 flex flex-col gap-2">
+        <div className="absolute end-2.5 top-2.5 flex flex-col gap-2">
           <button
             type="button"
             onClick={handleWishlist}
             aria-pressed={saved}
-            aria-label={saved ? `Remove ${title} from wishlist` : `Save ${title} to wishlist`}
-            title={saved ? 'Remove from wishlist' : 'Save to wishlist'}
+            aria-label={saved ? t('product.removeFromWishlistNamed', { name: title }) : t('product.saveToWishlistNamed', { name: title })}
+            title={saved ? t('product.removeFromWishlist') : t('product.saveToWishlist')}
             className={`
               grid h-9 w-9 place-items-center rounded-full
               shadow-sm ring-1 backdrop-blur transition-all duration-200 active:scale-90
@@ -200,8 +205,8 @@ export default function ProductCard({
           <button
             type="button"
             onClick={() => setQuickView(true)}
-            aria-label={`Quick view: ${title}`}
-            title="Quick view"
+            aria-label={t('product.quickViewNamed', { name: title })}
+            title={t('product.quickView')}
             className="
               grid h-9 w-9 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm ring-1 ring-slate-200/70 backdrop-blur
               transition-all duration-200 hover:bg-white hover:text-primary-600 active:scale-90
@@ -226,7 +231,7 @@ export default function ProductCard({
           </p>
         )}
 
-        <h3 className="mt-1 text-left text-sm font-semibold leading-snug text-slate-800">
+        <h3 className="mt-1 text-start text-sm font-semibold leading-snug text-slate-800">
           <Link
             to={url}
             className="line-clamp-2 min-h-[2.5rem] transition-colors hover:text-primary-600 focus-visible:underline focus-visible:outline-none"
@@ -243,14 +248,14 @@ export default function ProductCard({
             {rating > 0 && (
               <span className="inline-flex items-center gap-0.5 font-bold text-slate-700">
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-                <span className="sr-only">Rated</span>
+                <span className="sr-only">{t('product.rated')}</span>
                 {rating.toFixed(1)}
               </span>
             )}
 
-            {reviews > 0 && <span>({reviews.toLocaleString()} reviews)</span>}
+            {reviews > 0 && <span>({t('product.reviewsCount', { count: reviews, formatted: formatNumber(reviews) })})</span>}
 
-            {sold > 0 && <span>{rating > 0 || reviews > 0 ? '· ' : ''}{sold.toLocaleString()} sold</span>}
+            {sold > 0 && <span>{rating > 0 || reviews > 0 ? '· ' : ''}{t('product.soldCount', { count: sold, formatted: formatNumber(sold) })}</span>}
 
           </div>
         )}
@@ -263,14 +268,14 @@ export default function ProductCard({
             <PriceTag value={price} className="text-lg sm:text-xl" />
             {oldPrice > 0 && (
               <span className="text-xs font-medium text-slate-400 line-through">
-                <span className="sr-only">Was </span>{formatPrice(oldPrice)}
+                <span className="sr-only">{t('product.was')} </span>{formatPrice(oldPrice)}
               </span>
             )}
           </div>
 
           <div className="mt-0.5 flex min-h-4 flex-wrap items-center gap-x-2 text-[11px] font-bold">
-            {oldPrice > 0 && <span className="text-emerald-600">Save {formatPrice(oldPrice - price)}</span>}
-            {view.lowStock && <span className="text-amber-600">Only {view.stock} left</span>}
+            {oldPrice > 0 && <span className="text-emerald-600">{t('product.save', { amount: formatPrice(oldPrice - price) })}</span>}
+            {view.lowStock && <span className="text-amber-600">{t('product.onlyLeft', { count: view.stock })}</span>}
           </div>
 
           {/* ADD TO CART */}
@@ -279,7 +284,7 @@ export default function ProductCard({
             type="button"
             onClick={handleAddToCart}
             disabled={soldOut}
-            aria-label={soldOut ? `${title} is sold out` : `Add ${title} to cart`}
+            aria-label={soldOut ? t('product.soldOutNamed', { name: title }) : t('product.addToCartNamed', { name: title })}
             className={`
               mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5
               text-xs font-bold transition-all duration-200 active:scale-[0.98] sm:text-sm
@@ -291,11 +296,11 @@ export default function ProductCard({
             `}
           >
             {soldOut ? (
-              <>Sold out</>
+              <>{t('product.soldOut')}</>
             ) : added ? (
-              <><Check className="h-4 w-4" aria-hidden="true" /> Added</>
+              <><Check className="h-4 w-4" aria-hidden="true" /> {t('product.added')}</>
             ) : (
-              <><ShoppingCart className="h-4 w-4" aria-hidden="true" /> Add to cart</>
+              <><ShoppingCart className="h-4 w-4" aria-hidden="true" /> {t('product.addToCart')}</>
             )}
           </button>
 

@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { formatPrice } from '../../utils/product';
 import { formatDayKey, formatNumber } from '../../utils/format';
 import { SITE, CURRENCY_SYMBOL } from '../../config/site';
+import i18n from '../../i18n';
+
+const t = (key, options) => i18n.t(key, { ns: 'admin', ...options });
 
 // Column chart of revenue per day (one series, so no legend: the card title names it).
 // Hover or arrow keys show a day's revenue and orders; "Table" lists every value.
@@ -84,14 +87,14 @@ export default function SalesChart({ data = [], refreshing = false }) {
   return (
     <div className={`transition-opacity ${refreshing ? 'opacity-50' : 'opacity-100'}`}>
       <div className="mb-2 flex justify-end">
-        <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-bold" role="group" aria-label="Chart or table">
+        <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-bold" role="group" aria-label={t('chart.chartOrTable')}>
           <button type="button" onClick={() => setShowTable(false)} aria-pressed={!showTable}
             className={`rounded-md px-2.5 py-1 ${!showTable ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>
-            Chart
+            {t('chart.chart')}
           </button>
           <button type="button" onClick={() => setShowTable(true)} aria-pressed={showTable}
             className={`rounded-md px-2.5 py-1 ${showTable ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>
-            Table
+            {t('chart.table')}
           </button>
         </div>
       </div>
@@ -99,20 +102,20 @@ export default function SalesChart({ data = [], refreshing = false }) {
       {showTable ? (
         <div className="max-h-72 overflow-auto rounded-xl border border-slate-100">
           <table className="w-full text-sm">
-            <caption className="sr-only">Revenue and orders per day</caption>
-            <thead className="sticky top-0 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <caption className="sr-only">{t('chart.caption')}</caption>
+            <thead className="sticky top-0 bg-slate-50 text-start text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th scope="col" className="px-3 py-2 font-bold">Day</th>
-                <th scope="col" className="px-3 py-2 text-right font-bold">Orders</th>
-                <th scope="col" className="px-3 py-2 text-right font-bold">Revenue</th>
+                <th scope="col" className="px-3 py-2 font-bold">{t('chart.day')}</th>
+                <th scope="col" className="px-3 py-2 text-end font-bold">{t('chart.orders')}</th>
+                <th scope="col" className="px-3 py-2 text-end font-bold">{t('chart.revenue')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 tabular-nums">
               {[...data].reverse().map((day) => (
                 <tr key={day.date}>
-                  <th scope="row" className="px-3 py-2 text-left font-semibold text-slate-700">{formatDayKey(day.date)}</th>
-                  <td className="px-3 py-2 text-right text-slate-600">{formatNumber(day.orders)}</td>
-                  <td className="px-3 py-2 text-right font-semibold text-slate-900">{formatPrice(day.revenue)}</td>
+                  <th scope="row" className="px-3 py-2 text-start font-semibold text-slate-700">{formatDayKey(day.date)}</th>
+                  <td className="px-3 py-2 text-end text-slate-600">{formatNumber(day.orders)}</td>
+                  <td className="px-3 py-2 text-end font-semibold text-slate-900">{formatPrice(day.revenue)}</td>
                 </tr>
               ))}
             </tbody>
@@ -125,7 +128,8 @@ export default function SalesChart({ data = [], refreshing = false }) {
           style={{ height: HEIGHT }}
           tabIndex={0}
           role="group"
-          aria-label="Revenue per day. Use the left and right arrow keys to read each day."
+          aria-label={t('chart.label')}
+          dir="ltr"
           onKeyDown={onKeyDown}
           onFocus={() => setActive((i) => i ?? data.length - 1)}
           onBlur={() => setActive(null)}
@@ -188,7 +192,7 @@ export default function SalesChart({ data = [], refreshing = false }) {
 
           {!hasSales && (
             <div className="pointer-events-none absolute inset-x-0 top-1/3 text-center text-sm font-semibold text-slate-400">
-              No sales in this period yet
+              {t('chart.noSales')}
             </div>
           )}
 
@@ -203,13 +207,13 @@ export default function SalesChart({ data = [], refreshing = false }) {
             >
               <p className="text-sm font-extrabold">{formatPrice(activeDay.revenue)}</p>
               <p className="mt-0.5 whitespace-nowrap text-slate-300">
-                {formatNumber(activeDay.orders)} order{activeDay.orders === 1 ? '' : 's'} · {formatDayKey(activeDay.date)}
+                {t('chart.ordersCount', { count: activeDay.orders, formatted: formatNumber(activeDay.orders) })} · {formatDayKey(activeDay.date)}
               </p>
             </div>
           )}
 
           <p className="sr-only" aria-live="polite">
-            {activeDay ? `${formatDayKey(activeDay.date)}: ${formatPrice(activeDay.revenue)}, ${activeDay.orders} orders` : ''}
+            {activeDay ? `${formatDayKey(activeDay.date)}: ${formatPrice(activeDay.revenue)}, ${t('chart.ordersCount', { count: activeDay.orders, formatted: formatNumber(activeDay.orders) })}` : ''}
           </p>
         </div>
       )}

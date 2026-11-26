@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { Link } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, X } from 'lucide-react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 import { getProductView } from '../utils/product';
 
 const CartContext = createContext(null);
@@ -29,6 +30,8 @@ function snapshot(product) {
         id: view.id,
         slug: view.slug,
         title: view.title,
+        // every language of the name, so the cart follows a language switch
+        name: product.name && typeof product.name === 'object' ? product.name : undefined,
         image: view.image,
         imageFallback: view.imageFallback,
         price: view.price,
@@ -41,6 +44,7 @@ function snapshot(product) {
 // Shopping cart kept in localStorage (survives reloads, synced across tabs)
 export function CartProvider({ children }) {
     const [items, setItems] = useState(readCart);
+    const { t } = useTranslation();
     const [toast, setToast] = useState(null); // { type: 'added' | 'error', title, text }
     const toastTimer = useRef(null);
     const itemsRef = useRef(items);
@@ -69,13 +73,13 @@ export function CartProvider({ children }) {
     const addItem = useCallback((product, quantity = 1) => {
         const view = getProductView(product);
         if (!view.inStock) {
-            showToast({ type: 'error', title: 'Out of stock', text: view.title });
+            showToast({ type: 'error', title: ['product.outOfStock'], text: view.title });
             return false;
         }
         const fresh = snapshot(product);
         const existing = itemsRef.current.find((item) => String(item.id) === String(view.id));
         if (existing && existing.quantity >= maxFor(fresh)) {
-            showToast({ type: 'error', title: `You already have the most available (${maxFor(fresh)})`, text: view.title });
+            showToast({ type: 'error', title: ['cart.maxReached', { count: maxFor(fresh) }], text: view.title });
             return false;
         }
         setItems((list) => {
@@ -87,7 +91,7 @@ export function CartProvider({ children }) {
             }
             return [...list, { ...fresh, quantity: Math.max(1, Math.min(maxFor(fresh), quantity)) }];
         });
-        showToast({ type: 'added', title: 'Added to cart', text: view.title });
+        showToast({ type: 'added', title: ['cart.added'], text: view.title });
         return true;
     }, [showToast]);
 
@@ -132,18 +136,18 @@ export function CartProvider({ children }) {
         <CartContext.Provider value={{ items, buyable, count, subtotal, addItem, setQuantity, removeItem, clearCart, refresh, maxFor }}>
             {children}
             {toast && (
-                <div className="fixed bottom-20 sm:bottom-6 right-4 left-4 sm:left-auto z-80 flex items-center gap-3 rounded-2xl bg-secondary px-4 py-3 text-sm text-white shadow-2xl sm:max-w-sm" role="status">
+                <div className="fixed bottom-20 sm:bottom-6 end-4 start-4 sm:start-auto z-80 flex items-center gap-3 rounded-2xl bg-secondary px-4 py-3 text-sm text-white shadow-2xl sm:max-w-sm" role="status">
                     {toast.type === 'error'
                         ? <AlertCircle className="w-5 h-5 shrink-0 text-amber-400" aria-hidden="true" />
                         : <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" aria-hidden="true" />}
                     <span className="flex-1 min-w-0">
-                        <span className="block font-bold">{toast.title}</span>
+                        <span className="block font-bold">{t(...toast.title)}</span>
                         <span className="block truncate text-xs text-slate-300">{toast.text}</span>
                     </span>
                     {toast.type === 'added' && (
-                        <Link to="/cart" onClick={() => setToast(null)} className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold hover:bg-white/20">View cart</Link>
+                        <Link to="/cart" onClick={() => setToast(null)} className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold hover:bg-white/20">{t('cart.viewCart')}</Link>
                     )}
-                    <button type="button" onClick={() => setToast(null)} className="shrink-0 text-slate-400 hover:text-white" aria-label="Close">
+                    <button type="button" onClick={() => setToast(null)} className="shrink-0 text-slate-400 hover:text-white" aria-label={t('common.close')}>
                         <X className="w-4 h-4" />
                     </button>
                 </div>

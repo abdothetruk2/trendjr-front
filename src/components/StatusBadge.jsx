@@ -3,6 +3,7 @@ import {
   AlertTriangle, Clock3, CheckCircle2, Loader, Truck, PackageCheck, XCircle, CircleDollarSign, Ban, Undo2,
   CalendarClock, CircleSlash, EyeOff, Eye, ShieldCheck, UserRound, PackageX, Infinity as InfinityIcon,
 } from 'lucide-react';
+import i18n from '../i18n';
 
 // Status pills: always an icon + a word, never color alone.
 // Used by the admin dashboard and the customer's order pages.
@@ -48,16 +49,24 @@ const STATUS = {
   },
 };
 
+// The status word in the visitor's language (English label as the fallback)
+export function statusLabel(kind, status) {
+  const label = STATUS[kind]?.[status]?.label;
+  if (!label) return status || i18n.t('status.unknown');
+  return i18n.t(`status.${kind}.${status}`, { defaultValue: label });
+}
+
 export default function StatusBadge({ kind, status }) {
-  const style = STATUS[kind]?.[status] || { label: status || 'Unknown', icon: AlertTriangle, cls: 'bg-slate-100 text-slate-600 ring-slate-200' };
+  const style = STATUS[kind]?.[status] || { icon: AlertTriangle, cls: 'bg-slate-100 text-slate-600 ring-slate-200' };
   const Icon = style.icon;
   return (
     <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${style.cls}`}>
       <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-      {style.label}
+      {statusLabel(kind, status)}
     </span>
   );
 }
 
-export const ORDER_STATUS_OPTIONS = Object.entries(STATUS.order).map(([value, { label }]) => ({ value, label }));
-export const PAYMENT_STATUS_OPTIONS = Object.entries(STATUS.payment).map(([value, { label }]) => ({ value, label }));
+// `label` is read when shown, so it follows the current language
+export const ORDER_STATUS_OPTIONS = Object.keys(STATUS.order).map((value) => ({ value, get label() { return statusLabel('order', value); } }));
+export const PAYMENT_STATUS_OPTIONS = Object.keys(STATUS.payment).map((value) => ({ value, get label() { return statusLabel('payment', value); } }));
